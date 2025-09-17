@@ -15,3 +15,14 @@ token_*.json
 *client_secret*.json
 *service_account*.json
 *.pickle
+
+# Config & secrets
+src/config.py
+config.py
+config/
+.env
+.env.*
+secrets/
+token_*.json
+*client_secret*.json
+*service_account*.json
