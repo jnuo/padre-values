@@ -1,0 +1,17 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Local data/artifacts
+downloads/
+*.pdf
+
+# Secrets/tokens
+.env
+secrets/
+token_*.json
+*client_secret*.json
+*service_account*.json
+*.pickle
