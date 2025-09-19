@@ -196,7 +196,7 @@ export default function Home() {
       <header className="border-b bg-card">
         <div className="flex items-center justify-between px-4 py-4 sm:px-6 md:px-8">
           <h1 className="text-xl font-semibold">
-            Yüksel Hoca Tahlil Sonuçları
+            Tahlil Sonuçları
           </h1>
           <div className="flex items-center gap-4">
             <div className="text-sm text-muted-foreground">

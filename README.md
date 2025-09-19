@@ -1,4 +1,4 @@
-# Yüksel Hoca Tahlil Sonuçları - Blood Test Analysis System
+# Blood Test Analysis System
 
 A complete blood test analysis system consisting of a Python backend for PDF processing and a modern web dashboard for data visualization.
 
@@ -236,4 +236,4 @@ Add `?debug=true` to URL to see console logs for debugging.
 
 ## 📝 License
 
-Private project for Yüksel Hoca medical practice.
+Private medical practice project.

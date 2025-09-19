@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Yüksel Hoca'nın Kan Testi Sonuçları",
+  title: "Kan Testi Sonuçları",
   description: "Oğlu tarafından hazırlanan web sitesi üzerinden görüntülenebilir.",
 };
 
