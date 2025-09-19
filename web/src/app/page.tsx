@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import {
   DndContext,
   closestCenter,
@@ -53,6 +53,7 @@ export default function Home() {
   const [dateRange, setDateRange] = useState<DateRange>("all");
   const [showAverage, setShowAverage] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const hasAutoSelected = useRef(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -83,15 +84,16 @@ export default function Home() {
 
   // Auto-select Hemoglobin when data is loaded
   useEffect(() => {
-    if (data && selectedMetrics.length === 0) {
+    if (data && !hasAutoSelected.current) {
       const hemoglobinMetric = data.metrics.find(metric => 
         metric.name.toLowerCase().includes('hemoglobin')
       );
       if (hemoglobinMetric) {
         setSelectedMetrics([hemoglobinMetric.id]);
+        hasAutoSelected.current = true;
       }
     }
-  }, [data, selectedMetrics.length]);
+  }, [data]);
 
   // Filter data based on date range
   const filteredData = useMemo(() => {
@@ -216,7 +218,7 @@ export default function Home() {
       <header className="border-b bg-card">
         <div className="flex items-center justify-between px-4 py-4 sm:px-6 md:px-8">
           <h1 className="text-xl font-semibold">
-            Tahlil Sonuçları
+            Yüksel Hoca Tahlil Sonuçları
           </h1>
           <div className="flex items-center gap-4">
             <div className="text-sm text-muted-foreground">
