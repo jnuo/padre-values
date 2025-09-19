@@ -28,14 +28,61 @@ This project provides a complete solution for processing blood test PDFs and vis
 - 📊 **Value Modes**: Switch between latest values and averages
 - 🎨 **Visual Indicators**: Green for normal values, red for out-of-range
 
+## 📋 Requirements
+
+### System Requirements
+- **Python 3.8+** (for backend)
+- **Node.js 18+** (for frontend)
+- **npm or yarn** (package manager)
+- **Google Cloud Console account** (for API credentials)
+- **OpenAI API account** (for AI extraction)
+
+### Python Backend Dependencies (53 packages)
+- **Google API packages**: Drive, Sheets, Authentication
+- **PDF processing**: PyMuPDF, pdfminer, pdfplumber, PyPDF2, pypdfium2
+- **AI/ML**: OpenAI API, Pandas, NumPy
+- **Image processing**: Pillow
+- **HTTP/Networking**: requests, httpx, urllib3
+- **Security**: cryptography, oauthlib, rsa
+
+### Web Frontend Dependencies (25+ packages)
+- **Core Framework**: Next.js 15.5.3, React 19.1.0, TypeScript 5
+- **Styling**: Tailwind CSS 4, Radix UI components
+- **Charts**: Recharts 3.2.1
+- **Interactions**: @dnd-kit (drag & drop)
+- **Testing**: Jest, React Testing Library
+- **Google APIs**: googleapis 160.0.0
+
+### Installation Commands
+
+```bash
+# Python Backend
+pip install -r requirements.txt
+
+# Web Frontend
+cd web
+npm install
+
+# Run Tests
+npm test
+```
+
+### Environment Variables Required
+
+**Python Backend** (`src/config.py`):
+- `OPENAI_API_KEY`: OpenAI API key for AI extraction
+- `GOOGLE_CREDENTIALS_FILE`: Path to Google credentials JSON
+- `DRIVE_FOLDER_ID`: Google Drive folder to monitor
+- `SHEET_ID`: Google Sheets document ID
+
+**Web Frontend** (`.env.local`):
+- `GOOGLE_SHEETS_SPREADSHEET_ID`: Google Sheet ID
+- `GOOGLE_SERVICE_ACCOUNT_EMAIL`: Service account email
+- `GOOGLE_SERVICE_ACCOUNT_KEY`: Service account private key
+- `NEXT_PUBLIC_LOGIN_USERNAME`: Dashboard username
+- `NEXT_PUBLIC_LOGIN_PASSWORD`: Dashboard password
+
 ## 🚀 Quick Start
-
-### Prerequisites
-
-- Python 3.9+
-- Node.js 18+
-- Google Cloud Project with APIs enabled
-- OpenAI API key
 
 ### 1. Python Backend Setup
 
@@ -66,7 +113,18 @@ cp .env.example .env.local
 # - Login credentials
 ```
 
-### 3. Google Cloud Setup
+### 3. Run Tests
+
+```bash
+# Python backend tests (if available)
+python -m pytest
+
+# Web frontend tests
+cd web
+npm test
+```
+
+### 4. Google Cloud Setup
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select existing
@@ -113,13 +171,21 @@ padre-values/
 │   │   │   ├── login-gate.tsx    # Login component
 │   │   │   ├── metric-chart.tsx  # Chart component
 │   │   │   └── metric-chip.tsx   # Draggable chip component
-│   │   └── lib/
-│   │       ├── sheets.ts         # Google Sheets client
-│   │       ├── date.ts           # Date utilities
-│   │       └── utils.ts          # General utilities
+│   │   ├── lib/
+│   │   │   ├── sheets.ts         # Google Sheets client
+│   │   │   ├── date.ts           # Date utilities
+│   │   │   └── utils.ts          # General utilities
+│   │   └── __tests__/            # Test files
+│   │       ├── basic.test.ts     # Basic functionality tests
+│   │       ├── lib/date.test.ts  # Date utility tests
+│   │       └── integration/      # Integration tests
 │   ├── .env.example              # Environment variables template
-│   └── README.md                 # Web dashboard documentation
+│   ├── package.json              # Node.js dependencies
+│   └── jest.config.js            # Jest test configuration
 ├── downloads/                    # Processed PDF files
+├── requirements.txt              # Python dependencies (53 packages)
+├── requirements-complete.txt     # Complete requirements reference
+├── REQUIREMENTS.md               # Detailed requirements documentation
 └── README.md                     # This file
 ```
 
