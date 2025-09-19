@@ -1,6 +1,6 @@
 "use client";
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceArea } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceArea, ReferenceLine } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
@@ -113,10 +113,31 @@ export function MetricChart({ metric, values, onHover, onRemove, className }: Me
                   y1={metric.ref_min}
                   y2={metric.ref_max}
                   fill="rgb(34, 197, 94)"
-                  fillOpacity={0.1}
+                  fillOpacity={0.15}
+                  stroke="rgb(34, 197, 94)"
+                  strokeDasharray="1 1"
+                  strokeOpacity={0.4}
+                  className="drop-shadow-sm"
+                />
+              )}
+              
+              {/* Reference lines for min and max */}
+              {metric.ref_min !== null && (
+                <ReferenceLine
+                  y={metric.ref_min}
                   stroke="rgb(34, 197, 94)"
                   strokeDasharray="2 2"
-                  strokeOpacity={0.3}
+                  strokeOpacity={0.6}
+                  label={{ value: `Min: ${metric.ref_min}`, position: "top" }}
+                />
+              )}
+              {metric.ref_max !== null && (
+                <ReferenceLine
+                  y={metric.ref_max}
+                  stroke="rgb(34, 197, 94)"
+                  strokeDasharray="2 2"
+                  strokeOpacity={0.6}
+                  label={{ value: `Max: ${metric.ref_max}`, position: "top" }}
                 />
               )}
               

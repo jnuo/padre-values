@@ -26,8 +26,15 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { Metric, MetricValue } from "@/lib/sheets";
+import { Info } from "lucide-react";
 import { compareDateAsc, parseToISO, formatTR } from "@/lib/date";
 import { MetricChart } from "@/components/metric-chart";
 import { MetricChip } from "@/components/metric-chip";
@@ -42,7 +49,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>([]);
-  const [hoveredDate, setHoveredDate] = useState<string | null>(null);
+  const [, setHoveredDate] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>("all");
   const [showAverage, setShowAverage] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -191,7 +198,8 @@ export default function Home() {
     .filter(Boolean) as Metric[];
 
   return (
-    <div className="min-h-screen bg-background">
+    <TooltipProvider>
+      <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-card">
         <div className="flex items-center justify-between px-4 py-4 sm:px-6 md:px-8">
@@ -261,6 +269,16 @@ export default function Home() {
                     (m.ref_max == null || value <= m.ref_max);
                   const accent = inRange ? "emerald" : "rose";
                   const isSelected = selectedMetrics.includes(m.id);
+                  
+                  // Determine flag status
+                  let flagStatus = "";
+                  if (typeof value === "number") {
+                    if (m.ref_min != null && value < m.ref_min) {
+                      flagStatus = "Düşük";
+                    } else if (m.ref_max != null && value > m.ref_max) {
+                      flagStatus = "Yüksek";
+                    }
+                  }
 
                   return (
                     <Card
@@ -273,8 +291,38 @@ export default function Home() {
                       onClick={() => toggleMetric(m.id)}
                     >
                       <CardContent className="p-2">
-                        <div className="text-xs text-muted-foreground mb-1 line-clamp-1">
-                          {m.name}
+                        <div className="flex items-start justify-between mb-1">
+                          <div className="text-xs text-muted-foreground line-clamp-1 flex-1">
+                            {m.name}
+                          </div>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 ml-1" />
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-xs">
+                              <div className="space-y-1">
+                                <div className="font-medium">{m.name}</div>
+                                {m.ref_min != null && m.ref_max != null ? (
+                                  <div className="text-sm">
+                                    Referans aralığı: {m.ref_min} - {m.ref_max} {m.unit || ""}
+                                  </div>
+                                ) : m.ref_min != null ? (
+                                  <div className="text-sm">
+                                    Minimum: {m.ref_min} {m.unit || ""}
+                                  </div>
+                                ) : m.ref_max != null ? (
+                                  <div className="text-sm">
+                                    Maksimum: {m.ref_max} {m.unit || ""}
+                                  </div>
+                                ) : null}
+                                {flagStatus && (
+                                  <div className="text-sm font-medium text-rose-600">
+                                    Durum: {flagStatus}
+                                  </div>
+                                )}
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
                         </div>
                         <div
                           className={cn(
@@ -347,5 +395,6 @@ export default function Home() {
         )}
       </main>
     </div>
+    </TooltipProvider>
   );
 }
