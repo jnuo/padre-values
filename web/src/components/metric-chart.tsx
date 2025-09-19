@@ -112,11 +112,11 @@ export function MetricChart({ metric, values, onHover, onRemove, className }: Me
                   x2="dataMax"
                   y1={metric.ref_min}
                   y2={metric.ref_max}
-                  fill="rgb(34, 197, 94)"
-                  fillOpacity={0.15}
-                  stroke="rgb(34, 197, 94)"
-                  strokeDasharray="1 1"
-                  strokeOpacity={0.4}
+                  fill="#22c55e"
+                  fillOpacity={0.3}
+                  stroke="#22c55e"
+                  strokeDasharray="2 2"
+                  strokeOpacity={0.7}
                   className="drop-shadow-sm"
                 />
               )}
@@ -125,18 +125,18 @@ export function MetricChart({ metric, values, onHover, onRemove, className }: Me
               {metric.ref_min !== null && (
                 <ReferenceLine
                   y={metric.ref_min}
-                  stroke="rgb(34, 197, 94)"
+                  stroke="#22c55e"
                   strokeDasharray="2 2"
-                  strokeOpacity={0.6}
+                  strokeOpacity={0.8}
                   label={{ value: `Min: ${metric.ref_min}`, position: "top" }}
                 />
               )}
               {metric.ref_max !== null && (
                 <ReferenceLine
                   y={metric.ref_max}
-                  stroke="rgb(34, 197, 94)"
+                  stroke="#22c55e"
                   strokeDasharray="2 2"
-                  strokeOpacity={0.6}
+                  strokeOpacity={0.8}
                   label={{ value: `Max: ${metric.ref_max}`, position: "top" }}
                 />
               )}
