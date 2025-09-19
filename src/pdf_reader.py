@@ -14,7 +14,9 @@ PROMPT = (
     "- H/L bayrağını 'flag' alanına yaz.\n"
     "- % ve # ayrı anahtar (örn: Nötrofil% / Nötrofil#).\n"
     "- 'Numune Alım Tarihi'ni tespit et ve sadece tarihi ISO 'YYYY-MM-DD' formatında ver (saatleri atla).\n"
-    "- ÇIKTI: sadece JSON -> {\"sample_date\": \"<YYYY-MM-DD|null>\", \"tests\": { \"<Ad>\": { \"value\": <number>, \"unit\": \"<unit|null>\", \"flag\": \"<H|L|N|null>\" } } }}"
+    "- Her test için mümkünse referans aralığını çıkar: alt sınır ve üst sınır.\n"
+    "- Referans aralığı mevcutsa 'ref_low' ve 'ref_high' alanlarını doldur. Yoksa boş bırak.\n"
+    "- ÇIKTI: sadece JSON -> {\"sample_date\": \"<YYYY-MM-DD|null>\", \"tests\": { \"<Ad>\": { \"value\": <number>, \"unit\": \"<unit|null>\", \"flag\": \"<H|L|N|null>\", \"ref_low\": <number|null>, \"ref_high\": <number|null> } } }}"
 )
 
 def extract_labs_from_pdf(pdf_path: str, dpi: int = 220) -> dict:

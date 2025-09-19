@@ -6,7 +6,7 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
-from src.config import GOOGLE_CREDENTIALS_FILE, SHEET_ID, SHEET_NAME, LOOKER_SHEET_NAME
+from src.config import GOOGLE_CREDENTIALS_FILE, SHEET_ID, SHEET_NAME, LOOKER_SHEET_NAME, REFERENCE_SHEET_NAME
 
 
 SCOPES = [
@@ -60,6 +60,92 @@ def read_and_print_sheet():
     return all_values
 
 
+def upsert_reference_values(values_dict_list_or_single):
+    """
+    Create (if missing) and upsert metric reference rows in a dedicated sheet.
+    - Sheet name comes from REFERENCE_SHEET_NAME
+    - Columns: [metric, unit, low, high]
+    - Only appends rows for metrics not already present
+    - Performs at most one read and one write
+    values_dict_list_or_single: dict or list[dict] with shape {tests: {metric: {unit, ref_low, ref_high}}}
+    """
+    # Normalize input to a list
+    if isinstance(values_dict_list_or_single, dict):
+        updates = [values_dict_list_or_single]
+    else:
+        updates = list(values_dict_list_or_single or [])
+
+    # Aggregate candidate refs from incoming updates
+    candidates = {}
+    for vd in updates:
+        tests = (vd or {}).get("tests", {})
+        for metric, obj in tests.items():
+            # Expect optional reference info if present
+            low = obj.get("ref_low") or obj.get("low")
+            high = obj.get("ref_high") or obj.get("high")
+            unit = obj.get("unit")
+            if low is None and high is None:
+                # skip metrics without any reference range info
+                continue
+            # Prefer first-seen reference for a metric; do not override
+            if metric not in candidates:
+                candidates[metric] = {
+                    "metric": metric,
+                    "unit": unit or "",
+                    "low": low if low is not None else "",
+                    "high": high if high is not None else "",
+                }
+
+    if not candidates:
+        return  # nothing to do
+
+    # Open sheet and get or create reference worksheet
+    gc = get_sheets_client()
+    sh = gc.open_by_key(SHEET_ID)
+    try:
+        ref_ws = sh.worksheet(REFERENCE_SHEET_NAME)
+    except gspread.exceptions.WorksheetNotFound:
+        ref_ws = sh.add_worksheet(title=REFERENCE_SHEET_NAME, rows="500", cols="10")
+        # seed header immediately to avoid second write later if empty
+        ref_ws.update("A1", [["metric", "unit", "low", "high"]])
+
+    # Single read of current refs
+    existing = ref_ws.get_all_values()
+    if not existing:
+        existing = [["metric", "unit", "low", "high"]]
+
+    # Normalize width and header
+    width = max(len(r) for r in existing)
+    existing = [r + [""] * (width - len(r)) for r in existing]
+    header = existing[0]
+    # Align columns to expected schema
+    expected = ["metric", "unit", "low", "high"]
+    # If header is not correct, reset to expected while preserving data below where possible
+    if [h.lower() for h in header[:4]] != expected:
+        header = ["metric", "unit", "low", "high"]
+        existing[0] = header
+
+    # Build set of existing metrics
+    existing_metrics = set()
+    for i in range(1, len(existing)):
+        name = (existing[i][0] or "").strip()
+        if name:
+            existing_metrics.add(name)
+
+    # Determine new rows to append
+    rows_to_append = []
+    for metric, row in candidates.items():
+        if metric in existing_metrics:
+            continue
+        rows_to_append.append([row["metric"], row["unit"], row["low"], row["high"]])
+
+    if not rows_to_append:
+        return
+
+    # Perform a single append batch write
+    # If the sheet currently only has header, start from row 2; otherwise just append
+    ref_ws.append_rows(rows_to_append, value_input_option="USER_ENTERED")
+
 def update_sheet_with_values2(values_dict):
     gc = get_sheets_client()
     sh = gc.open_by_key(SHEET_ID)
@@ -105,6 +191,12 @@ def update_sheet_with_values(values_dict):
     gc = get_sheets_client()
     sh = gc.open_by_key(SHEET_ID)
     ws = sh.worksheet(SHEET_NAME)
+
+    # Also upsert reference values (single read+write internally)
+    try:
+        upsert_reference_values(values_dict)
+    except Exception as e:
+        print(f"Reference upsert skipped: {e}")
 
     # 2) Read all values (2D list) and normalize width
     data = ws.get_all_values()
@@ -211,6 +303,12 @@ def batch_update_sheet(sheet_data, updates):
     width = len(header)
     data = [r + [""] * (width - len(r)) for r in data]
     row_index = { (data[i][0] or "").strip(): i for i in range(1, len(data)) if (data[i][0] or "").strip() }
+
+    # upfront: ensure reference sheet is updated using all updates in one go
+    try:
+        upsert_reference_values(updates)
+    except Exception as e:
+        print(f"Reference upsert skipped: {e}")
 
     updated, skipped = 0, 0
     for values_dict in updates:
