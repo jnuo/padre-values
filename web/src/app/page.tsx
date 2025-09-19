@@ -81,6 +81,18 @@ export default function Home() {
     };
   }, []);
 
+  // Auto-select Hemoglobin when data is loaded
+  useEffect(() => {
+    if (data && selectedMetrics.length === 0) {
+      const hemoglobinMetric = data.metrics.find(metric => 
+        metric.name.toLowerCase().includes('hemoglobin')
+      );
+      if (hemoglobinMetric) {
+        setSelectedMetrics([hemoglobinMetric.id]);
+      }
+    }
+  }, [data, selectedMetrics.length]);
+
   // Filter data based on date range
   const filteredData = useMemo(() => {
     if (!data) return { metrics: [], values: [] };
