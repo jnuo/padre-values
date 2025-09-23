@@ -38,7 +38,7 @@ function getUserConfigs(): UserConfig[] {
 	
 	try {
 		return JSON.parse(usersEnv);
-	} catch (error) {
+	} catch {
 		throw new Error("Invalid USERS_CONFIG JSON format");
 	}
 }

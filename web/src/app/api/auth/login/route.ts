@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     }
 
     // Return user config without password for security
-    const { password: _, ...userConfigWithoutPassword } = userConfig;
+    const { password: _password, ...userConfigWithoutPassword } = userConfig;
     return NextResponse.json({ user: userConfigWithoutPassword });
   } catch (error) {
     console.error("/api/auth/login error", error);

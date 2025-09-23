@@ -77,7 +77,7 @@ export default function Home() {
     let ignore = false;
     async function load() {
       try {
-        const res = await fetch(`/api/data?userId=${currentUser.id}`, { cache: "no-store" });
+        const res = await fetch(`/api/data?userId=${currentUser!.id}`, { cache: "no-store" });
         if (!res.ok) throw new Error("Failed to load data");
         const json = (await res.json()) as ApiData;
         if (!ignore) setData(json);

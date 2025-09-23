@@ -43,7 +43,7 @@ export function LoginGate({ onLogin }: LoginGateProps) {
         const { error } = await response.json();
         setError(error || "Geçersiz kullanıcı adı veya şifre");
       }
-    } catch (error) {
+    } catch {
       setError("Giriş yapılırken bir hata oluştu");
     }
   };
