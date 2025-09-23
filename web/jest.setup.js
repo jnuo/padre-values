@@ -27,5 +27,13 @@ jest.mock('next-themes', () => ({
 }))
 
 // Mock environment variables
-process.env.NEXT_PUBLIC_LOGIN_USERNAME = 'yuksel'
-process.env.NEXT_PUBLIC_LOGIN_PASSWORD = '123'
+process.env.USERS_CONFIG = JSON.stringify([
+  {
+    id: 'yuksel',
+    name: 'Yuksel',
+    username: 'yuksel',
+    password: '123',
+    dataSheetName: 'YukselData',
+    referenceSheetName: 'Reference Values'
+  }
+])

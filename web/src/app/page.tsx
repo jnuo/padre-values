@@ -35,6 +35,14 @@ import {
 import { cn } from "@/lib/utils";
 import type { Metric, MetricValue } from "@/lib/sheets";
 import { Info } from "lucide-react";
+
+type UserConfig = {
+  id: string;
+  name: string;
+  username: string;
+  dataSheetName: string;
+  referenceSheetName: string;
+};
 import { compareDateAsc, parseToISO, formatTR } from "@/lib/date";
 import { MetricChart } from "@/components/metric-chart";
 import { MetricChip } from "@/components/metric-chip";
@@ -53,6 +61,7 @@ export default function Home() {
   const [dateRange, setDateRange] = useState<DateRange>("all");
   const [showAverage, setShowAverage] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState<UserConfig | null>(null);
   const hasAutoSelected = useRef(false);
 
   const sensors = useSensors(
@@ -63,10 +72,12 @@ export default function Home() {
   );
 
   useEffect(() => {
+    if (!currentUser) return;
+    
     let ignore = false;
     async function load() {
       try {
-        const res = await fetch("/api/data", { cache: "no-store" });
+        const res = await fetch(`/api/data?userId=${currentUser.id}`, { cache: "no-store" });
         if (!res.ok) throw new Error("Failed to load data");
         const json = (await res.json()) as ApiData;
         if (!ignore) setData(json);
@@ -80,7 +91,7 @@ export default function Home() {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [currentUser]);
 
   // Auto-select Hemoglobin when data is loaded
   useEffect(() => {
@@ -196,7 +207,10 @@ export default function Home() {
   };
 
   if (!isLoggedIn) {
-    return <LoginGate onLogin={() => setIsLoggedIn(true)} />;
+    return <LoginGate onLogin={(userConfig) => {
+      setCurrentUser(userConfig);
+      setIsLoggedIn(true);
+    }} />;
   }
 
   if (loading) {
@@ -218,7 +232,7 @@ export default function Home() {
       <header className="border-b bg-card">
         <div className="flex items-center justify-between px-4 py-4 sm:px-6 md:px-8">
           <h1 className="text-xl font-semibold">
-            Yüksel Hoca Tahlil Sonuçları
+            {currentUser?.name} Tahlil Sonuçları
           </h1>
           <div className="flex items-center gap-4">
             <div className="text-sm text-muted-foreground">

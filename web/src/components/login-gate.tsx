@@ -6,8 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
+type UserConfig = {
+  id: string;
+  name: string;
+  username: string;
+  dataSheetName: string;
+  referenceSheetName: string;
+};
+
 type LoginGateProps = {
-  onLogin: () => void;
+  onLogin: (userConfig: UserConfig) => void;
 };
 
 export function LoginGate({ onLogin }: LoginGateProps) {
@@ -15,17 +23,28 @@ export function LoginGate({ onLogin }: LoginGateProps) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     
-    // Get credentials from environment variables
-    const validUsername = process.env.NEXT_PUBLIC_LOGIN_USERNAME || "demo";
-    const validPassword = process.env.NEXT_PUBLIC_LOGIN_PASSWORD || "demo123";
-    
-    if (username === validUsername && password === validPassword) {
-      onLogin();
-    } else {
-      setError("Geçersiz kullanıcı adı veya şifre");
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (response.ok) {
+        const { user } = await response.json();
+        onLogin(user);
+      } else {
+        const { error } = await response.json();
+        setError(error || "Geçersiz kullanıcı adı veya şifre");
+      }
+    } catch (error) {
+      setError("Giriş yapılırken bir hata oluştu");
     }
   };
 
@@ -33,7 +52,7 @@ export function LoginGate({ onLogin }: LoginGateProps) {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Yüksel Hoca Tahlil Sonuçları</CardTitle>
+          <CardTitle className="text-2xl">Tahlil Sonuçları</CardTitle>
           <p className="text-sm text-muted-foreground mt-2">
             Giriş yapmak için kimlik bilgilerinizi girin
           </p>

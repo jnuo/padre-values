@@ -19,6 +19,44 @@ export type SheetsPayload = {
 	values: MetricValue[];
 };
 
+export type UserConfig = {
+	id: string;
+	name: string;
+	username: string;
+	password: string;
+	dataSheetName: string;
+	referenceSheetName: string;
+};
+
+// Load user configurations from environment variables
+function getUserConfigs(): UserConfig[] {
+	const usersEnv = process.env.USERS_CONFIG;
+	
+	if (!usersEnv) {
+		throw new Error("USERS_CONFIG not found in environment variables");
+	}
+	
+	try {
+		return JSON.parse(usersEnv);
+	} catch (error) {
+		throw new Error("Invalid USERS_CONFIG JSON format");
+	}
+}
+
+export function getAvailableUsers(): UserConfig[] {
+	return getUserConfigs();
+}
+
+export function getUserConfig(userId: string): UserConfig | null {
+	const users = getUserConfigs();
+	return users.find(user => user.id === userId) || null;
+}
+
+export function authenticateUser(username: string, password: string): UserConfig | null {
+	const users = getUserConfigs();
+	return users.find(user => user.username === username && user.password === password) || null;
+}
+
 function getAuth() {
 	const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
 	const privateKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY?.replace(/\\n/g, "\n");
@@ -34,13 +72,18 @@ function getAuth() {
 	});
 }
 
-export async function fetchSheetsData(spreadsheetId: string) : Promise<SheetsPayload> {
+export async function fetchSheetsData(spreadsheetId: string, userId: string) : Promise<SheetsPayload> {
+	const userConfig = getUserConfig(userId);
+	if (!userConfig) {
+		throw new Error(`User with ID '${userId}' not found`);
+	}
+
 	const auth = getAuth();
 	const sheets = google.sheets({ version: "v4", auth });
 
 	const [lookerRes, refsRes] = await Promise.all([
-		sheets.spreadsheets.values.get({ spreadsheetId, range: "Looker" }),
-		sheets.spreadsheets.values.get({ spreadsheetId, range: "Reference Values" }),
+		sheets.spreadsheets.values.get({ spreadsheetId, range: userConfig.dataSheetName }),
+		sheets.spreadsheets.values.get({ spreadsheetId, range: userConfig.referenceSheetName }),
 	]);
 
 	const looker = lookerRes.data.values ?? [];
