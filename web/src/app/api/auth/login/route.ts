@@ -20,6 +20,7 @@ export async function POST(request: Request) {
 
     // Return user config without password for security
     const { password: _password, ...userConfigWithoutPassword } = userConfig;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return NextResponse.json({ user: userConfigWithoutPassword });
   } catch (error) {
     console.error("/api/auth/login error", error);
