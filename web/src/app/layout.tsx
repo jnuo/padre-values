@@ -9,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Kan Testi Sonuçları",
-  description: "Oğlu tarafından hazırlanan web sitesi üzerinden görüntülenebilir.",
+  title: "ViziAI - Tahlil Sonuçlarınızı Kolayca Anlamlandırın",
+  description: "E-nabız'dan veya laboratuar sayfalarından indirdiğiniz tahlil sonuçlarını PDF (veya herhangi bir formatta) yükleyin. ViziAI yapay zeka ile bu verileri düzenli bir formata ta analiz eder, farklıl değerleri kolayca annlaşılır ve karşılaştırılabilir bir arayüzde incelemenizi sağlar.",
 };
 
 export default function RootLayout({

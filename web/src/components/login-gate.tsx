@@ -52,6 +52,9 @@ export function LoginGate({ onLogin }: LoginGateProps) {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          <div className="mb-4">
+            <h1 className="text-3xl font-bold text-primary">ViziAI</h1>
+          </div>
           <CardTitle className="text-2xl">Tahlil Sonuçları</CardTitle>
           <p className="text-sm text-muted-foreground mt-2">
             Giriş yapmak için kimlik bilgilerinizi girin
