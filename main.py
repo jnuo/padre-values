@@ -15,12 +15,12 @@ def main():
       return
 
    # 2. Read the sheet once
-   try:
-      sheet_data = sheets_updater.read_sheet_data()
-      print("Loaded sheet data for batch update.")
-   except Exception as e:
-      print(f"[ERROR] Failed to read sheet: {e}")
-      return
+   # try:
+   sheet_data = sheets_updater.read_sheet_data()
+   print("Loaded sheet data for batch update.")
+   # except Exception as e:
+   #    print(f"[ERROR] Failed to read sheet: {e}")
+   #    return
 
    # 3. Process all PDF files and update in memory
    updates = []
