@@ -43,12 +43,10 @@ def main():
          continue
 
    # 4. Write back to the sheet once
-   try:
-      sheets_updater.batch_update_sheet(sheet_data, updates)
-      print("Batch sheet update complete.")
-      sheets_updater.rebuild_pivot_sheet()  # uses SHEET_NAME -> LOOKER_SHEET_NAME from config
-   except Exception as e:
-      print(f"[ERROR] Failed to batch update sheet: {e}")
+   sheets_updater.batch_update_sheet(sheet_data, updates)
+   print("Batch sheet update complete.")
+   sheets_updater.rebuild_pivot_sheet()  # uses SHEET_NAME -> LOOKER_SHEET_NAME from config
+   
 
 if __name__ == "__main__":
     main()
