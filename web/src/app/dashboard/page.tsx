@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
@@ -34,7 +35,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { Metric, MetricValue } from "@/lib/sheets";
-import { Info } from "lucide-react";
+import { Info, Search, X } from "lucide-react";
 
 type UserConfig = {
   id: string;
@@ -54,6 +55,18 @@ type ApiData = { metrics: Metric[]; values: MetricValue[] };
 
 type DateRange = "all" | "15" | "30" | "90";
 
+// Normalize Turkish characters for search
+function normalizeTurkish(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ş/g, 's')
+    .replace(/ı/g, 'i')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c');
+}
+
 export default function Dashboard() {
   const router = useRouter();
   const [data, setData] = useState<ApiData | null>(null);
@@ -66,6 +79,8 @@ export default function Dashboard() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserConfig | null>(null);
   const hasAutoSelected = useRef(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearchInput, setShowSearchInput] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -76,7 +91,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!currentUser) return;
-    
+
     let ignore = false;
     async function load() {
       try {
@@ -99,7 +114,7 @@ export default function Dashboard() {
   // Auto-select Hemoglobin when data is loaded
   useEffect(() => {
     if (data && !hasAutoSelected.current) {
-      const hemoglobinMetric = data.metrics.find(metric => 
+      const hemoglobinMetric = data.metrics.find(metric =>
         metric.name.toLowerCase().includes('hemoglobin')
       );
       if (hemoglobinMetric) {
@@ -129,6 +144,17 @@ export default function Dashboard() {
 
     return { ...data, values: filteredValues };
   }, [data, dateRange]);
+
+  // Filter metrics based on search query
+  const displayedMetrics = useMemo(() => {
+    if (!searchQuery || searchQuery.length <= 1) {
+      return filteredData.metrics;
+    }
+    const normalizedQuery = normalizeTurkish(searchQuery);
+    return filteredData.metrics.filter((m) =>
+      normalizeTurkish(m.name).includes(normalizedQuery)
+    );
+  }, [filteredData.metrics, searchQuery]);
 
   const valuesByMetric = useMemo(() => {
     if (!filteredData)
@@ -209,6 +235,22 @@ export default function Dashboard() {
     setSelectedMetrics(selectedMetrics.filter((id) => id !== metricId));
   };
 
+  const closeSearch = () => {
+    setShowSearchInput(false);
+    setSearchQuery("");
+  };
+
+  // Handle Escape key to close search
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && showSearchInput) {
+        closeSearch();
+      }
+    };
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [showSearchInput]);
+
   if (!isLoggedIn) {
     return <LoginGate onLogin={(userConfig) => {
       setCurrentUser(userConfig);
@@ -233,28 +275,17 @@ export default function Dashboard() {
       <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-card">
-        <div className="flex items-center justify-between px-4 py-4 sm:px-6 md:px-8">
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              onClick={() => router.push("/")}
-              className="text-2xl font-bold text-primary hover:text-primary/80"
-            >
+        <div className="px-4 py-3 sm:px-6 md:px-8 space-y-2">
+          {/* Row 1: Logo (left) + Dropdown (right) */}
+          <div className="flex items-center justify-between">
+            <div className="text-xl sm:text-2xl font-bold text-primary cursor-pointer hover:text-primary/80" onClick={() => router.push("/")}>
               ViziAI
-            </Button>
-            <h1 className="text-xl font-semibold">
-              {currentUser?.name} Tahlil Sonuçları
-            </h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-muted-foreground">
-              {dateRangeDisplay}
             </div>
             <Select
               value={dateRange}
               onValueChange={(value: DateRange) => setDateRange(value)}
             >
-              <SelectTrigger className="w-32">
+              <SelectTrigger className="w-36 sm:w-40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -265,6 +296,16 @@ export default function Dashboard() {
               </SelectContent>
             </Select>
           </div>
+
+          {/* Row 2: Title (left) + Date period (right) */}
+          <div className="flex items-center justify-between">
+            <h1 className="text-base sm:text-lg font-medium">
+              {currentUser?.name} Tahlil Sonuçları
+            </h1>
+            <div className="text-xs sm:text-sm text-muted-foreground">
+              {dateRangeDisplay}
+            </div>
+          </div>
         </div>
       </header>
 
@@ -272,35 +313,105 @@ export default function Dashboard() {
         {/* Metric Grid Widget */}
         <Card className="rounded-2xl">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+            <div className="flex items-center gap-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground whitespace-nowrap">
                 Değerler
               </CardTitle>
-              <div className="flex items-center space-x-2">
-                <Label
-                  htmlFor="average-switch"
-                  className="text-xs text-muted-foreground"
-                >
-                  Son Değer
-                </Label>
-                <Switch
-                  id="average-switch"
-                  checked={showAverage}
-                  onCheckedChange={setShowAverage}
+
+              {/* Desktop search - always visible */}
+              <div className="hidden md:block flex-1 max-w-xs">
+                <Input
+                  type="text"
+                  placeholder="Ara..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="h-8"
                 />
-                <Label
-                  htmlFor="average-switch"
-                  className="text-xs text-muted-foreground"
-                >
-                  Ortalama
-                </Label>
               </div>
+
+              {/* Mobile: Search icon OR expanded search (fills the space) */}
+              {!showSearchInput ? (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowSearchInput(true)}
+                    className="h-8 w-8 flex-shrink-0 md:hidden"
+                  >
+                    <Search className="h-4 w-4" />
+                  </Button>
+
+                  {/* Switch - visible when search is closed */}
+                  <div className="flex items-center space-x-2 ml-auto">
+                    <Label
+                      htmlFor="average-switch"
+                      className="text-xs text-muted-foreground whitespace-nowrap"
+                    >
+                      Son Değer
+                    </Label>
+                    <Switch
+                      id="average-switch"
+                      checked={showAverage}
+                      onCheckedChange={setShowAverage}
+                    />
+                    <Label
+                      htmlFor="average-switch"
+                      className="text-xs text-muted-foreground whitespace-nowrap"
+                    >
+                      Ortalama
+                    </Label>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Expanded search - takes full width, hides switch */}
+                  <div className="relative flex-1 md:hidden animate-in fade-in zoom-in-95 duration-300 ease-out">
+                    <Input
+                      type="text"
+                      placeholder="Ara..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="h-8 pr-9"
+                      autoFocus
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={closeSearch}
+                      className="absolute right-0.5 top-0.5 h-7 w-7"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+
+                  {/* Desktop switch - always visible */}
+                  <div className="hidden md:flex items-center space-x-2 ml-auto">
+                    <Label
+                      htmlFor="average-switch"
+                      className="text-xs text-muted-foreground whitespace-nowrap"
+                    >
+                      Son Değer
+                    </Label>
+                    <Switch
+                      id="average-switch"
+                      checked={showAverage}
+                      onCheckedChange={setShowAverage}
+                    />
+                    <Label
+                      htmlFor="average-switch"
+                      className="text-xs text-muted-foreground whitespace-nowrap"
+                    >
+                      Ortalama
+                    </Label>
+                  </div>
+                </>
+              )}
             </div>
           </CardHeader>
           <CardContent className="pt-0">
             <div className="max-h-80 overflow-y-auto p-2">
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {filteredData.metrics.map((m) => {
+                {displayedMetrics.map((m) => {
                   const latest = valuesByMetric.get(m.id);
                   const value = latest?.value;
                   const inRange =
