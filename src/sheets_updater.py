@@ -35,7 +35,15 @@ def get_sheets_client():
         if creds and creds.expired and creds.refresh_token and required_scopes.issubset(
             set(creds.scopes or [])
         ):
-            creds.refresh(Request())
+            try:
+                creds.refresh(Request())
+            except Exception as e:
+                # Token refresh failed (expired/revoked), delete old token and re-authenticate
+                print(f"Token refresh failed: {e}. Re-authenticating...")
+                if os.path.exists(TOKEN_PATH):
+                    os.remove(TOKEN_PATH)
+                flow = InstalledAppFlow.from_client_secrets_file(GOOGLE_CREDENTIALS_FILE, SCOPES)
+                creds = flow.run_local_server(port=0)
         else:
             flow = InstalledAppFlow.from_client_secrets_file(GOOGLE_CREDENTIALS_FILE, SCOPES)
             creds = flow.run_local_server(port=0)
@@ -369,6 +377,257 @@ def batch_update_sheet(sheet_data, updates):
         print(f"Batch sheet upsert complete: {updated} cells updated, {skipped} skipped.")
     else:
         print(f"Batch update: {skipped} skipped, nothing updated.")
+
+def get_all_metric_names():
+    """
+    Read the sheet and return all unique metric names (first column values, excluding header).
+    """
+    gc = get_sheets_client()
+    sh = gc.open_by_key(SHEET_ID)
+    ws = sh.worksheet(SHEET_NAME)
+    data = ws.get_all_values()
+    if not data or len(data) < 2:
+        return []
+    # Skip header row (data[0]), collect first column
+    metrics = [row[0].strip() for row in data[1:] if row and row[0].strip()]
+    return list(set(metrics))  # deduplicate
+
+def identify_synonyms_with_ai(metric_names):
+    """
+    Use ChatGPT to identify which metric names are synonyms (short/long versions, Turkish/English, etc.).
+    Returns a dict mapping original_name -> unified_name.
+    Important: Metrics with different suffixes like 'Bazofil#' vs 'Bazofil%' should NOT be merged.
+    """
+    from src.openai_utils import chat_completion
+    import json
+
+    if not metric_names:
+        return {}
+
+    print(f"Sending {len(metric_names)} metric names to AI for analysis...")
+    print(f"Sample metrics: {metric_names[:10]}")
+
+    prompt = f"""Kan tahlili metrik isimlerini analiz ediyorsun. Aşağıda çeşitli laboratuvar raporlarından gelen metrik isimleri listesi var.
+Bazı metrikler farklı isimlendirme kuralları ile tekrar ediyor (örneğin, kısa vs uzun form, Türkçe vs İngilizce isimler).
+Ancak farklı birimleri veya son ekleri olan metrikler (örneğin "Bazofil#" vs "Bazofil%") AYNI ŞEY DEĞİLDİR ve birleştirilmemelidir.
+
+Görevin:
+1. Aynı teste atıfta bulunan metrik isim gruplarını belirle
+2. Her grup için tek bir birleşik isim seç (TÜRKÇE'yi tercih et, kısaltmalar yerine tam form)
+3. Her orijinal ismi birleşik ismine eşleyen bir JSON objesi döndür
+4. Eğer bir metriğin eşanlamlısı yoksa, çıktıya dahil etme
+
+Metrik isimleri:
+{json.dumps(metric_names, ensure_ascii=False)}
+
+SADECE geçerli bir JSON objesi döndür (açıklama yapma), bu formatta:
+{{
+  "HGB": "Hemoglobin",
+  "Albumin": "Albümin",
+  "ALB": "Albümin",
+  ...
+}}
+
+Unutma: # vs % gibi farklı son ekleri veya farklı birimleri olan metrikleri birleştirme. TÜRKÇE İSİMLERİ TERCIH ET."""
+
+    response = chat_completion(prompt, model="gpt-4o", max_tokens=2000, temperature=0)
+    print(f"AI Response:\n{response}\n")
+
+    # Parse JSON response
+    try:
+        # Clean response in case it has markdown code blocks
+        response = response.strip()
+        if response.startswith("```"):
+            # Remove markdown code blocks
+            lines = response.split("\n")
+            response = "\n".join([l for l in lines if not l.startswith("```")])
+
+        synonym_map = json.loads(response)
+        print(f"Parsed synonym map: {synonym_map}")
+        return synonym_map
+    except json.JSONDecodeError as e:
+        print(f"[ERROR] Failed to parse AI response as JSON: {e}")
+        print(f"Response was: {response}")
+        return {}
+
+def consolidate_columns(synonym_map):
+    """
+    Consolidate duplicate columns based on the synonym mapping.
+    For each group of synonyms:
+    1. Merge all values into the unified column in the data sheet
+    2. Delete the duplicate columns
+    3. Preserve all data (when multiple synonyms have values for the same date, keep the first non-empty value)
+    4. Also consolidate the reference sheet to match
+    """
+    if not synonym_map:
+        print("No synonym mappings to consolidate.")
+        return
+
+    print(f"Starting consolidation with {len(synonym_map)} mappings...")
+
+    gc = get_sheets_client()
+    sh = gc.open_by_key(SHEET_ID)
+
+    # === Consolidate DATA sheet ===
+    ws = sh.worksheet(SHEET_NAME)
+    data = ws.get_all_values()
+
+    if not data:
+        return
+
+    # Normalize width
+    width = max(len(r) for r in data)
+    data = [r + [""] * (width - len(r)) for r in data]
+
+    header = data[0]
+
+    # Build metric -> row index map
+    row_index = {}
+    for i in range(1, len(data)):
+        metric = (data[i][0] or "").strip()
+        if metric:
+            row_index[metric] = i
+
+    print(f"Found {len(row_index)} metrics in data sheet: {list(row_index.keys())[:10]}...")
+
+    # Group synonyms by unified name
+    # unified_name -> [original_name1, original_name2, ...]
+    groups = {}
+    for original, unified in synonym_map.items():
+        if unified not in groups:
+            groups[unified] = []
+        groups[unified].append(original)
+
+    print(f"Grouped into {len(groups)} unified names: {list(groups.keys())[:10]}...")
+
+    # For each group, merge data
+    for unified_name, original_names in groups.items():
+        # Find which names actually exist in the sheet
+        existing = [name for name in original_names if name in row_index]
+
+        if not existing:
+            continue
+
+        # Ensure unified row exists
+        if unified_name not in row_index:
+            # Create new row for unified name
+            new_row = [""] * width
+            new_row[0] = unified_name
+            data.append(new_row)
+            row_index[unified_name] = len(data) - 1
+
+        unified_idx = row_index[unified_name]
+
+        # Merge data from all synonym rows into unified row
+        for orig_name in existing:
+            if orig_name == unified_name:
+                continue  # Skip if it's already the unified name
+
+            orig_idx = row_index[orig_name]
+
+            # For each column (skip metric column), merge values
+            for col in range(1, len(data[orig_idx])):
+                orig_val = data[orig_idx][col].strip()
+                unified_val = data[unified_idx][col].strip()
+
+                # If unified row is empty but original has value, copy it
+                if not unified_val and orig_val:
+                    data[unified_idx][col] = orig_val
+
+    # Remove duplicate rows (keep unified, remove originals that were merged)
+    rows_to_remove = set()
+    for unified_name, original_names in groups.items():
+        for orig_name in original_names:
+            if orig_name != unified_name and orig_name in row_index:
+                rows_to_remove.add(row_index[orig_name])
+
+    # Build new data without removed rows
+    new_data = [data[0]]  # Keep header
+    for i in range(1, len(data)):
+        if i not in rows_to_remove:
+            new_data.append(data[i])
+
+    # Write back to data sheet
+    ws.clear()
+    ws.update("A1", new_data, value_input_option="USER_ENTERED")
+    print(f"Data sheet: Consolidated {len(rows_to_remove)} duplicate metric rows.")
+
+    # === Consolidate REFERENCE sheet ===
+    try:
+        ref_ws = sh.worksheet(REFERENCE_SHEET_NAME)
+    except gspread.exceptions.WorksheetNotFound:
+        print("Reference sheet not found, skipping reference consolidation.")
+        return
+
+    ref_data = ref_ws.get_all_values()
+    if not ref_data or len(ref_data) < 2:
+        print("Reference sheet is empty, skipping reference consolidation.")
+        return
+
+    # Normalize width
+    ref_width = max(len(r) for r in ref_data)
+    ref_data = [r + [""] * (ref_width - len(r)) for r in ref_data]
+
+    # Build metric -> row index map for reference sheet
+    ref_row_index = {}
+    for i in range(1, len(ref_data)):
+        metric = (ref_data[i][0] or "").strip()
+        if metric:
+            ref_row_index[metric] = i
+
+    print(f"Found {len(ref_row_index)} metrics in reference sheet: {list(ref_row_index.keys())[:10]}...")
+
+    # For each group, merge reference data
+    for unified_name, original_names in groups.items():
+        existing_refs = [name for name in original_names if name in ref_row_index]
+
+        if not existing_refs:
+            continue
+
+        # Ensure unified row exists in reference sheet
+        if unified_name not in ref_row_index:
+            # Create new row for unified name
+            new_row = [""] * ref_width
+            new_row[0] = unified_name
+            ref_data.append(new_row)
+            ref_row_index[unified_name] = len(ref_data) - 1
+
+        unified_idx = ref_row_index[unified_name]
+
+        # Merge reference values from all synonym rows
+        for orig_name in existing_refs:
+            if orig_name == unified_name:
+                continue
+
+            orig_idx = ref_row_index[orig_name]
+
+            # Merge unit, low, high values (columns 1, 2, 3)
+            for col in range(1, min(4, len(ref_data[orig_idx]))):
+                orig_val = ref_data[orig_idx][col].strip()
+                unified_val = ref_data[unified_idx][col].strip()
+
+                # If unified row is empty but original has value, copy it
+                if not unified_val and orig_val:
+                    ref_data[unified_idx][col] = orig_val
+
+    # Remove duplicate rows from reference sheet
+    ref_rows_to_remove = set()
+    for unified_name, original_names in groups.items():
+        for orig_name in original_names:
+            if orig_name != unified_name and orig_name in ref_row_index:
+                ref_rows_to_remove.add(ref_row_index[orig_name])
+
+    # Build new reference data without removed rows
+    new_ref_data = [ref_data[0]]  # Keep header
+    for i in range(1, len(ref_data)):
+        if i not in ref_rows_to_remove:
+            new_ref_data.append(ref_data[i])
+
+    # Write back to reference sheet
+    ref_ws.clear()
+    ref_ws.update("A1", new_ref_data, value_input_option="USER_ENTERED")
+    print(f"Reference sheet: Consolidated {len(ref_rows_to_remove)} duplicate metric rows.")
+    print(f"Total consolidation complete!")
 
 def rebuild_pivot_sheet(source_ws_name=SHEET_NAME, target_ws_name=LOOKER_SHEET_NAME):
     """

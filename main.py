@@ -45,6 +45,20 @@ def main():
    # 4. Write back to the sheet once
    sheets_updater.batch_update_sheet(sheet_data, updates)
    print("Batch sheet update complete.")
+
+   # 5. Collect all unique column names and identify synonyms using ChatGPT
+   print("\n--- Identifying duplicate/synonym column names...")
+   all_metrics = sheets_updater.get_all_metric_names()
+   print(f"Found {len(all_metrics)} unique metric names.")
+
+   synonym_map = sheets_updater.identify_synonyms_with_ai(all_metrics)
+   print(f"AI identified {len(synonym_map)} synonym mappings.")
+
+   # 6. Consolidate duplicate columns based on AI mapping
+   if synonym_map:
+      sheets_updater.consolidate_columns(synonym_map)
+      print("Column consolidation complete.")
+
    sheets_updater.rebuild_pivot_sheet()  # uses SHEET_NAME -> LOOKER_SHEET_NAME from config
    
 
