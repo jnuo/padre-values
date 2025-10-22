@@ -811,7 +811,7 @@ export default function Dashboard() {
                 console.log("[TOUCH] Container touch start:", {
                   touches: e.touches.length,
                   y: e.touches[0]?.clientY,
-                  target: e.target.className,
+                  target: (e.target as HTMLElement).className,
                   scrollHeight: el.scrollHeight,
                   clientHeight: el.clientHeight,
                   canScroll: el.scrollHeight > el.clientHeight
