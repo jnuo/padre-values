@@ -5,7 +5,8 @@ import {
   DndContext,
   closestCenter,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   DragEndEvent,
@@ -35,7 +36,15 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { Metric, MetricValue } from "@/lib/sheets";
-import { Info, Search, X } from "lucide-react";
+import { Info, Search, X, ArrowUpDown, GripVertical } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type UserConfig = {
   id: string;
@@ -67,6 +76,82 @@ function normalizeTurkish(str: string): string {
     .replace(/ç/g, 'c');
 }
 
+// Sortable metric item for the sort sheet
+function SortableMetricItem({
+  id,
+  name,
+  value,
+  unit,
+  inRange
+}: {
+  id: string;
+  name: string;
+  value?: number;
+  unit?: string;
+  inRange: boolean;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  const accent = inRange ? "emerald" : "rose";
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{...style, pointerEvents: 'auto'}}
+      className={cn(
+        "flex items-center gap-2 p-2 border rounded-lg transition-all",
+        isDragging
+          ? "opacity-40 scale-105 shadow-lg cursor-grabbing"
+          : "hover:shadow-sm opacity-100",
+        `bg-${accent}-50 dark:bg-${accent}-900/20 border-${accent}-200/60 dark:border-${accent}-900/40`
+      )}
+    >
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1"
+        style={{ touchAction: 'none', pointerEvents: 'auto' }}
+        onTouchStart={(e) => {
+          console.log(`[TOUCH] Handle touch start: ${name}`);
+          e.stopPropagation();
+        }}
+      >
+        <GripVertical className="h-4 w-4" />
+      </div>
+      <div className="flex-1 min-w-0" style={{pointerEvents: 'none'}}>
+        <div className="text-xs text-muted-foreground truncate">{name}</div>
+        <div
+          className={cn(
+            "text-sm font-semibold",
+            inRange
+              ? "text-emerald-700 dark:text-emerald-300"
+              : "text-rose-700 dark:text-rose-300"
+          )}
+        >
+          {typeof value === "number" ? value.toFixed(1) : "—"}
+          {unit && (
+            <span className="text-xs ml-0.5 font-normal text-muted-foreground">
+              {unit}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const router = useRouter();
   const [data, setData] = useState<ApiData | null>(null);
@@ -81,13 +166,95 @@ export default function Dashboard() {
   const hasAutoSelected = useRef(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchInput, setShowSearchInput] = useState(false);
+  const [sortSheetOpen, setSortSheetOpen] = useState(false);
+  const [metricOrder, setMetricOrder] = useState<string[]>([]);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    // Temporarily disable TouchSensor to test if it's blocking scroll
+    // useSensor(TouchSensor, {
+    //   activationConstraint: {
+    //     distance: 8,
+    //   },
+    // }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  console.log("[DND] Sensors configured - TouchSensor DISABLED for testing");
+
+  // Log when sort sheet opens/closes
+  useEffect(() => {
+    if (sortSheetOpen) {
+      console.log("[SORT SHEET] Opened");
+    } else {
+      console.log("[SORT SHEET] Closed");
+    }
+  }, [sortSheetOpen]);
+
+  // Add native scroll listener (bypasses React synthetic events)
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleNativeScroll = () => {
+      console.log("[SCROLL] NATIVE scroll event fired!", {
+        scrollTop: container.scrollTop,
+        scrollHeight: container.scrollHeight,
+        clientHeight: container.clientHeight
+      });
+    };
+
+    container.addEventListener('scroll', handleNativeScroll, { passive: true });
+    console.log("[SCROLL] Native scroll listener attached");
+
+    return () => {
+      container.removeEventListener('scroll', handleNativeScroll);
+    };
+  }, [sortSheetOpen]);
+
+  // Load user from localStorage on mount
+  useEffect(() => {
+    const savedUser = localStorage.getItem("viziai_user");
+    if (savedUser) {
+      try {
+        const user = JSON.parse(savedUser);
+        console.log("[LOGIN] Auto-login from localStorage:", user.name);
+        setCurrentUser(user);
+        setIsLoggedIn(true);
+      } catch (error) {
+        console.error("[LOGIN] Failed to parse saved user", error);
+        localStorage.removeItem("viziai_user");
+      }
+    } else {
+      console.log("[LOGIN] No saved user found");
+    }
+  }, []);
+
+  // Load metric order from localStorage
+  useEffect(() => {
+    if (!currentUser) return;
+    const saved = localStorage.getItem(`metricOrder_${currentUser.id}`);
+    if (saved) {
+      try {
+        setMetricOrder(JSON.parse(saved));
+      } catch {
+        // Ignore parse errors
+      }
+    }
+  }, [currentUser]);
+
+  // Save metric order to localStorage
+  useEffect(() => {
+    if (!currentUser || metricOrder.length === 0) return;
+    localStorage.setItem(`metricOrder_${currentUser.id}`, JSON.stringify(metricOrder));
+  }, [metricOrder, currentUser]);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -98,7 +265,13 @@ export default function Dashboard() {
         const res = await fetch(`/api/data?userId=${currentUser!.id}`, { cache: "no-store" });
         if (!res.ok) throw new Error("Failed to load data");
         const json = (await res.json()) as ApiData;
-        if (!ignore) setData(json);
+        if (!ignore) {
+          setData(json);
+          // Initialize metric order if empty
+          if (metricOrder.length === 0) {
+            setMetricOrder(json.metrics.map(m => m.id));
+          }
+        }
       } catch (e: unknown) {
         if (!ignore) setError((e as Error)?.message ?? "Error");
       } finally {
@@ -145,16 +318,33 @@ export default function Dashboard() {
     return { ...data, values: filteredValues };
   }, [data, dateRange]);
 
-  // Filter metrics based on search query
+  // Sort and filter metrics based on order and search query
   const displayedMetrics = useMemo(() => {
-    if (!searchQuery || searchQuery.length <= 1) {
-      return filteredData.metrics;
+    let metrics = filteredData.metrics;
+
+    // Apply search filter
+    if (searchQuery && searchQuery.length > 1) {
+      const normalizedQuery = normalizeTurkish(searchQuery);
+      metrics = metrics.filter((m) =>
+        normalizeTurkish(m.name).includes(normalizedQuery)
+      );
     }
-    const normalizedQuery = normalizeTurkish(searchQuery);
-    return filteredData.metrics.filter((m) =>
-      normalizeTurkish(m.name).includes(normalizedQuery)
-    );
-  }, [filteredData.metrics, searchQuery]);
+
+    // Apply custom sort order
+    if (metricOrder.length > 0) {
+      metrics = [...metrics].sort((a, b) => {
+        const indexA = metricOrder.indexOf(a.id);
+        const indexB = metricOrder.indexOf(b.id);
+        // If not in order array, put at end
+        if (indexA === -1 && indexB === -1) return 0;
+        if (indexA === -1) return 1;
+        if (indexB === -1) return -1;
+        return indexA - indexB;
+      });
+    }
+
+    return metrics;
+  }, [filteredData.metrics, searchQuery, metricOrder]);
 
   const valuesByMetric = useMemo(() => {
     if (!filteredData)
@@ -240,6 +430,23 @@ export default function Dashboard() {
     setSearchQuery("");
   };
 
+  const handleSortDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setMetricOrder((items) => {
+        const oldIndex = items.indexOf(active.id as string);
+        const newIndex = items.indexOf(over.id as string);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
+  const resetMetricOrder = () => {
+    if (data) {
+      setMetricOrder(data.metrics.map(m => m.id));
+    }
+  };
+
   // Handle Escape key to close search
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -255,6 +462,8 @@ export default function Dashboard() {
     return <LoginGate onLogin={(userConfig) => {
       setCurrentUser(userConfig);
       setIsLoggedIn(true);
+      // Save user to localStorage
+      localStorage.setItem("viziai_user", JSON.stringify(userConfig));
     }} />;
   }
 
@@ -273,37 +482,33 @@ export default function Dashboard() {
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background">
-      {/* Header */}
+      {/* Header - Product + User Info */}
       <header className="border-b bg-card">
-        <div className="px-4 py-3 sm:px-6 md:px-8 space-y-2">
-          {/* Row 1: Logo (left) + Dropdown (right) */}
+        <div className="px-4 py-3 sm:px-6 md:px-8">
           <div className="flex items-center justify-between">
-            <div className="text-xl sm:text-2xl font-bold text-primary cursor-pointer hover:text-primary/80" onClick={() => router.push("/")}>
+            <div
+              className="text-xl sm:text-2xl font-bold text-primary cursor-pointer hover:text-primary/80"
+              onClick={() => router.push("/")}
+            >
               ViziAI
             </div>
-            <Select
-              value={dateRange}
-              onValueChange={(value: DateRange) => setDateRange(value)}
-            >
-              <SelectTrigger className="w-36 sm:w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tümü</SelectItem>
-                <SelectItem value="90">Son 90 gün</SelectItem>
-                <SelectItem value="30">Son 30 gün</SelectItem>
-                <SelectItem value="15">Son 15 gün</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Row 2: Title (left) + Date period (right) */}
-          <div className="flex items-center justify-between">
-            <h1 className="text-base sm:text-lg font-medium">
-              {currentUser?.name} Tahlil Sonuçları
-            </h1>
-            <div className="text-xs sm:text-sm text-muted-foreground">
-              {dateRangeDisplay}
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium hidden sm:inline">
+                {currentUser?.name}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setIsLoggedIn(false);
+                  setCurrentUser(null);
+                  // Clear user from localStorage
+                  localStorage.removeItem("viziai_user");
+                  router.push("/");
+                }}
+              >
+                Çıkış
+              </Button>
             </div>
           </div>
         </div>
@@ -312,100 +517,127 @@ export default function Dashboard() {
       <main className="p-4 sm:p-6 md:p-8 space-y-6">
         {/* Metric Grid Widget */}
         <Card className="rounded-2xl">
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-3 space-y-3">
+            {/* Row 1: Title + Average + Date */}
             <div className="flex items-center gap-3">
               <CardTitle className="text-sm font-medium text-muted-foreground whitespace-nowrap">
                 Değerler
               </CardTitle>
 
-              {/* Desktop search - always visible */}
-              <div className="hidden md:block flex-1 max-w-xs">
-                <Input
-                  type="text"
-                  placeholder="Ara..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-8"
-                />
+              <div className="flex items-center gap-3 ml-auto">
+                {/* Average switch */}
+                <div className="flex items-center space-x-2">
+                  <Label
+                    htmlFor="average-switch"
+                    className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline"
+                  >
+                    Son Değer
+                  </Label>
+                  <Switch
+                    id="average-switch"
+                    checked={showAverage}
+                    onCheckedChange={setShowAverage}
+                  />
+                  <Label
+                    htmlFor="average-switch"
+                    className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline"
+                  >
+                    Ortalama
+                  </Label>
+                </div>
+
+                {/* Date filter */}
+                <Select
+                  value={dateRange}
+                  onValueChange={(value: DateRange) => setDateRange(value)}
+                >
+                  <SelectTrigger className="w-36 sm:w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tümü</SelectItem>
+                    <SelectItem value="90">Son 90 gün</SelectItem>
+                    <SelectItem value="30">Son 30 gün</SelectItem>
+                    <SelectItem value="15">Son 15 gün</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Row 2: Search + Sort + Date Range Display */}
+            <div className="flex items-center gap-3">
+              {/* Desktop: Search input + Sort button */}
+              <div className="hidden md:flex items-center gap-2">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Ara..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="h-8 pl-8 w-48"
+                  />
+                </div>
+                <div className="w-px h-5 bg-border" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSortSheetOpen(true)}
+                  className="h-8 gap-1.5"
+                >
+                  <ArrowUpDown className="h-3.5 w-3.5" />
+                  <span className="text-xs">Sırala</span>
+                </Button>
               </div>
 
-              {/* Mobile: Search icon OR expanded search (fills the space) */}
+              {/* Mobile: Search button + Sort button */}
               {!showSearchInput ? (
-                <>
+                <div className="flex md:hidden items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowSearchInput(true)}
+                    className="h-8 gap-1.5"
+                  >
+                    <Search className="h-3.5 w-3.5" />
+                    <span className="text-xs">Ara</span>
+                  </Button>
+                  <div className="w-px h-5 bg-border" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSortSheetOpen(true)}
+                    className="h-8 gap-1.5"
+                  >
+                    <ArrowUpDown className="h-3.5 w-3.5" />
+                    <span className="text-xs">Sırala</span>
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex-1 md:hidden relative">
+                  <Input
+                    type="text"
+                    placeholder="Ara..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="h-8 pr-8"
+                    autoFocus
+                  />
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setShowSearchInput(true)}
-                    className="h-8 w-8 flex-shrink-0 md:hidden"
+                    onClick={closeSearch}
+                    className="absolute right-0.5 top-0.5 h-7 w-7"
                   >
-                    <Search className="h-4 w-4" />
+                    <X className="h-3.5 w-3.5" />
                   </Button>
-
-                  {/* Switch - visible when search is closed */}
-                  <div className="flex items-center space-x-2 ml-auto">
-                    <Label
-                      htmlFor="average-switch"
-                      className="text-xs text-muted-foreground whitespace-nowrap"
-                    >
-                      Son Değer
-                    </Label>
-                    <Switch
-                      id="average-switch"
-                      checked={showAverage}
-                      onCheckedChange={setShowAverage}
-                    />
-                    <Label
-                      htmlFor="average-switch"
-                      className="text-xs text-muted-foreground whitespace-nowrap"
-                    >
-                      Ortalama
-                    </Label>
-                  </div>
-                </>
-              ) : (
-                <>
-                  {/* Expanded search - takes full width, hides switch */}
-                  <div className="relative flex-1 md:hidden animate-in fade-in zoom-in-95 duration-300 ease-out">
-                    <Input
-                      type="text"
-                      placeholder="Ara..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="h-8 pr-9"
-                      autoFocus
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={closeSearch}
-                      className="absolute right-0.5 top-0.5 h-7 w-7"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-
-                  {/* Desktop switch - always visible */}
-                  <div className="hidden md:flex items-center space-x-2 ml-auto">
-                    <Label
-                      htmlFor="average-switch"
-                      className="text-xs text-muted-foreground whitespace-nowrap"
-                    >
-                      Son Değer
-                    </Label>
-                    <Switch
-                      id="average-switch"
-                      checked={showAverage}
-                      onCheckedChange={setShowAverage}
-                    />
-                    <Label
-                      htmlFor="average-switch"
-                      className="text-xs text-muted-foreground whitespace-nowrap"
-                    >
-                      Ortalama
-                    </Label>
-                  </div>
-                </>
+                </div>
               )}
+
+              {/* Date range display */}
+              <div className="text-xs text-muted-foreground ml-auto">
+                {dateRangeDisplay}
+              </div>
             </div>
           </CardHeader>
           <CardContent className="pt-0">
@@ -545,6 +777,104 @@ export default function Dashboard() {
           </div>
         )}
       </main>
+
+      {/* Sort Sheet */}
+      <Sheet open={sortSheetOpen} onOpenChange={setSortSheetOpen}>
+        <SheetContent className="w-full sm:max-w-sm !p-0 !gap-0 overflow-hidden">
+          <div className="flex flex-col h-full">
+            <SheetHeader className="pb-4 pl-2 pt-6 flex-shrink-0">
+              <SheetTitle className="text-base">Metrikleri Sırala</SheetTitle>
+              <p className="text-xs text-muted-foreground">
+                Sıralamayı değiştirmek için metrikleri sürükleyin
+              </p>
+            </SheetHeader>
+            <div
+              ref={scrollContainerRef}
+              className="flex-1 pl-2 pr-2"
+              style={{
+                overflowY: 'scroll',
+                WebkitOverflowScrolling: 'touch',
+                overscrollBehavior: 'contain',
+                minHeight: 0,
+                position: 'relative',
+                touchAction: 'auto'
+              }}
+              onScroll={(e) => {
+                console.log("[SCROLL] Container scrolled:", {
+                  scrollTop: e.currentTarget.scrollTop,
+                  scrollHeight: e.currentTarget.scrollHeight,
+                  clientHeight: e.currentTarget.clientHeight
+                });
+              }}
+              onTouchStart={(e) => {
+                const el = e.currentTarget;
+                console.log("[TOUCH] Container touch start:", {
+                  touches: e.touches.length,
+                  y: e.touches[0]?.clientY,
+                  target: e.target.className,
+                  scrollHeight: el.scrollHeight,
+                  clientHeight: el.clientHeight,
+                  canScroll: el.scrollHeight > el.clientHeight
+                });
+              }}
+              onTouchMove={(e) => {
+                console.log("[TOUCH] Container touch move:", {
+                  y: e.touches[0]?.clientY
+                });
+              }}
+              onTouchEnd={() => {
+                console.log("[TOUCH] Container touch end");
+              }}
+            >
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleSortDragEnd}
+              >
+                <SortableContext
+                  items={metricOrder}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-2 pb-4 mr-2">
+                    {metricOrder.map((metricId) => {
+                      const metric = data?.metrics.find((m) => m.id === metricId);
+                      if (!metric) return null;
+
+                      const latest = valuesByMetric.get(metricId);
+                      const value = latest?.value;
+                      const inRange =
+                        typeof value === "number" &&
+                        (metric.ref_min == null || value >= metric.ref_min) &&
+                        (metric.ref_max == null || value <= metric.ref_max);
+
+                      return (
+                        <SortableMetricItem
+                          key={metricId}
+                          id={metricId}
+                          name={metric.name}
+                          value={value}
+                          unit={metric.unit}
+                          inRange={inRange}
+                        />
+                      );
+                    })}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            </div>
+            <div className="flex-shrink-0 p-2 border-t">
+              <Button
+                variant="outline"
+                onClick={resetMetricOrder}
+                className="w-full"
+                size="sm"
+              >
+                Varsayılana Dön
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
     </TooltipProvider>
   );
