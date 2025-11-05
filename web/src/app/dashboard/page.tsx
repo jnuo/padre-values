@@ -348,8 +348,8 @@ export default function Dashboard() {
 
   const valuesByMetric = useMemo(() => {
     if (!filteredData)
-      return new Map<string, { date: string; value: number }>();
-    const map = new Map<string, { date: string; value: number }>();
+      return new Map<string, { date: string; value: number; count: number }>();
+    const map = new Map<string, { date: string; value: number; count: number }>();
 
     // Group values by metric
     const metricGroups = new Map<string, { date: string; value: number }[]>();
@@ -372,13 +372,13 @@ export default function Dashboard() {
         const latestEntry = values
           .sort((a, b) => compareDateAsc(a.date, b.date))
           .pop()!;
-        map.set(metricId, { date: latestEntry.date, value: average });
+        map.set(metricId, { date: latestEntry.date, value: average, count: values.length });
       } else {
         // Get the latest (most recent) value for this metric
         const latestEntry = values
           .sort((a, b) => compareDateAsc(a.date, b.date))
           .pop()!;
-        map.set(metricId, { date: latestEntry.date, value: latestEntry.value });
+        map.set(metricId, { date: latestEntry.date, value: latestEntry.value, count: 1 });
       }
     }
 
@@ -722,6 +722,13 @@ export default function Dashboard() {
                             </span>
                           ) : null}
                         </div>
+                        {latest && (
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            {showAverage && latest.count > 1
+                              ? `${latest.count} değer`
+                              : formatTR(latest.date)}
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   );
