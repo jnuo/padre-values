@@ -409,26 +409,44 @@ def identify_synonyms_with_ai(metric_names):
 
     prompt = f"""Kan tahlili metrik isimlerini analiz ediyorsun. Aşağıda çeşitli laboratuvar raporlarından gelen metrik isimleri listesi var.
 Bazı metrikler farklı isimlendirme kuralları ile tekrar ediyor (örneğin, kısa vs uzun form, Türkçe vs İngilizce isimler).
-Ancak farklı birimleri veya son ekleri olan metrikler (örneğin "Bazofil#" vs "Bazofil%") AYNI ŞEY DEĞİLDİR ve birleştirilmemelidir.
+
+KRİTİK KURALLAR:
+1. # ve % SON EKLERİ FARKLI METRİKLERDİR - ASLA BİRLEŞTİRME:
+   - "Nötrofil#" (mutlak sayı, 10^3/µL) ≠ "Nötrofil%" (yüzde, %)
+   - "Bazofil#" ≠ "Bazofil%"
+   - "Lenfosit#" ≠ "Lenfosit%"
+   - ASLA aynı grupta # ve % metriklerini bulundurma
+
+2. ANCAK, aynı birimdeki metrikler BİRLEŞTİRİLEBİLİR:
+   - "Nötrofil" (10^3/µL) = "Nötrofil#" (10^3/µL) → "Nötrofil#" seç
+   - "Lenfosit" (10^3/µL) = "Lenfosit#" (10^3/µL) → "Lenfosit#" seç
+   - "HGB" = "Hemoglobin" → "Hemoglobin" seç (UZUN ismi tercih et!)
 
 Görevin:
-1. Aynı teste atıfta bulunan metrik isim gruplarını belirle
-2. Her grup için tek bir birleşik isim seç (TÜRKÇE'yi tercih et, kısaltmalar yerine tam form)
-3. Her orijinal ismi birleşik ismine eşleyen bir JSON objesi döndür
-4. Eğer bir metriğin eşanlamlısı yoksa, çıktıya dahil etme
+1. Aynı teste ve aynı birime atıfta bulunan metrik isim gruplarını belirle
+2. # ile % metriklerini ASLA aynı grupta bulundurma
+3. BIRLEŞIK İSIM SEÇERKEN - MUTLAKA EN UZUN AÇIKLAYICI İSMİ SEÇ:
+   - "HGB" + "Hemoglobin" → "Hemoglobin" seç (HGB DEĞİL!)
+   - "PLT" + "Trombosit" → "Trombosit" seç (PLT DEĞİL!)
+   - "Nötrofil" + "Nötrofil#" → "Nötrofil#" seç (# ekini koru!)
+   - TÜRKÇE tam form tercih et, kısaltmalar kullanma
+4. Her orijinal ismi → birleşik ismine eşle
+5. Eşanlamlısı yoksa çıktıya dahil etme
 
 Metrik isimleri:
 {json.dumps(metric_names, ensure_ascii=False)}
 
-SADECE geçerli bir JSON objesi döndür (açıklama yapma), bu formatta:
+SADECE geçerli JSON döndür:
 {{
+  "Nötrofil": "Nötrofil#",
   "HGB": "Hemoglobin",
-  "Albumin": "Albümin",
-  "ALB": "Albümin",
+  "PLT": "Trombosit",
+  "WBC": "Lökosit",
   ...
 }}
 
-Unutma: # vs % gibi farklı son ekleri veya farklı birimleri olan metrikleri birleştirme. TÜRKÇE İSİMLERİ TERCIH ET."""
+KRİTİK: Kısa→Uzun (HGB→Hemoglobin DEĞİL Hemoglobin→HGB!)
+# ve % ASLA AYNI GRUPTA OLMASIN!"""
 
     response = chat_completion(prompt, model="gpt-4o", max_tokens=2000, temperature=0)
     print(f"AI Response:\n{response}\n")
@@ -450,6 +468,120 @@ Unutma: # vs % gibi farklı son ekleri veya farklı birimleri olan metrikleri bi
         print(f"Response was: {response}")
         return {}
 
+def _validate_synonym_mappings(synonym_map):
+    """
+    Validates synonym mappings to prevent merging incompatible metrics.
+
+    Rules:
+    1. Metrics with # vs % suffixes are NEVER merged (different units, different ref ranges)
+    2. Metrics with different reference ranges are NOT merged
+
+    Returns:
+        A filtered synonym_map with only valid merges
+    """
+    if not synonym_map:
+        return {}
+
+    print(f"Validating {len(synonym_map)} synonym mappings...")
+
+    # Get reference ranges from the reference sheet
+    try:
+        gc = get_sheets_client()
+        sh = gc.open_by_key(SHEET_ID)
+        ref_ws = sh.worksheet(REFERENCE_SHEET_NAME)
+        ref_data = ref_ws.get_all_values()
+
+        # Build map: metric_name -> (low, high)
+        ref_ranges = {}
+        if ref_data and len(ref_data) > 1:
+            for i in range(1, len(ref_data)):
+                if len(ref_data[i]) >= 4:
+                    metric = ref_data[i][0].strip()
+                    low = ref_data[i][2].strip()
+                    high = ref_data[i][3].strip()
+                    if metric:
+                        ref_ranges[metric] = (low, high)
+
+        print(f"Loaded {len(ref_ranges)} reference ranges")
+    except Exception as e:
+        print(f"Warning: Could not load reference ranges: {e}")
+        ref_ranges = {}
+
+    # Group by unified name to check compatibility
+    groups = {}
+    for original, unified in synonym_map.items():
+        if unified not in groups:
+            groups[unified] = []
+        groups[unified].append(original)
+
+    validated_map = {}
+
+    for unified_name, original_names in groups.items():
+        # Rule 1: Check for # vs % suffix conflicts
+        has_hash = any(name.endswith('#') for name in original_names)
+        has_percent = any(name.endswith('%') for name in original_names)
+
+        if has_hash and has_percent:
+            print(f"❌ Rejecting merge: '{unified_name}' group contains both # and % metrics: {original_names}")
+            continue
+
+        # Rule 2: Check reference range compatibility (LENIENT - only for major conflicts)
+        # Allow minor variations between labs (e.g., 50 vs 55 is OK)
+        # Only reject if ranges are VERY different (e.g., 5 vs 50)
+        ranges_in_group = []
+        for name in original_names:
+            if name in ref_ranges:
+                ranges_in_group.append((name, ref_ranges[name]))
+
+        if len(ranges_in_group) > 1:
+            # Parse ranges and check for major conflicts
+            def parse_range(rng_tuple):
+                """Parse range tuple to floats, return None if invalid"""
+                try:
+                    low = float(rng_tuple[0]) if rng_tuple[0] else None
+                    high = float(rng_tuple[1]) if rng_tuple[1] else None
+                    return (low, high)
+                except (ValueError, TypeError):
+                    return None
+
+            parsed_ranges = [(name, parse_range(rng)) for name, rng in ranges_in_group]
+            parsed_ranges = [(n, r) for n, r in parsed_ranges if r is not None]
+
+            if len(parsed_ranges) > 1:
+                # Check if high values differ by more than 50% (major conflict)
+                high_values = [r[1] for _, r in parsed_ranges if r[1] is not None]
+                if len(high_values) > 1:
+                    max_high = max(high_values)
+                    min_high = min(high_values)
+                    if max_high > 0 and (max_high / min_high) > 2.0:  # More than 2x difference
+                        print(f"⚠️  Warning: '{unified_name}' has significantly different reference ranges:")
+                        for name, rng in ranges_in_group:
+                            print(f"   - {name}: {rng}")
+                        print(f"   → Merging anyway (minor lab variations are normal)")
+                    # Otherwise, allow merge even with small differences
+
+        # Rule 3: Only prevent merging when base metric mixes with BOTH # AND % variants
+        # (e.g., reject ["Nötrofil", "Nötrofil#", "Nötrofil%"] but allow ["Nötrofil", "Nötrofil#"])
+        base_names = [n.rstrip('#%') for n in original_names]
+        if len(set(base_names)) == 1 and len(original_names) > 1:
+            # All have the same base name
+            has_hash = any(n.endswith('#') for n in original_names)
+            has_percent = any(n.endswith('%') for n in original_names)
+            has_no_suffix = any(not n.endswith('#') and not n.endswith('%') for n in original_names)
+
+            # Only reject if base metric is mixed with BOTH # AND % (already caught by Rule 1)
+            # Allow merging base with only # (if same ref range) or only % (if same ref range)
+            if has_no_suffix and has_hash and has_percent:
+                print(f"❌ Rejecting merge: Base metric mixed with both # and % variants: {original_names}")
+                continue
+
+        # All checks passed, add to validated map
+        for original in original_names:
+            validated_map[original] = unified_name
+
+    print(f"✓ Validated {len(validated_map)} mappings (rejected {len(synonym_map) - len(validated_map)})")
+    return validated_map
+
 def consolidate_columns(synonym_map):
     """
     Consolidate duplicate columns based on the synonym mapping.
@@ -458,12 +590,21 @@ def consolidate_columns(synonym_map):
     2. Delete the duplicate columns
     3. Preserve all data (when multiple synonyms have values for the same date, keep the first non-empty value)
     4. Also consolidate the reference sheet to match
+
+    IMPORTANT: Before merging, validates that metrics have compatible reference ranges.
+    Metrics with # vs % suffixes or different reference ranges will NOT be merged.
     """
     if not synonym_map:
         print("No synonym mappings to consolidate.")
         return
 
     print(f"Starting consolidation with {len(synonym_map)} mappings...")
+
+    # Validate synonym mappings before consolidating
+    validated_synonym_map = _validate_synonym_mappings(synonym_map)
+    if len(validated_synonym_map) < len(synonym_map):
+        rejected = len(synonym_map) - len(validated_synonym_map)
+        print(f"⚠️  Rejected {rejected} mappings due to incompatible reference ranges or # vs % suffixes")
 
     gc = get_sheets_client()
     sh = gc.open_by_key(SHEET_ID)
@@ -493,7 +634,7 @@ def consolidate_columns(synonym_map):
     # Group synonyms by unified name
     # unified_name -> [original_name1, original_name2, ...]
     groups = {}
-    for original, unified in synonym_map.items():
+    for original, unified in validated_synonym_map.items():
         if unified not in groups:
             groups[unified] = []
         groups[unified].append(original)

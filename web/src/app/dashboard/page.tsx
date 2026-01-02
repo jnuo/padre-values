@@ -67,6 +67,7 @@ type DateRange = "all" | "15" | "30" | "90";
 // Normalize Turkish characters for search
 function normalizeTurkish(str: string): string {
   return str
+    .replace(/İ/g, 'i')  // Turkish uppercase İ → i (must be before toLowerCase)
     .toLowerCase()
     .replace(/ğ/g, 'g')
     .replace(/ü/g, 'u')
@@ -82,13 +83,17 @@ function SortableMetricItem({
   name,
   value,
   unit,
-  inRange
+  inRange,
+  onSendToTop,
+  isFirst
 }: {
   id: string;
   name: string;
   value?: number;
   unit?: string;
   inRange: boolean;
+  onSendToTop?: () => void;
+  isFirst?: boolean;
 }) {
   const {
     attributes,
@@ -111,7 +116,7 @@ function SortableMetricItem({
       ref={setNodeRef}
       style={{...style, pointerEvents: 'auto'}}
       className={cn(
-        "flex items-center gap-2 p-2 border rounded-lg transition-all",
+        "group flex items-center gap-2 p-2 border rounded-lg transition-all relative",
         isDragging
           ? "opacity-40 scale-105 shadow-lg cursor-grabbing"
           : "hover:shadow-sm opacity-100",
@@ -148,6 +153,40 @@ function SortableMetricItem({
           )}
         </div>
       </div>
+
+      {/* Send to Top Button */}
+      {!isFirst && onSendToTop && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onSendToTop();
+          }}
+          className={cn(
+            "flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium",
+            "transition-all duration-200 ease-out",
+            // Always visible on mobile, hover-only on desktop
+            "opacity-100 sm:opacity-0 sm:group-hover:opacity-100",
+            "translate-x-0 sm:translate-x-2 sm:group-hover:translate-x-0",
+            "bg-background/80 backdrop-blur-sm",
+            "border border-border/50",
+            "hover:bg-primary/10 hover:border-primary/30",
+            "active:scale-95",
+            "text-muted-foreground hover:text-primary"
+          )}
+          style={{ pointerEvents: 'auto' }}
+        >
+          <svg
+            className="w-3 h-3"
+            fill="none"
+            strokeWidth="2.5"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
+          </svg>
+          <span className="hidden sm:inline">En üste gönder</span>
+        </button>
+      )}
     </div>
   );
 }
@@ -445,6 +484,30 @@ export default function Dashboard() {
     if (data) {
       setMetricOrder(data.metrics.map(m => m.id));
     }
+  };
+
+  const sendToTop = (metricId: string) => {
+    // Preserve scroll position
+    const container = scrollContainerRef.current;
+    const scrollTop = container?.scrollTop || 0;
+
+    setMetricOrder((items) => {
+      const index = items.indexOf(metricId);
+      if (index === -1 || index === 0) return items; // Already at top or not found
+
+      // Remove from current position and add to beginning
+      const newOrder = [...items];
+      newOrder.splice(index, 1);
+      newOrder.unshift(metricId);
+      return newOrder;
+    });
+
+    // Restore scroll position after React updates
+    requestAnimationFrame(() => {
+      if (container) {
+        container.scrollTop = scrollTop;
+      }
+    });
   };
 
   // Handle Escape key to close search
@@ -836,7 +899,7 @@ export default function Dashboard() {
                   strategy={verticalListSortingStrategy}
                 >
                   <div className="space-y-2 pb-4 mr-2">
-                    {metricOrder.map((metricId) => {
+                    {metricOrder.map((metricId, index) => {
                       const metric = data?.metrics.find((m) => m.id === metricId);
                       if (!metric) return null;
 
@@ -847,6 +910,8 @@ export default function Dashboard() {
                         (metric.ref_min == null || value >= metric.ref_min) &&
                         (metric.ref_max == null || value <= metric.ref_max);
 
+                      const isFirst = index === 0;
+
                       return (
                         <SortableMetricItem
                           key={metricId}
@@ -855,6 +920,8 @@ export default function Dashboard() {
                           value={value}
                           unit={metric.unit}
                           inRange={inRange}
+                          onSendToTop={() => sendToTop(metricId)}
+                          isFirst={isFirst}
                         />
                       );
                     })}
