@@ -72,6 +72,21 @@ function getAuth() {
 	});
 }
 
+function getAuthWithWrite() {
+	const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+	const privateKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY?.replace(/\\n/g, "\n");
+	if (!clientEmail || !privateKey) {
+		throw new Error("Missing Google service account env vars");
+	}
+	return new google.auth.JWT({
+		email: clientEmail,
+		key: privateKey,
+		scopes: [
+			"https://www.googleapis.com/auth/spreadsheets",
+		],
+	});
+}
+
 export async function fetchSheetsData(spreadsheetId: string, userId: string) : Promise<SheetsPayload> {
 	const userConfig = getUserConfig(userId);
 	if (!userConfig) {
@@ -136,5 +151,74 @@ export async function fetchSheetsData(spreadsheetId: string, userId: string) : P
 	return { metrics, values };
 }
 
+export async function reorderSheetColumns(
+	spreadsheetId: string,
+	userId: string,
+	newMetricOrder: string[]
+): Promise<void> {
+	const userConfig = getUserConfig(userId);
+	if (!userConfig) {
+		throw new Error(`User with ID '${userId}' not found`);
+	}
+
+	const auth = getAuthWithWrite();
+	const sheets = google.sheets({ version: "v4", auth });
+
+	// First, read the current sheet to get all data
+	const currentData = await sheets.spreadsheets.values.get({
+		spreadsheetId,
+		range: userConfig.dataSheetName,
+	});
+
+	const rows = currentData.data.values ?? [];
+	if (rows.length === 0) {
+		throw new Error("Sheet is empty");
+	}
+
+	const header = rows[0] as string[];
+	const currentMetrics = header.slice(1); // Skip "Date" column
+
+	// Validate that all metrics in newMetricOrder exist in current sheet
+	const currentMetricsSet = new Set(currentMetrics);
+	for (const metric of newMetricOrder) {
+		if (!currentMetricsSet.has(metric)) {
+			throw new Error(`Metric '${metric}' not found in sheet`);
+		}
+	}
+
+	// Build column index map: metric name -> current column index (0-based)
+	const metricToIndex = new Map<string, number>();
+	for (let i = 1; i < header.length; i++) {
+		metricToIndex.set(header[i], i);
+	}
+
+	// Create new column order: [0 (Date), ...reordered metric indices]
+	const newColumnOrder = [0]; // Keep Date as first column
+	for (const metricName of newMetricOrder) {
+		const idx = metricToIndex.get(metricName);
+		if (idx !== undefined) {
+			newColumnOrder.push(idx);
+		}
+	}
+
+	// Reorder all rows based on the new column order
+	const reorderedRows = rows.map((row) => {
+		const newRow: string[] = [];
+		for (const colIdx of newColumnOrder) {
+			newRow.push((row[colIdx] as string) ?? "");
+		}
+		return newRow;
+	});
+
+	// Write the reordered data back to the sheet
+	await sheets.spreadsheets.values.update({
+		spreadsheetId,
+		range: userConfig.dataSheetName,
+		valueInputOption: "RAW",
+		requestBody: {
+			values: reorderedRows,
+		},
+	});
+}
 
 
