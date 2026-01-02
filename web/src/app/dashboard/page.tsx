@@ -59,6 +59,7 @@ import { MetricChip } from "@/components/metric-chip";
 import { LoginGate } from "@/components/login-gate";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/toast";
 
 type ApiData = { metrics: Metric[]; values: MetricValue[] };
 
@@ -193,6 +194,7 @@ function SortableMetricItem({
 
 export default function Dashboard() {
   const router = useRouter();
+  const { addToast } = useToast();
   const [data, setData] = useState<ApiData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -275,25 +277,6 @@ export default function Dashboard() {
       console.log("[LOGIN] No saved user found");
     }
   }, []);
-
-  // Load metric order from localStorage
-  useEffect(() => {
-    if (!currentUser) return;
-    const saved = localStorage.getItem(`metricOrder_${currentUser.id}`);
-    if (saved) {
-      try {
-        setMetricOrder(JSON.parse(saved));
-      } catch {
-        // Ignore parse errors
-      }
-    }
-  }, [currentUser]);
-
-  // Save metric order to localStorage
-  useEffect(() => {
-    if (!currentUser || metricOrder.length === 0) return;
-    localStorage.setItem(`metricOrder_${currentUser.id}`, JSON.stringify(metricOrder));
-  }, [metricOrder, currentUser]);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -387,8 +370,8 @@ export default function Dashboard() {
 
   const valuesByMetric = useMemo(() => {
     if (!filteredData)
-      return new Map<string, { date: string; value: number }>();
-    const map = new Map<string, { date: string; value: number }>();
+      return new Map<string, { date: string; value: number; count: number }>();
+    const map = new Map<string, { date: string; value: number; count: number }>();
 
     // Group values by metric
     const metricGroups = new Map<string, { date: string; value: number }[]>();
@@ -411,13 +394,13 @@ export default function Dashboard() {
         const latestEntry = values
           .sort((a, b) => compareDateAsc(a.date, b.date))
           .pop()!;
-        map.set(metricId, { date: latestEntry.date, value: average });
+        map.set(metricId, { date: latestEntry.date, value: average, count: values.length });
       } else {
         // Get the latest (most recent) value for this metric
         const latestEntry = values
           .sort((a, b) => compareDateAsc(a.date, b.date))
           .pop()!;
-        map.set(metricId, { date: latestEntry.date, value: latestEntry.value });
+        map.set(metricId, { date: latestEntry.date, value: latestEntry.value, count: 1 });
       }
     }
 
@@ -469,20 +452,87 @@ export default function Dashboard() {
     setSearchQuery("");
   };
 
-  const handleSortDragEnd = (event: DragEndEvent) => {
+  const handleSortDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
-    if (over && active.id !== over.id) {
-      setMetricOrder((items) => {
-        const oldIndex = items.indexOf(active.id as string);
-        const newIndex = items.indexOf(over.id as string);
-        return arrayMove(items, oldIndex, newIndex);
+    if (!over || active.id === over.id || !currentUser) return;
+
+    // Save the old order for potential rollback
+    const oldOrder = [...metricOrder];
+
+    // Optimistically update UI
+    const oldIndex = metricOrder.indexOf(active.id as string);
+    const newIndex = metricOrder.indexOf(over.id as string);
+    const newOrder = arrayMove(metricOrder, oldIndex, newIndex);
+    setMetricOrder(newOrder);
+
+    // Call API to persist the change
+    try {
+      const response = await fetch('/api/reorder-columns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          newMetricOrder: newOrder,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to reorder columns');
+      }
+
+      // Success - order is already correct in UI
+      console.log('[REORDER] Successfully persisted metric order to Google Sheets');
+    } catch (error) {
+      // Error - revert UI to old order
+      console.error('[REORDER] Failed to persist order:', error);
+      setMetricOrder(oldOrder);
+      addToast({
+        type: 'error',
+        message: 'Sıralama kaydedilemedi. Lütfen tekrar deneyin.',
+        duration: 5000,
       });
     }
   };
 
-  const resetMetricOrder = () => {
-    if (data) {
-      setMetricOrder(data.metrics.map(m => m.id));
+  const resetMetricOrder = async () => {
+    if (!data || !currentUser) return;
+
+    const oldOrder = [...metricOrder];
+    const defaultOrder = data.metrics.map(m => m.id);
+
+    // Optimistically update UI
+    setMetricOrder(defaultOrder);
+
+    // Call API to persist the reset
+    try {
+      const response = await fetch('/api/reorder-columns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          newMetricOrder: defaultOrder,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to reset column order');
+      }
+
+      console.log('[REORDER] Successfully reset metric order');
+      addToast({
+        type: 'success',
+        message: 'Sıralama varsayılana döndürüldü.',
+        duration: 3000,
+      });
+    } catch (error) {
+      // Error - revert UI
+      console.error('[REORDER] Failed to reset order:', error);
+      setMetricOrder(oldOrder);
+      addToast({
+        type: 'error',
+        message: 'Sıralama sıfırlanamadı. Lütfen tekrar deneyin.',
+        duration: 5000,
+      });
     }
   };
 
@@ -785,6 +835,13 @@ export default function Dashboard() {
                             </span>
                           ) : null}
                         </div>
+                        {latest && (
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            {showAverage && latest.count > 1
+                              ? `${latest.count} değer`
+                              : formatTR(latest.date)}
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   );
