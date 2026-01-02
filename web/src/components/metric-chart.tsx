@@ -31,8 +31,8 @@ export function MetricChart({ metric, values, onHover, onRemove, className }: Me
 
   if (chartData.length === 0) {
     return (
-      <Card className={cn("rounded-2xl", className)}>
-        <CardHeader className="pb-2">
+      <Card className={cn("rounded-xl", className)}>
+        <CardHeader className="!px-3 pt-3 pb-1">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-medium">{metric.name}</CardTitle>
             <Button variant="ghost" size="sm" onClick={onRemove} className="h-6 w-6 p-0">
@@ -40,7 +40,7 @@ export function MetricChart({ metric, values, onHover, onRemove, className }: Me
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="pt-0">
+        <CardContent className="!px-3 pt-0 pb-2">
           <div className="text-sm text-muted-foreground">No data available</div>
         </CardContent>
       </Card>
@@ -71,17 +71,17 @@ export function MetricChart({ metric, values, onHover, onRemove, className }: Me
     (metric.ref_max == null || latestValue <= metric.ref_max);
 
   return (
-    <Card className={cn("rounded-2xl", className)}>
-      <CardHeader className="pb-2">
+    <Card className={cn("rounded-xl", className)}>
+      <CardHeader className="!px-3 pt-3 pb-1">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium">{metric.name}</CardTitle>
-            <Badge 
-              variant="secondary" 
+            <Badge
+              variant="secondary"
               className={cn(
                 "text-xs",
-                inRange 
-                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300" 
+                inRange
+                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300"
                   : "bg-rose-100 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300"
               )}
             >
@@ -93,8 +93,8 @@ export function MetricChart({ metric, values, onHover, onRemove, className }: Me
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
-        <div className="h-48 w-full">
+      <CardContent className="!px-3 pt-0 pb-2">
+        <div className="h-52 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={chartData}

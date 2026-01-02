@@ -78,6 +78,41 @@ function normalizeTurkish(str: string): string {
     .replace(/ç/g, 'c');
 }
 
+// Deduplicate metrics with different capitalizations
+function deduplicateMetrics(data: ApiData): ApiData {
+  const metricMap = new Map<string, Metric>();
+  const metricIdMapping = new Map<string, string>(); // old ID → canonical ID
+
+  // Group metrics by normalized name
+  for (const metric of data.metrics) {
+    const normalizedName = normalizeTurkish(metric.name);
+
+    if (!metricMap.has(normalizedName)) {
+      // First occurrence - keep it
+      metricMap.set(normalizedName, metric);
+      metricIdMapping.set(metric.id, metric.id);
+    } else {
+      // Duplicate found - map this ID to the canonical one
+      const canonical = metricMap.get(normalizedName)!;
+      metricIdMapping.set(metric.id, canonical.id);
+    }
+  }
+
+  // Deduplicated metrics
+  const deduplicatedMetrics = Array.from(metricMap.values());
+
+  // Remap all values to use canonical metric IDs
+  const deduplicatedValues = data.values.map(v => ({
+    ...v,
+    metric_id: metricIdMapping.get(v.metric_id) || v.metric_id
+  }));
+
+  return {
+    metrics: deduplicatedMetrics,
+    values: deduplicatedValues
+  };
+}
+
 // Sortable metric item for the sort sheet
 function SortableMetricItem({
   id,
@@ -320,7 +355,10 @@ export default function Dashboard() {
   const filteredData = useMemo(() => {
     if (!data) return { metrics: [], values: [] };
 
-    if (dateRange === "all") return data;
+    // First, deduplicate metrics with different capitalizations
+    const deduplicated = deduplicateMetrics(data);
+
+    if (dateRange === "all") return deduplicated;
 
     const days = parseInt(dateRange);
     const cutoffDate = new Date();
@@ -328,13 +366,13 @@ export default function Dashboard() {
     const cutoffString = cutoffDate.toISOString().split("T")[0];
 
     // Filter values that are within the date range
-    const filteredValues = data.values.filter((v) => {
+    const filteredValues = deduplicated.values.filter((v) => {
       const iso = parseToISO(v.date);
       if (!iso) return false;
       return iso >= cutoffString;
     });
 
-    return { ...data, values: filteredValues };
+    return { ...deduplicated, values: filteredValues };
   }, [data, dateRange]);
 
   // Sort and filter metrics based on order and search query
@@ -624,7 +662,7 @@ export default function Dashboard() {
       <div className="min-h-screen bg-background">
       {/* Header - Product + User Info */}
       <header className="border-b bg-card">
-        <div className="px-4 py-3 sm:px-6 md:px-8">
+        <div className="px-4 py-2 sm:px-6 md:px-8">
           <div className="flex items-center justify-between">
             <div
               className="text-xl sm:text-2xl font-bold text-primary cursor-pointer hover:text-primary/80"
@@ -654,17 +692,17 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className="p-4 sm:p-6 md:p-8 space-y-6">
+      <main className="p-2 sm:p-3 md:p-4 space-y-3">
         {/* Metric Grid Widget */}
-        <Card className="rounded-2xl">
-          <CardHeader className="pb-3 space-y-3">
+        <Card className="rounded-xl">
+          <CardHeader className="pb-1.5 space-y-1.5">
             {/* Row 1: Title + Average + Date */}
-            <div className="flex items-center gap-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-xs font-medium text-muted-foreground whitespace-nowrap">
                 Değerler
               </CardTitle>
 
-              <div className="flex items-center gap-3 ml-auto">
+              <div className="flex items-center gap-2 ml-auto">
                 {/* Average switch */}
                 <div className="flex items-center space-x-2">
                   <Label
@@ -691,7 +729,7 @@ export default function Dashboard() {
                   value={dateRange}
                   onValueChange={(value: DateRange) => setDateRange(value)}
                 >
-                  <SelectTrigger className="w-36 sm:w-40">
+                  <SelectTrigger className="w-36 sm:w-40 h-7 text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -705,7 +743,7 @@ export default function Dashboard() {
             </div>
 
             {/* Row 2: Search + Sort + Date Range Display */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {/* Desktop: Search input + Sort button */}
               <div className="hidden md:flex items-center gap-2">
                 <div className="relative">
@@ -715,7 +753,7 @@ export default function Dashboard() {
                     placeholder="Ara..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-8 pl-8 w-48"
+                    className="h-7 pl-8 w-48 text-xs"
                   />
                 </div>
                 <div className="w-px h-5 bg-border" />
@@ -723,7 +761,7 @@ export default function Dashboard() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setSortSheetOpen(true)}
-                  className="h-8 gap-1.5"
+                  className="h-7 gap-1 px-2"
                 >
                   <ArrowUpDown className="h-3.5 w-3.5" />
                   <span className="text-xs">Sırala</span>
@@ -737,7 +775,7 @@ export default function Dashboard() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowSearchInput(true)}
-                    className="h-8 gap-1.5"
+                    className="h-7 gap-1 px-2"
                   >
                     <Search className="h-3.5 w-3.5" />
                     <span className="text-xs">Ara</span>
@@ -747,7 +785,7 @@ export default function Dashboard() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setSortSheetOpen(true)}
-                    className="h-8 gap-1.5"
+                    className="h-7 gap-1 px-2"
                   >
                     <ArrowUpDown className="h-3.5 w-3.5" />
                     <span className="text-xs">Sırala</span>
@@ -760,14 +798,14 @@ export default function Dashboard() {
                     placeholder="Ara..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-8 pr-8"
+                    className="h-7 pr-8 text-xs"
                     autoFocus
                   />
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={closeSearch}
-                    className="absolute right-0.5 top-0.5 h-7 w-7"
+                    className="absolute right-0.5 top-0.5 h-6 w-6"
                   >
                     <X className="h-3.5 w-3.5" />
                   </Button>
@@ -780,9 +818,9 @@ export default function Dashboard() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="pt-0">
-            <div className="max-h-80 overflow-y-auto p-2">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <CardContent className="pt-0 px-0">
+            <div className="max-h-48 overflow-y-auto p-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
                 {displayedMetrics.map((m) => {
                   const latest = valuesByMetric.get(m.id);
                   const value = latest?.value;
@@ -806,12 +844,12 @@ export default function Dashboard() {
                     <Card
                       key={m.id}
                       className={cn(
-                        "rounded-xl transition cursor-pointer hover:shadow-md",
-                        isSelected && "ring-2 ring-primary ring-offset-4"
+                        "rounded-lg transition cursor-pointer hover:shadow-md",
+                        isSelected && "ring-2 ring-primary ring-offset-2"
                       )}
                       onClick={() => toggleMetric(m.id)}
                     >
-                      <CardContent className="p-2">
+                      <CardContent className="px-1.5 py-0.5 space-y-0">
                         <div className="flex items-start justify-between mb-1">
                           <div className="text-xs text-muted-foreground line-clamp-1 flex-1">
                             {m.name}
@@ -847,7 +885,7 @@ export default function Dashboard() {
                         </div>
                         <div
                           className={cn(
-                            "text-lg font-semibold",
+                            "text-lg font-semibold leading-none",
                             inRange
                               ? "text-emerald-700 dark:text-emerald-300"
                               : "text-rose-700 dark:text-rose-300"
@@ -861,7 +899,7 @@ export default function Dashboard() {
                           ) : null}
                         </div>
                         {latest && (
-                          <div className="text-xs text-muted-foreground mt-0.5">
+                          <div className="text-xs text-muted-foreground leading-none">
                             {showAverage && latest.count > 1
                               ? `${latest.count} değer`
                               : formatTR(latest.date)}
@@ -876,39 +914,9 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Chart Chips and Charts */}
+        {/* Charts */}
         {selectedMetrics.length > 0 && (
-          <div className="space-y-4">
-            <div className="flex flex-wrap gap-2">
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={selectedMetrics}
-                  strategy={verticalListSortingStrategy}
-                >
-                  {selectedMetrics.map((metricId) => {
-                    const metric = filteredData.metrics.find(
-                      (m) => m.id === metricId
-                    );
-                    if (!metric) return null;
-                    return (
-                      <MetricChip
-                        key={metricId}
-                        id={metricId}
-                        name={metric.name}
-                        onRemove={() => removeMetric(metricId)}
-                      />
-                    );
-                  })}
-                </SortableContext>
-              </DndContext>
-            </div>
-
-            {/* Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {selectedMetricsData.map((metric) => (
                 <MetricChart
                   key={metric.id}
@@ -918,7 +926,6 @@ export default function Dashboard() {
                   onRemove={() => removeMetric(metric.id)}
                 />
               ))}
-            </div>
           </div>
         )}
       </main>
