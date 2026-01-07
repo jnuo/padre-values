@@ -55,6 +55,9 @@ export async function middleware(request: NextRequest) {
   const isAuthenticated = !!user;
   const pathname = request.nextUrl.pathname;
 
+  // Check for demo mode cookie
+  const isDemoMode = request.cookies.get("demo_mode")?.value === "true";
+
   // Protected routes that require authentication
   const protectedRoutes = ["/dashboard"];
   const isProtectedRoute = protectedRoutes.some(
@@ -73,8 +76,8 @@ export async function middleware(request: NextRequest) {
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
 
-  // Redirect unauthenticated users from protected routes to login
-  if (isProtectedRoute && !isAuthenticated) {
+  // Redirect unauthenticated users from protected routes to login (unless demo mode)
+  if (isProtectedRoute && !isAuthenticated && !isDemoMode) {
     const redirectUrl = new URL("/login", request.url);
     // Save the intended destination for post-login redirect
     redirectUrl.searchParams.set("redirect", pathname);
@@ -89,8 +92,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(destination, request.url));
   }
 
-  // Return 401 for protected API routes if not authenticated
-  if (isProtectedApiRoute && !isAuthenticated) {
+  // Return 401 for protected API routes if not authenticated (unless demo mode)
+  if (isProtectedApiRoute && !isAuthenticated && !isDemoMode) {
     return NextResponse.json(
       { error: "Unauthorized", message: "Authentication required" },
       { status: 401 },

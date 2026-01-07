@@ -177,7 +177,11 @@ function LoginContent() {
         <Button
           variant="ghost"
           className="w-full"
-          onClick={() => router.push("/dashboard")}
+          onClick={() => {
+            // Set demo mode cookie and redirect
+            document.cookie = "demo_mode=true; path=/; max-age=86400"; // 24 hours
+            router.push("/dashboard");
+          }}
         >
           Demo hesabı ile devam et
         </Button>

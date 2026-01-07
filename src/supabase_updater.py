@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 # Default profile name used for automated imports
-DEFAULT_PROFILE_NAME = "Father (Migrated)"
+DEFAULT_PROFILE_NAME = "Yüksel O."
 
 
 def get_or_create_profile(profile_name: str = DEFAULT_PROFILE_NAME) -> str:

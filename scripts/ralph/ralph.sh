@@ -17,21 +17,36 @@ for i in $(seq 1 $MAX_ITERATIONS); do
     | claude --dangerously-skip-permissions 2>&1 \
     | tee /dev/stderr) || true
 
-  if echo "$OUTPUT" | grep -q "<promise>PHASE1_COMPLETE</promise>"; then
+  # Check for checkpoint (needs user approval)
+  if echo "$OUTPUT" | grep -q "CHECKPOINT:"; then
     echo ""
-    echo "✅ Phase 1 complete!"
-    echo "📋 Next steps:"
-    echo "   1. Test the dashboard at localhost:3000"
-    echo "   2. Verify your father's data appears from Supabase"
-    echo "   3. Set up Google OAuth (we'll do this together)"
-    echo "   4. Run ralph.sh again for Phase 2"
+    echo "⏸️  Checkpoint reached!"
+    echo "📋 Ralph is waiting for your approval."
+    echo "   Review the changes, test them, then run ralph.sh again to continue."
     exit 0
   fi
 
-  if echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>"; then
+  # Check for blocked (needs user input)
+  if echo "$OUTPUT" | grep -q "BLOCKED:"; then
     echo ""
-    echo "✅ All stories complete!"
+    echo "🚫 Ralph is blocked and needs your help!"
+    echo "   Check the output above for details."
+    exit 1
+  fi
+
+  # Check for all tasks complete
+  if echo "$OUTPUT" | grep -q "ALL_TASKS_COMPLETE"; then
+    echo ""
+    echo "✅ All tasks complete!"
     exit 0
+  fi
+
+  # Check for error
+  if echo "$OUTPUT" | grep -q "ERROR:"; then
+    echo ""
+    echo "❌ Ralph encountered an error!"
+    echo "   Check the output above for details."
+    exit 1
   fi
 
   echo ""

@@ -10,6 +10,11 @@ type ClaimResult = {
   profile_name?: string;
 };
 
+type ProfileError = {
+  type: "auth" | "profile_name" | "claim";
+  message: string;
+};
+
 /**
  * Hook to automatically claim profiles when a user first logs in
  *
@@ -19,13 +24,16 @@ type ClaimResult = {
  * 3. Shows a toast notification if a profile was claimed
  *
  * Usage:
- *   const { isAuthenticated, claimResult, loading } = useProfileClaim();
+ *   const { isAuthenticated, claimResult, loading, error } = useProfileClaim();
  */
 export function useProfileClaim() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [profileName, setProfileName] = useState<string | null>(null);
   const [claimResult, setClaimResult] = useState<ClaimResult | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<ProfileError | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -42,6 +50,29 @@ export function useProfileClaim() {
         if (user) {
           setIsAuthenticated(true);
           setUserEmail(user.email || null);
+          // Get display name from Google OAuth metadata
+          setUserName(
+            user.user_metadata?.full_name ||
+              user.user_metadata?.name ||
+              user.email?.split("@")[0] ||
+              null,
+          );
+
+          // Fetch the profile display_name using RPC (bypasses RLS recursion)
+          const { data: profileDisplayName, error: profileError } =
+            await supabase.rpc("get_my_profile_name");
+
+          if (profileError) {
+            console.error("Failed to fetch profile name:", profileError);
+            if (mounted) {
+              setError({
+                type: "profile_name",
+                message: "Profil adı yüklenemedi.",
+              });
+            }
+          } else if (profileDisplayName) {
+            setProfileName(profileDisplayName);
+          }
 
           // Check if we've already tried to claim for this user
           const claimAttemptKey = `profile_claim_attempted_${user.id}`;
@@ -63,36 +94,40 @@ export function useProfileClaim() {
                   localStorage.setItem(claimAttemptKey, "true");
 
                   if (result.claimed) {
-                    console.log(
-                      "[PROFILE_CLAIM] Successfully claimed profile:",
-                      result.profile_name,
-                    );
-                  } else {
-                    console.log(
-                      "[PROFILE_CLAIM] No profile to claim:",
-                      result.message,
-                    );
+                    // Set profile name from claim result
+                    setProfileName(result.profile_name || null);
                   }
                 }
+              } else {
+                console.error("Profile claim failed:", response.status);
+                if (mounted) {
+                  setError({
+                    type: "claim",
+                    message: "Profil bağlama işlemi başarısız oldu.",
+                  });
+                }
               }
-            } catch (claimError) {
-              console.warn(
-                "[PROFILE_CLAIM] Failed to claim profile:",
-                claimError,
-              );
+            } catch (err) {
+              console.error("Profile claim error:", err);
+              if (mounted) {
+                setError({
+                  type: "claim",
+                  message: "Profil bağlama işlemi başarısız oldu.",
+                });
+              }
             }
-          } else {
-            console.log(
-              "[PROFILE_CLAIM] Already attempted claim for this user",
-            );
           }
         } else {
           setIsAuthenticated(false);
         }
       } catch (err) {
-        console.warn("[PROFILE_CLAIM] Auth check failed:", err);
+        console.error("Auth check failed:", err);
         if (mounted) {
           setIsAuthenticated(false);
+          setError({
+            type: "auth",
+            message: "Oturum doğrulaması başarısız oldu.",
+          });
         }
       } finally {
         if (mounted) {
@@ -108,5 +143,13 @@ export function useProfileClaim() {
     };
   }, []);
 
-  return { isAuthenticated, userEmail, claimResult, loading };
+  return {
+    isAuthenticated,
+    userEmail,
+    userName,
+    profileName,
+    claimResult,
+    loading,
+    error,
+  };
 }

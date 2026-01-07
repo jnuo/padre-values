@@ -6,7 +6,6 @@ import {
   closestCenter,
   KeyboardSensor,
   MouseSensor,
-  TouchSensor,
   useSensor,
   useSensors,
   DragEndEvent,
@@ -55,8 +54,6 @@ type UserConfig = {
 };
 import { compareDateAsc, parseToISO, formatTR } from "@/lib/date";
 import { MetricChart } from "@/components/metric-chart";
-import { MetricChip } from "@/components/metric-chip";
-import { LoginGate } from "@/components/login-gate";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/toast";
@@ -163,7 +160,6 @@ function SortableMetricItem({
         className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1"
         style={{ touchAction: "none", pointerEvents: "auto" }}
         onTouchStart={(e) => {
-          console.log(`[TOUCH] Handle touch start: ${name}`);
           e.stopPropagation();
         }}
       >
@@ -239,16 +235,22 @@ export default function Dashboard() {
   const [, setHoveredDate] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>("all");
   const [showAverage, setShowAverage] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [currentUser, setCurrentUser] = useState<UserConfig | null>(null);
+  // Check Supabase auth and claim profile if needed
+  const { profileName, claimResult, error: profileError } = useProfileClaim();
+
+  // User config - uses authenticated user name or demo fallback
+  const [currentUser] = useState<UserConfig>({
+    id: "user",
+    name: "", // Will be updated via userName
+    username: "user",
+    dataSheetName: "",
+    referenceSheetName: "",
+  });
   const hasAutoSelected = useRef(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [metricOrder, setMetricOrder] = useState<string[]>([]);
-
-  // Check Supabase auth and claim profile if needed
-  const { claimResult } = useProfileClaim();
 
   // Show toast when a profile is claimed
   useEffect(() => {
@@ -260,12 +262,20 @@ export default function Dashboard() {
     }
   }, [claimResult, addToast]);
 
+  // Show toast when there's a profile error
+  useEffect(() => {
+    if (profileError) {
+      addToast({
+        type: "error",
+        message: profileError.message,
+        duration: 5000,
+      });
+    }
+  }, [profileError, addToast]);
+
   // Load metric order from Supabase API on mount
   useEffect(() => {
     if (!currentUser) return;
-
-    // Capture user id to avoid TypeScript null check issues in async function
-    const userId = currentUser.id;
 
     async function loadMetricOrder() {
       try {
@@ -278,45 +288,15 @@ export default function Dashboard() {
             data.order.length > 0
           ) {
             setMetricOrder(data.order);
-            console.log(
-              "[METRIC_ORDER] Loaded from Supabase API:",
-              data.order.length,
-              "metrics",
-            );
-            return;
           }
         }
-        // Fallback to localStorage if API returns empty
-        const savedOrder = localStorage.getItem(`metricOrder_${userId}`);
-        if (savedOrder) {
-          try {
-            const parsed = JSON.parse(savedOrder);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              setMetricOrder(parsed);
-              console.log(
-                "[METRIC_ORDER] Loaded from localStorage:",
-                parsed.length,
-                "metrics",
-              );
-            }
-          } catch (e) {
-            console.warn("[METRIC_ORDER] Failed to parse saved order:", e);
-          }
-        }
-      } catch (error) {
-        console.warn("[METRIC_ORDER] Failed to load from API:", error);
-        // Fallback to localStorage
-        const savedOrder = localStorage.getItem(`metricOrder_${userId}`);
-        if (savedOrder) {
-          try {
-            const parsed = JSON.parse(savedOrder);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              setMetricOrder(parsed);
-            }
-          } catch {
-            // ignore parse errors
-          }
-        }
+      } catch (err) {
+        console.error("Failed to load metric order:", err);
+        addToast({
+          type: "error",
+          message: "Metrik sıralaması yüklenemedi.",
+          duration: 5000,
+        });
       }
     }
 
@@ -341,56 +321,6 @@ export default function Dashboard() {
     }),
   );
 
-  console.log("[DND] Sensors configured - TouchSensor DISABLED for testing");
-
-  // Log when sort sheet opens/closes
-  useEffect(() => {
-    if (sortSheetOpen) {
-      console.log("[SORT SHEET] Opened");
-    } else {
-      console.log("[SORT SHEET] Closed");
-    }
-  }, [sortSheetOpen]);
-
-  // Add native scroll listener (bypasses React synthetic events)
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    const handleNativeScroll = () => {
-      console.log("[SCROLL] NATIVE scroll event fired!", {
-        scrollTop: container.scrollTop,
-        scrollHeight: container.scrollHeight,
-        clientHeight: container.clientHeight,
-      });
-    };
-
-    container.addEventListener("scroll", handleNativeScroll, { passive: true });
-    console.log("[SCROLL] Native scroll listener attached");
-
-    return () => {
-      container.removeEventListener("scroll", handleNativeScroll);
-    };
-  }, [sortSheetOpen]);
-
-  // Load user from localStorage on mount
-  useEffect(() => {
-    const savedUser = localStorage.getItem("viziai_user");
-    if (savedUser) {
-      try {
-        const user = JSON.parse(savedUser);
-        console.log("[LOGIN] Auto-login from localStorage:", user.name);
-        setCurrentUser(user);
-        setIsLoggedIn(true);
-      } catch (error) {
-        console.error("[LOGIN] Failed to parse saved user", error);
-        localStorage.removeItem("viziai_user");
-      }
-    } else {
-      console.log("[LOGIN] No saved user found");
-    }
-  }, []);
-
   // Fetch data from Supabase API (or fallback to Google Sheets)
   useEffect(() => {
     if (!currentUser) return;
@@ -403,9 +333,6 @@ export default function Dashboard() {
 
         // If Supabase returns empty or fails, try the Google Sheets endpoint
         if (!res.ok) {
-          console.log(
-            "[DATA] Supabase API failed, falling back to Google Sheets",
-          );
           res = await fetch(`/api/data?userId=${currentUser!.id}`, {
             cache: "no-store",
           });
@@ -416,7 +343,6 @@ export default function Dashboard() {
 
         // If Supabase returned empty data and we have Google Sheets config, try that
         if (json.metrics.length === 0 && json.values.length === 0) {
-          console.log("[DATA] Supabase returned empty, trying Google Sheets");
           const sheetsRes = await fetch(`/api/data?userId=${currentUser!.id}`, {
             cache: "no-store",
           });
@@ -442,7 +368,16 @@ export default function Dashboard() {
           }
         }
       } catch (e: unknown) {
-        if (!ignore) setError((e as Error)?.message ?? "Error");
+        const errorMessage = (e as Error)?.message ?? "Bilinmeyen hata";
+        console.error("Failed to load metrics data:", e);
+        if (!ignore) {
+          setError(errorMessage);
+          addToast({
+            type: "error",
+            message: `Veriler yüklenemedi: ${errorMessage}`,
+            duration: 5000,
+          });
+        }
       } finally {
         if (!ignore) setLoading(false);
       }
@@ -585,17 +520,6 @@ export default function Dashboard() {
     return `${formatTR(earliest)} - ${formatTR(latest)}`;
   }, [filteredData]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (over && active.id !== over.id) {
-      setSelectedMetrics((items) => {
-        const oldIndex = items.indexOf(active.id as string);
-        const newIndex = items.indexOf(over.id as string);
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
-  };
-
   const toggleMetric = (metricId: string) => {
     if (selectedMetrics.includes(metricId)) {
       setSelectedMetrics(selectedMetrics.filter((id) => id !== metricId));
@@ -623,30 +547,25 @@ export default function Dashboard() {
     const newOrder = arrayMove(metricOrder, oldIndex, newIndex);
     setMetricOrder(newOrder);
 
-    // Save to Supabase API (primary storage)
+    // Save to Supabase API
     try {
       const response = await fetch("/api/metric-order", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ order: newOrder }),
       });
-
-      if (response.ok) {
-        console.log("[REORDER] Saved to Supabase API");
-      } else {
-        console.warn("[REORDER] Supabase API failed, saving to localStorage");
-        localStorage.setItem(
-          `metricOrder_${currentUser.id}`,
-          JSON.stringify(newOrder),
-        );
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
       }
-    } catch (error) {
-      // Fallback to localStorage if API fails
-      console.warn("[REORDER] API error, saving to localStorage:", error);
-      localStorage.setItem(
-        `metricOrder_${currentUser.id}`,
-        JSON.stringify(newOrder),
-      );
+    } catch (err) {
+      console.error("Failed to save metric order:", err);
+      addToast({
+        type: "error",
+        message: "Sıralama kaydedilemedi. Lütfen tekrar deneyin.",
+        duration: 5000,
+      });
+      // Revert to old order on failure
+      setMetricOrder(metricOrder);
     }
   };
 
@@ -671,20 +590,16 @@ export default function Dashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ order: defaultOrder }),
       });
-
       if (!response.ok) {
-        // Fallback to localStorage
-        localStorage.setItem(
-          `metricOrder_${currentUser.id}`,
-          JSON.stringify(defaultOrder),
-        );
+        throw new Error(`HTTP ${response.status}`);
       }
-    } catch {
-      // Fallback to localStorage
-      localStorage.setItem(
-        `metricOrder_${currentUser.id}`,
-        JSON.stringify(defaultOrder),
-      );
+    } catch (err) {
+      console.error("Failed to reset metric order:", err);
+      addToast({
+        type: "error",
+        message: "Sıralama sıfırlanamadı. Lütfen tekrar deneyin.",
+        duration: 5000,
+      });
     }
   };
 
@@ -718,20 +633,18 @@ export default function Dashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ order: newOrder }),
       });
-
       if (!response.ok) {
-        // Fallback to localStorage
-        localStorage.setItem(
-          `metricOrder_${currentUser.id}`,
-          JSON.stringify(newOrder),
-        );
+        throw new Error(`HTTP ${response.status}`);
       }
-    } catch {
-      // Fallback to localStorage
-      localStorage.setItem(
-        `metricOrder_${currentUser.id}`,
-        JSON.stringify(newOrder),
-      );
+    } catch (err) {
+      console.error("Failed to send metric to top:", err);
+      addToast({
+        type: "error",
+        message: "Metrik en üste taşınamadı. Lütfen tekrar deneyin.",
+        duration: 5000,
+      });
+      // Revert on failure
+      setMetricOrder(metricOrder);
     }
   };
 
@@ -745,19 +658,6 @@ export default function Dashboard() {
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
   }, [showSearchInput]);
-
-  if (!isLoggedIn) {
-    return (
-      <LoginGate
-        onLogin={(userConfig) => {
-          setCurrentUser(userConfig);
-          setIsLoggedIn(true);
-          // Save user to localStorage
-          localStorage.setItem("viziai_user", JSON.stringify(userConfig));
-        }}
-      />
-    );
-  }
 
   if (loading) {
     return <div className="p-6">Loading…</div>;
@@ -786,17 +686,19 @@ export default function Dashboard() {
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-sm font-medium hidden sm:inline">
-                  {currentUser?.name}
+                  {profileName || "Kullanıcı"}
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => {
-                    setIsLoggedIn(false);
-                    setCurrentUser(null);
-                    // Clear user from localStorage
-                    localStorage.removeItem("viziai_user");
-                    router.push("/");
+                  onClick={async () => {
+                    // Sign out from Supabase and clear cookies
+                    const supabase = (
+                      await import("@/lib/supabase-browser")
+                    ).createBrowserClient();
+                    await supabase.auth.signOut();
+                    document.cookie = "demo_mode=; path=/; max-age=0";
+                    router.push("/login");
                   }}
                 >
                   Çıkış
@@ -1065,32 +967,6 @@ export default function Dashboard() {
                   minHeight: 0,
                   position: "relative",
                   touchAction: "auto",
-                }}
-                onScroll={(e) => {
-                  console.log("[SCROLL] Container scrolled:", {
-                    scrollTop: e.currentTarget.scrollTop,
-                    scrollHeight: e.currentTarget.scrollHeight,
-                    clientHeight: e.currentTarget.clientHeight,
-                  });
-                }}
-                onTouchStart={(e) => {
-                  const el = e.currentTarget;
-                  console.log("[TOUCH] Container touch start:", {
-                    touches: e.touches.length,
-                    y: e.touches[0]?.clientY,
-                    target: (e.target as HTMLElement).className,
-                    scrollHeight: el.scrollHeight,
-                    clientHeight: el.clientHeight,
-                    canScroll: el.scrollHeight > el.clientHeight,
-                  });
-                }}
-                onTouchMove={(e) => {
-                  console.log("[TOUCH] Container touch move:", {
-                    y: e.touches[0]?.clientY,
-                  });
-                }}
-                onTouchEnd={() => {
-                  console.log("[TOUCH] Container touch end");
                 }}
               >
                 <DndContext

@@ -25,7 +25,7 @@ type MetricsPayload = {
 };
 
 // Default profile name for migrated data
-const DEFAULT_PROFILE_NAME = "Father (Migrated)";
+const DEFAULT_PROFILE_NAME = "Yüksel O.";
 
 function getSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
