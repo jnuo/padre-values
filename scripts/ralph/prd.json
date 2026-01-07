@@ -22,11 +22,12 @@
       "acceptanceCriteria": [
         "Analyze src/sheets_updater.py to understand current data structure (wide format, reference sheet)",
         "Analyze src/pdf_reader.py to see what fields are extracted from PDFs",
-        "Create supabase/migrations/001_initial_schema.sql with normalized tables",
+        "Run `supabase migration new initial_schema` to create migration file",
         "Required tables: users (auth), reports (per PDF/date), metrics (test values with refs)",
         "Include all fields from extraction: value, unit, ref_low, ref_high",
         "Add foreign key constraints and RLS policies",
         "Add indexes on user_id, sample_date, and metric name",
+        "Run `supabase db push` to apply migration to remote database",
         "Document schema with ER diagram or description in schema.md"
       ],
       "priority": 2,

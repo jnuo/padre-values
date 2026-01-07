@@ -16,6 +16,13 @@ Migrate ViziAI from Google Sheets backend to Supabase for:
 - PDF caching: Extracted labs cached as .labs.json next to PDF
 - Wide format: Current sheet has metrics as rows, dates as columns
 
+## Supabase CLI (available and linked!)
+Project is linked to ViziAI (umrhdgqvyipnraapshhl). Use these commands:
+- `supabase migration new <name>` - create migration file in supabase/migrations/
+- `supabase db push` - apply migrations to remote database
+- `supabase db diff` - see schema differences
+- `supabase gen types typescript --local > web/src/types/supabase.ts` - generate types
+
 ## Key Files
 - src/config.py - All configuration constants
 - src/sheets_updater.py - Current Google Sheets integration (982 lines)
