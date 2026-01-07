@@ -68,14 +68,14 @@ type DateRange = "all" | "15" | "30" | "90";
 // Normalize Turkish characters for search
 function normalizeTurkish(str: string): string {
   return str
-    .replace(/İ/g, 'i')  // Turkish uppercase İ → i (must be before toLowerCase)
+    .replace(/İ/g, "i") // Turkish uppercase İ → i (must be before toLowerCase)
     .toLowerCase()
-    .replace(/ğ/g, 'g')
-    .replace(/ü/g, 'u')
-    .replace(/ş/g, 's')
-    .replace(/ı/g, 'i')
-    .replace(/ö/g, 'o')
-    .replace(/ç/g, 'c');
+    .replace(/ğ/g, "g")
+    .replace(/ü/g, "u")
+    .replace(/ş/g, "s")
+    .replace(/ı/g, "i")
+    .replace(/ö/g, "o")
+    .replace(/ç/g, "c");
 }
 
 // Deduplicate metrics with different capitalizations
@@ -102,14 +102,14 @@ function deduplicateMetrics(data: ApiData): ApiData {
   const deduplicatedMetrics = Array.from(metricMap.values());
 
   // Remap all values to use canonical metric IDs
-  const deduplicatedValues = data.values.map(v => ({
+  const deduplicatedValues = data.values.map((v) => ({
     ...v,
-    metric_id: metricIdMapping.get(v.metric_id) || v.metric_id
+    metric_id: metricIdMapping.get(v.metric_id) || v.metric_id,
   }));
 
   return {
     metrics: deduplicatedMetrics,
-    values: deduplicatedValues
+    values: deduplicatedValues,
   };
 }
 
@@ -121,7 +121,7 @@ function SortableMetricItem({
   unit,
   inRange,
   onSendToTop,
-  isFirst
+  isFirst,
 }: {
   id: string;
   name: string;
@@ -148,19 +148,19 @@ function SortableMetricItem({
   return (
     <div
       ref={setNodeRef}
-      style={{...style, pointerEvents: 'auto'}}
+      style={{ ...style, pointerEvents: "auto" }}
       className={cn(
         "group flex items-center gap-2 p-2 border rounded-lg transition-all relative",
         isDragging
           ? "opacity-40 scale-105 shadow-lg cursor-grabbing"
-          : "hover:shadow-sm opacity-100"
+          : "hover:shadow-sm opacity-100",
       )}
     >
       <div
         {...attributes}
         {...listeners}
         className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1"
-        style={{ touchAction: 'none', pointerEvents: 'auto' }}
+        style={{ touchAction: "none", pointerEvents: "auto" }}
         onTouchStart={(e) => {
           console.log(`[TOUCH] Handle touch start: ${name}`);
           e.stopPropagation();
@@ -168,14 +168,14 @@ function SortableMetricItem({
       >
         <GripVertical className="h-4 w-4" />
       </div>
-      <div className="flex-1 min-w-0" style={{pointerEvents: 'none'}}>
+      <div className="flex-1 min-w-0" style={{ pointerEvents: "none" }}>
         <div className="text-xs text-muted-foreground truncate">{name}</div>
         <div
           className={cn(
             "text-sm font-semibold",
             inRange
               ? "text-emerald-700 dark:text-emerald-300"
-              : "text-rose-700 dark:text-rose-300"
+              : "text-rose-700 dark:text-rose-300",
           )}
         >
           {typeof value === "number" ? value.toFixed(1) : "—"}
@@ -204,9 +204,9 @@ function SortableMetricItem({
             "border border-border/50",
             "hover:bg-primary/10 hover:border-primary/30",
             "active:scale-95",
-            "text-muted-foreground hover:text-primary"
+            "text-muted-foreground hover:text-primary",
           )}
-          style={{ pointerEvents: 'auto' }}
+          style={{ pointerEvents: "auto" }}
         >
           <svg
             className="w-3 h-3"
@@ -215,7 +215,11 @@ function SortableMetricItem({
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"
+            />
           </svg>
           <span className="hidden sm:inline">En üste gönder</span>
         </button>
@@ -257,7 +261,7 @@ export default function Dashboard() {
     // }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   console.log("[DND] Sensors configured - TouchSensor DISABLED for testing");
@@ -280,15 +284,15 @@ export default function Dashboard() {
       console.log("[SCROLL] NATIVE scroll event fired!", {
         scrollTop: container.scrollTop,
         scrollHeight: container.scrollHeight,
-        clientHeight: container.clientHeight
+        clientHeight: container.clientHeight,
       });
     };
 
-    container.addEventListener('scroll', handleNativeScroll, { passive: true });
+    container.addEventListener("scroll", handleNativeScroll, { passive: true });
     console.log("[SCROLL] Native scroll listener attached");
 
     return () => {
-      container.removeEventListener('scroll', handleNativeScroll);
+      container.removeEventListener("scroll", handleNativeScroll);
     };
   }, [sortSheetOpen]);
 
@@ -310,20 +314,54 @@ export default function Dashboard() {
     }
   }, []);
 
+  // Fetch data from Supabase API (or fallback to Google Sheets)
   useEffect(() => {
     if (!currentUser) return;
 
     let ignore = false;
     async function load() {
       try {
-        const res = await fetch(`/api/data?userId=${currentUser!.id}`, { cache: "no-store" });
+        // Try Supabase API first, fall back to Google Sheets if it fails
+        let res = await fetch(`/api/metrics`, { cache: "no-store" });
+
+        // If Supabase returns empty or fails, try the Google Sheets endpoint
+        if (!res.ok) {
+          console.log(
+            "[DATA] Supabase API failed, falling back to Google Sheets",
+          );
+          res = await fetch(`/api/data?userId=${currentUser!.id}`, {
+            cache: "no-store",
+          });
+        }
+
         if (!res.ok) throw new Error("Failed to load data");
         const json = (await res.json()) as ApiData;
+
+        // If Supabase returned empty data and we have Google Sheets config, try that
+        if (json.metrics.length === 0 && json.values.length === 0) {
+          console.log("[DATA] Supabase returned empty, trying Google Sheets");
+          const sheetsRes = await fetch(`/api/data?userId=${currentUser!.id}`, {
+            cache: "no-store",
+          });
+          if (sheetsRes.ok) {
+            const sheetsJson = (await sheetsRes.json()) as ApiData;
+            if (sheetsJson.metrics.length > 0 || sheetsJson.values.length > 0) {
+              if (!ignore) {
+                setData(sheetsJson);
+                if (metricOrder.length === 0) {
+                  setMetricOrder(sheetsJson.metrics.map((m) => m.id));
+                }
+              }
+              return;
+            }
+          }
+        }
+
         if (!ignore) {
           setData(json);
           // Initialize metric order if empty
           if (metricOrder.length === 0) {
-            setMetricOrder(json.metrics.map(m => m.id));
+            setMetricOrder(json.metrics.map((m) => m.id));
           }
         }
       } catch (e: unknown) {
@@ -341,8 +379,8 @@ export default function Dashboard() {
   // Auto-select Hemoglobin when data is loaded
   useEffect(() => {
     if (data && !hasAutoSelected.current) {
-      const hemoglobinMetric = data.metrics.find(metric =>
-        metric.name.toLowerCase().includes('hemoglobin')
+      const hemoglobinMetric = data.metrics.find((metric) =>
+        metric.name.toLowerCase().includes("hemoglobin"),
       );
       if (hemoglobinMetric) {
         setSelectedMetrics([hemoglobinMetric.id]);
@@ -383,7 +421,7 @@ export default function Dashboard() {
     if (searchQuery && searchQuery.length > 1) {
       const normalizedQuery = normalizeTurkish(searchQuery);
       metrics = metrics.filter((m) =>
-        normalizeTurkish(m.name).includes(normalizedQuery)
+        normalizeTurkish(m.name).includes(normalizedQuery),
       );
     }
 
@@ -406,7 +444,10 @@ export default function Dashboard() {
   const valuesByMetric = useMemo(() => {
     if (!filteredData)
       return new Map<string, { date: string; value: number; count: number }>();
-    const map = new Map<string, { date: string; value: number; count: number }>();
+    const map = new Map<
+      string,
+      { date: string; value: number; count: number }
+    >();
 
     // Group values by metric
     const metricGroups = new Map<string, { date: string; value: number }[]>();
@@ -429,13 +470,21 @@ export default function Dashboard() {
         const latestEntry = values
           .sort((a, b) => compareDateAsc(a.date, b.date))
           .pop()!;
-        map.set(metricId, { date: latestEntry.date, value: average, count: values.length });
+        map.set(metricId, {
+          date: latestEntry.date,
+          value: average,
+          count: values.length,
+        });
       } else {
         // Get the latest (most recent) value for this metric
         const latestEntry = values
           .sort((a, b) => compareDateAsc(a.date, b.date))
           .pop()!;
-        map.set(metricId, { date: latestEntry.date, value: latestEntry.value, count: 1 });
+        map.set(metricId, {
+          date: latestEntry.date,
+          value: latestEntry.value,
+          count: 1,
+        });
       }
     }
 
@@ -502,9 +551,9 @@ export default function Dashboard() {
 
     // Call API to persist the change
     try {
-      const response = await fetch('/api/reorder-columns', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/reorder-columns", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: currentUser.id,
           newMetricOrder: newOrder,
@@ -512,18 +561,20 @@ export default function Dashboard() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to reorder columns');
+        throw new Error("Failed to reorder columns");
       }
 
       // Success - order is already correct in UI
-      console.log('[REORDER] Successfully persisted metric order to Google Sheets');
+      console.log(
+        "[REORDER] Successfully persisted metric order to Google Sheets",
+      );
     } catch (error) {
       // Error - revert UI to old order
-      console.error('[REORDER] Failed to persist order:', error);
+      console.error("[REORDER] Failed to persist order:", error);
       setMetricOrder(oldOrder);
       addToast({
-        type: 'error',
-        message: 'Sıralama kaydedilemedi. Lütfen tekrar deneyin.',
+        type: "error",
+        message: "Sıralama kaydedilemedi. Lütfen tekrar deneyin.",
         duration: 5000,
       });
     }
@@ -533,16 +584,16 @@ export default function Dashboard() {
     if (!data || !currentUser) return;
 
     const oldOrder = [...metricOrder];
-    const defaultOrder = data.metrics.map(m => m.id);
+    const defaultOrder = data.metrics.map((m) => m.id);
 
     // Optimistically update UI
     setMetricOrder(defaultOrder);
 
     // Call API to persist the reset
     try {
-      const response = await fetch('/api/reorder-columns', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/reorder-columns", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: currentUser.id,
           newMetricOrder: defaultOrder,
@@ -550,22 +601,22 @@ export default function Dashboard() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to reset column order');
+        throw new Error("Failed to reset column order");
       }
 
-      console.log('[REORDER] Successfully reset metric order');
+      console.log("[REORDER] Successfully reset metric order");
       addToast({
-        type: 'success',
-        message: 'Sıralama varsayılana döndürüldü.',
+        type: "success",
+        message: "Sıralama varsayılana döndürüldü.",
         duration: 3000,
       });
     } catch (error) {
       // Error - revert UI
-      console.error('[REORDER] Failed to reset order:', error);
+      console.error("[REORDER] Failed to reset order:", error);
       setMetricOrder(oldOrder);
       addToast({
-        type: 'error',
-        message: 'Sıralama sıfırlanamadı. Lütfen tekrar deneyin.',
+        type: "error",
+        message: "Sıralama sıfırlanamadı. Lütfen tekrar deneyin.",
         duration: 5000,
       });
     }
@@ -599,9 +650,9 @@ export default function Dashboard() {
 
     // Call API to persist the change
     try {
-      const response = await fetch('/api/reorder-columns', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/reorder-columns", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: currentUser.id,
           newMetricOrder: newOrder,
@@ -609,17 +660,19 @@ export default function Dashboard() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to send metric to top');
+        throw new Error("Failed to send metric to top");
       }
 
-      console.log('[REORDER] Successfully sent metric to top and persisted to Google Sheets');
+      console.log(
+        "[REORDER] Successfully sent metric to top and persisted to Google Sheets",
+      );
     } catch (error) {
       // Error - revert UI to old order
-      console.error('[REORDER] Failed to persist send-to-top:', error);
+      console.error("[REORDER] Failed to persist send-to-top:", error);
       setMetricOrder(oldOrder);
       addToast({
-        type: 'error',
-        message: 'Metrik en üste gönderilemedi. Lütfen tekrar deneyin.',
+        type: "error",
+        message: "Metrik en üste gönderilemedi. Lütfen tekrar deneyin.",
         duration: 5000,
       });
     }
@@ -637,12 +690,16 @@ export default function Dashboard() {
   }, [showSearchInput]);
 
   if (!isLoggedIn) {
-    return <LoginGate onLogin={(userConfig) => {
-      setCurrentUser(userConfig);
-      setIsLoggedIn(true);
-      // Save user to localStorage
-      localStorage.setItem("viziai_user", JSON.stringify(userConfig));
-    }} />;
+    return (
+      <LoginGate
+        onLogin={(userConfig) => {
+          setCurrentUser(userConfig);
+          setIsLoggedIn(true);
+          // Save user to localStorage
+          localStorage.setItem("viziai_user", JSON.stringify(userConfig));
+        }}
+      />
+    );
   }
 
   if (loading) {
@@ -660,126 +717,102 @@ export default function Dashboard() {
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background">
-      {/* Header - Product + User Info */}
-      <header className="border-b bg-card">
-        <div className="px-4 py-2 sm:px-6 md:px-8">
-          <div className="flex items-center justify-between">
-            <div
-              className="text-xl sm:text-2xl font-bold text-primary cursor-pointer hover:text-primary/80"
-              onClick={() => router.push("/")}
-            >
-              ViziAI
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium hidden sm:inline">
-                {currentUser?.name}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setIsLoggedIn(false);
-                  setCurrentUser(null);
-                  // Clear user from localStorage
-                  localStorage.removeItem("viziai_user");
-                  router.push("/");
-                }}
+        {/* Header - Product + User Info */}
+        <header className="border-b bg-card">
+          <div className="px-4 py-2 sm:px-6 md:px-8">
+            <div className="flex items-center justify-between">
+              <div
+                className="text-xl sm:text-2xl font-bold text-primary cursor-pointer hover:text-primary/80"
+                onClick={() => router.push("/")}
               >
-                Çıkış
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="p-2 sm:p-3 md:p-4 space-y-3">
-        {/* Metric Grid Widget */}
-        <Card className="rounded-xl">
-          <CardHeader className="pb-1.5 space-y-1.5">
-            {/* Row 1: Title + Average + Date */}
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-xs font-medium text-muted-foreground whitespace-nowrap">
-                Değerler
-              </CardTitle>
-
-              <div className="flex items-center gap-2 ml-auto">
-                {/* Average switch */}
-                <div className="flex items-center space-x-2">
-                  <Label
-                    htmlFor="average-switch"
-                    className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline"
-                  >
-                    Son Değer
-                  </Label>
-                  <Switch
-                    id="average-switch"
-                    checked={showAverage}
-                    onCheckedChange={setShowAverage}
-                  />
-                  <Label
-                    htmlFor="average-switch"
-                    className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline"
-                  >
-                    Ortalama
-                  </Label>
-                </div>
-
-                {/* Date filter */}
-                <Select
-                  value={dateRange}
-                  onValueChange={(value: DateRange) => setDateRange(value)}
-                >
-                  <SelectTrigger className="w-36 sm:w-40 h-7 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tümü</SelectItem>
-                    <SelectItem value="90">Son 90 gün</SelectItem>
-                    <SelectItem value="30">Son 30 gün</SelectItem>
-                    <SelectItem value="15">Son 15 gün</SelectItem>
-                  </SelectContent>
-                </Select>
+                ViziAI
               </div>
-            </div>
-
-            {/* Row 2: Search + Sort + Date Range Display */}
-            <div className="flex items-center gap-2">
-              {/* Desktop: Search input + Sort button */}
-              <div className="hidden md:flex items-center gap-2">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder="Ara..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-7 pl-8 w-48 text-xs"
-                  />
-                </div>
-                <div className="w-px h-5 bg-border" />
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium hidden sm:inline">
+                  {currentUser?.name}
+                </span>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  onClick={() => setSortSheetOpen(true)}
-                  className="h-7 gap-1 px-2"
+                  onClick={() => {
+                    setIsLoggedIn(false);
+                    setCurrentUser(null);
+                    // Clear user from localStorage
+                    localStorage.removeItem("viziai_user");
+                    router.push("/");
+                  }}
                 >
-                  <ArrowUpDown className="h-3.5 w-3.5" />
-                  <span className="text-xs">Sırala</span>
+                  Çıkış
                 </Button>
               </div>
+            </div>
+          </div>
+        </header>
 
-              {/* Mobile: Search button + Sort button */}
-              {!showSearchInput ? (
-                <div className="flex md:hidden items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowSearchInput(true)}
-                    className="h-7 gap-1 px-2"
+        <main className="p-2 sm:p-3 md:p-4 space-y-3">
+          {/* Metric Grid Widget */}
+          <Card className="rounded-xl">
+            <CardHeader className="pb-1.5 space-y-1.5">
+              {/* Row 1: Title + Average + Date */}
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-xs font-medium text-muted-foreground whitespace-nowrap">
+                  Değerler
+                </CardTitle>
+
+                <div className="flex items-center gap-2 ml-auto">
+                  {/* Average switch */}
+                  <div className="flex items-center space-x-2">
+                    <Label
+                      htmlFor="average-switch"
+                      className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline"
+                    >
+                      Son Değer
+                    </Label>
+                    <Switch
+                      id="average-switch"
+                      checked={showAverage}
+                      onCheckedChange={setShowAverage}
+                    />
+                    <Label
+                      htmlFor="average-switch"
+                      className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline"
+                    >
+                      Ortalama
+                    </Label>
+                  </div>
+
+                  {/* Date filter */}
+                  <Select
+                    value={dateRange}
+                    onValueChange={(value: DateRange) => setDateRange(value)}
                   >
-                    <Search className="h-3.5 w-3.5" />
-                    <span className="text-xs">Ara</span>
-                  </Button>
+                    <SelectTrigger className="w-36 sm:w-40 h-7 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tümü</SelectItem>
+                      <SelectItem value="90">Son 90 gün</SelectItem>
+                      <SelectItem value="30">Son 30 gün</SelectItem>
+                      <SelectItem value="15">Son 15 gün</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Row 2: Search + Sort + Date Range Display */}
+              <div className="flex items-center gap-2">
+                {/* Desktop: Search input + Sort button */}
+                <div className="hidden md:flex items-center gap-2">
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Ara..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="h-7 pl-8 w-48 text-xs"
+                    />
+                  </div>
                   <div className="w-px h-5 bg-border" />
                   <Button
                     variant="ghost"
@@ -791,132 +824,157 @@ export default function Dashboard() {
                     <span className="text-xs">Sırala</span>
                   </Button>
                 </div>
-              ) : (
-                <div className="flex-1 md:hidden relative">
-                  <Input
-                    type="text"
-                    placeholder="Ara..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-7 pr-8 text-xs"
-                    autoFocus
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={closeSearch}
-                    className="absolute right-0.5 top-0.5 h-6 w-6"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              )}
 
-              {/* Date range display */}
-              <div className="text-xs text-muted-foreground ml-auto">
-                {dateRangeDisplay}
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0 px-0">
-            <div className="max-h-48 overflow-y-auto p-2">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                {displayedMetrics.map((m) => {
-                  const latest = valuesByMetric.get(m.id);
-                  const value = latest?.value;
-                  const inRange =
-                    typeof value === "number" &&
-                    (m.ref_min == null || value >= m.ref_min) &&
-                    (m.ref_max == null || value <= m.ref_max);
-                  const isSelected = selectedMetrics.includes(m.id);
-
-                  // Determine flag status
-                  let flagStatus = "";
-                  if (typeof value === "number") {
-                    if (m.ref_min != null && value < m.ref_min) {
-                      flagStatus = "Düşük";
-                    } else if (m.ref_max != null && value > m.ref_max) {
-                      flagStatus = "Yüksek";
-                    }
-                  }
-
-                  return (
-                    <Card
-                      key={m.id}
-                      className={cn(
-                        "rounded-lg transition cursor-pointer hover:shadow-md",
-                        isSelected && "ring-2 ring-primary ring-offset-2"
-                      )}
-                      onClick={() => toggleMetric(m.id)}
+                {/* Mobile: Search button + Sort button */}
+                {!showSearchInput ? (
+                  <div className="flex md:hidden items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowSearchInput(true)}
+                      className="h-7 gap-1 px-2"
                     >
-                      <CardContent className="px-1.5 py-0.5 space-y-0">
-                        <div className="flex items-start justify-between mb-1">
-                          <div className="text-xs text-muted-foreground line-clamp-1 flex-1">
-                            {m.name}
-                          </div>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Info className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 ml-1" />
-                            </TooltipTrigger>
-                            <TooltipContent side="top" className="max-w-xs">
-                              <div className="space-y-1">
-                                <div className="font-medium">{m.name}</div>
-                                {m.ref_min != null && m.ref_max != null ? (
-                                  <div className="text-sm">
-                                    Referans aralığı: {m.ref_min} - {m.ref_max} {m.unit || ""}
-                                  </div>
-                                ) : m.ref_min != null ? (
-                                  <div className="text-sm">
-                                    Minimum: {m.ref_min} {m.unit || ""}
-                                  </div>
-                                ) : m.ref_max != null ? (
-                                  <div className="text-sm">
-                                    Maksimum: {m.ref_max} {m.unit || ""}
-                                  </div>
-                                ) : null}
-                                {flagStatus && (
-                                  <div className="text-sm font-medium text-rose-600">
-                                    Durum: {flagStatus}
-                                  </div>
-                                )}
-                              </div>
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
-                        <div
-                          className={cn(
-                            "text-lg font-semibold leading-none",
-                            inRange
-                              ? "text-emerald-700 dark:text-emerald-300"
-                              : "text-rose-700 dark:text-rose-300"
-                          )}
-                        >
-                          {typeof value === "number" ? value.toFixed(1) : "—"}
-                          {m.unit ? (
-                            <span className="text-xs ml-1 font-normal text-muted-foreground">
-                              {m.unit}
-                            </span>
-                          ) : null}
-                        </div>
-                        {latest && (
-                          <div className="text-xs text-muted-foreground leading-none">
-                            {showAverage && latest.count > 1
-                              ? `${latest.count} değer`
-                              : formatTR(latest.date)}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                      <Search className="h-3.5 w-3.5" />
+                      <span className="text-xs">Ara</span>
+                    </Button>
+                    <div className="w-px h-5 bg-border" />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSortSheetOpen(true)}
+                      className="h-7 gap-1 px-2"
+                    >
+                      <ArrowUpDown className="h-3.5 w-3.5" />
+                      <span className="text-xs">Sırala</span>
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex-1 md:hidden relative">
+                    <Input
+                      type="text"
+                      placeholder="Ara..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="h-7 pr-8 text-xs"
+                      autoFocus
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={closeSearch}
+                      className="absolute right-0.5 top-0.5 h-6 w-6"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                )}
 
-        {/* Charts */}
-        {selectedMetrics.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Date range display */}
+                <div className="text-xs text-muted-foreground ml-auto">
+                  {dateRangeDisplay}
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0 px-0">
+              <div className="max-h-48 overflow-y-auto p-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                  {displayedMetrics.map((m) => {
+                    const latest = valuesByMetric.get(m.id);
+                    const value = latest?.value;
+                    const inRange =
+                      typeof value === "number" &&
+                      (m.ref_min == null || value >= m.ref_min) &&
+                      (m.ref_max == null || value <= m.ref_max);
+                    const isSelected = selectedMetrics.includes(m.id);
+
+                    // Determine flag status
+                    let flagStatus = "";
+                    if (typeof value === "number") {
+                      if (m.ref_min != null && value < m.ref_min) {
+                        flagStatus = "Düşük";
+                      } else if (m.ref_max != null && value > m.ref_max) {
+                        flagStatus = "Yüksek";
+                      }
+                    }
+
+                    return (
+                      <Card
+                        key={m.id}
+                        className={cn(
+                          "rounded-lg transition cursor-pointer hover:shadow-md",
+                          isSelected && "ring-2 ring-primary ring-offset-2",
+                        )}
+                        onClick={() => toggleMetric(m.id)}
+                      >
+                        <CardContent className="px-1.5 py-0.5 space-y-0">
+                          <div className="flex items-start justify-between mb-1">
+                            <div className="text-xs text-muted-foreground line-clamp-1 flex-1">
+                              {m.name}
+                            </div>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 ml-1" />
+                              </TooltipTrigger>
+                              <TooltipContent side="top" className="max-w-xs">
+                                <div className="space-y-1">
+                                  <div className="font-medium">{m.name}</div>
+                                  {m.ref_min != null && m.ref_max != null ? (
+                                    <div className="text-sm">
+                                      Referans aralığı: {m.ref_min} -{" "}
+                                      {m.ref_max} {m.unit || ""}
+                                    </div>
+                                  ) : m.ref_min != null ? (
+                                    <div className="text-sm">
+                                      Minimum: {m.ref_min} {m.unit || ""}
+                                    </div>
+                                  ) : m.ref_max != null ? (
+                                    <div className="text-sm">
+                                      Maksimum: {m.ref_max} {m.unit || ""}
+                                    </div>
+                                  ) : null}
+                                  {flagStatus && (
+                                    <div className="text-sm font-medium text-rose-600">
+                                      Durum: {flagStatus}
+                                    </div>
+                                  )}
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <div
+                            className={cn(
+                              "text-lg font-semibold leading-none",
+                              inRange
+                                ? "text-emerald-700 dark:text-emerald-300"
+                                : "text-rose-700 dark:text-rose-300",
+                            )}
+                          >
+                            {typeof value === "number" ? value.toFixed(1) : "—"}
+                            {m.unit ? (
+                              <span className="text-xs ml-1 font-normal text-muted-foreground">
+                                {m.unit}
+                              </span>
+                            ) : null}
+                          </div>
+                          {latest && (
+                            <div className="text-xs text-muted-foreground leading-none">
+                              {showAverage && latest.count > 1
+                                ? `${latest.count} değer`
+                                : formatTR(latest.date)}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Charts */}
+          {selectedMetrics.length > 0 && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {selectedMetricsData.map((metric) => (
                 <MetricChart
                   key={metric.id}
@@ -926,112 +984,114 @@ export default function Dashboard() {
                   onRemove={() => removeMetric(metric.id)}
                 />
               ))}
-          </div>
-        )}
-      </main>
+            </div>
+          )}
+        </main>
 
-      {/* Sort Sheet */}
-      <Sheet open={sortSheetOpen} onOpenChange={setSortSheetOpen}>
-        <SheetContent className="w-full sm:max-w-sm !p-0 !gap-0 overflow-hidden">
-          <div className="flex flex-col h-full">
-            <SheetHeader className="pb-4 pl-2 pt-6 flex-shrink-0">
-              <SheetTitle className="text-base">Metrikleri Sırala</SheetTitle>
-              <p className="text-xs text-muted-foreground">
-                Sıralamayı değiştirmek için metrikleri sürükleyin
-              </p>
-            </SheetHeader>
-            <div
-              ref={scrollContainerRef}
-              className="flex-1 pl-2 pr-2"
-              style={{
-                overflowY: 'scroll',
-                WebkitOverflowScrolling: 'touch',
-                overscrollBehavior: 'contain',
-                minHeight: 0,
-                position: 'relative',
-                touchAction: 'auto'
-              }}
-              onScroll={(e) => {
-                console.log("[SCROLL] Container scrolled:", {
-                  scrollTop: e.currentTarget.scrollTop,
-                  scrollHeight: e.currentTarget.scrollHeight,
-                  clientHeight: e.currentTarget.clientHeight
-                });
-              }}
-              onTouchStart={(e) => {
-                const el = e.currentTarget;
-                console.log("[TOUCH] Container touch start:", {
-                  touches: e.touches.length,
-                  y: e.touches[0]?.clientY,
-                  target: (e.target as HTMLElement).className,
-                  scrollHeight: el.scrollHeight,
-                  clientHeight: el.clientHeight,
-                  canScroll: el.scrollHeight > el.clientHeight
-                });
-              }}
-              onTouchMove={(e) => {
-                console.log("[TOUCH] Container touch move:", {
-                  y: e.touches[0]?.clientY
-                });
-              }}
-              onTouchEnd={() => {
-                console.log("[TOUCH] Container touch end");
-              }}
-            >
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleSortDragEnd}
+        {/* Sort Sheet */}
+        <Sheet open={sortSheetOpen} onOpenChange={setSortSheetOpen}>
+          <SheetContent className="w-full sm:max-w-sm !p-0 !gap-0 overflow-hidden">
+            <div className="flex flex-col h-full">
+              <SheetHeader className="pb-4 pl-2 pt-6 flex-shrink-0">
+                <SheetTitle className="text-base">Metrikleri Sırala</SheetTitle>
+                <p className="text-xs text-muted-foreground">
+                  Sıralamayı değiştirmek için metrikleri sürükleyin
+                </p>
+              </SheetHeader>
+              <div
+                ref={scrollContainerRef}
+                className="flex-1 pl-2 pr-2"
+                style={{
+                  overflowY: "scroll",
+                  WebkitOverflowScrolling: "touch",
+                  overscrollBehavior: "contain",
+                  minHeight: 0,
+                  position: "relative",
+                  touchAction: "auto",
+                }}
+                onScroll={(e) => {
+                  console.log("[SCROLL] Container scrolled:", {
+                    scrollTop: e.currentTarget.scrollTop,
+                    scrollHeight: e.currentTarget.scrollHeight,
+                    clientHeight: e.currentTarget.clientHeight,
+                  });
+                }}
+                onTouchStart={(e) => {
+                  const el = e.currentTarget;
+                  console.log("[TOUCH] Container touch start:", {
+                    touches: e.touches.length,
+                    y: e.touches[0]?.clientY,
+                    target: (e.target as HTMLElement).className,
+                    scrollHeight: el.scrollHeight,
+                    clientHeight: el.clientHeight,
+                    canScroll: el.scrollHeight > el.clientHeight,
+                  });
+                }}
+                onTouchMove={(e) => {
+                  console.log("[TOUCH] Container touch move:", {
+                    y: e.touches[0]?.clientY,
+                  });
+                }}
+                onTouchEnd={() => {
+                  console.log("[TOUCH] Container touch end");
+                }}
               >
-                <SortableContext
-                  items={metricOrder}
-                  strategy={verticalListSortingStrategy}
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleSortDragEnd}
                 >
-                  <div className="space-y-2 pb-4 mr-2">
-                    {metricOrder.map((metricId, index) => {
-                      const metric = data?.metrics.find((m) => m.id === metricId);
-                      if (!metric) return null;
+                  <SortableContext
+                    items={metricOrder}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="space-y-2 pb-4 mr-2">
+                      {metricOrder.map((metricId, index) => {
+                        const metric = data?.metrics.find(
+                          (m) => m.id === metricId,
+                        );
+                        if (!metric) return null;
 
-                      const latest = valuesByMetric.get(metricId);
-                      const value = latest?.value;
-                      const inRange =
-                        typeof value === "number" &&
-                        (metric.ref_min == null || value >= metric.ref_min) &&
-                        (metric.ref_max == null || value <= metric.ref_max);
+                        const latest = valuesByMetric.get(metricId);
+                        const value = latest?.value;
+                        const inRange =
+                          typeof value === "number" &&
+                          (metric.ref_min == null || value >= metric.ref_min) &&
+                          (metric.ref_max == null || value <= metric.ref_max);
 
-                      const isFirst = index === 0;
+                        const isFirst = index === 0;
 
-                      return (
-                        <SortableMetricItem
-                          key={metricId}
-                          id={metricId}
-                          name={metric.name}
-                          value={value}
-                          unit={metric.unit}
-                          inRange={inRange}
-                          onSendToTop={() => sendToTop(metricId)}
-                          isFirst={isFirst}
-                        />
-                      );
-                    })}
-                  </div>
-                </SortableContext>
-              </DndContext>
+                        return (
+                          <SortableMetricItem
+                            key={metricId}
+                            id={metricId}
+                            name={metric.name}
+                            value={value}
+                            unit={metric.unit}
+                            inRange={inRange}
+                            onSendToTop={() => sendToTop(metricId)}
+                            isFirst={isFirst}
+                          />
+                        );
+                      })}
+                    </div>
+                  </SortableContext>
+                </DndContext>
+              </div>
+              <div className="flex-shrink-0 p-2 border-t">
+                <Button
+                  variant="outline"
+                  onClick={resetMetricOrder}
+                  className="w-full"
+                  size="sm"
+                >
+                  Varsayılana Dön
+                </Button>
+              </div>
             </div>
-            <div className="flex-shrink-0 p-2 border-t">
-              <Button
-                variant="outline"
-                onClick={resetMetricOrder}
-                className="w-full"
-                size="sm"
-              >
-                Varsayılana Dön
-              </Button>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
-    </div>
+          </SheetContent>
+        </Sheet>
+      </div>
     </TooltipProvider>
   );
 }
