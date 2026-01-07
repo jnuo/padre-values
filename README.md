@@ -31,6 +31,7 @@ This project provides a complete solution for processing blood test PDFs and vis
 ## 📋 Requirements
 
 ### System Requirements
+
 - **Python 3.8+** (for backend)
 - **Node.js 18+** (for frontend)
 - **npm or yarn** (package manager)
@@ -38,6 +39,7 @@ This project provides a complete solution for processing blood test PDFs and vis
 - **OpenAI API account** (for AI extraction)
 
 ### Python Backend Dependencies (53 packages)
+
 - **Google API packages**: Drive, Sheets, Authentication
 - **PDF processing**: PyMuPDF, pdfminer, pdfplumber, PyPDF2, pypdfium2
 - **AI/ML**: OpenAI API, Pandas, NumPy
@@ -46,6 +48,7 @@ This project provides a complete solution for processing blood test PDFs and vis
 - **Security**: cryptography, oauthlib, rsa
 
 ### Web Frontend Dependencies (25+ packages)
+
 - **Core Framework**: Next.js 15.5.3, React 19.1.0, TypeScript 5
 - **Styling**: Tailwind CSS 4, Radix UI components
 - **Charts**: Recharts 3.2.1
@@ -70,12 +73,14 @@ npm test
 ### Environment Variables Required
 
 **Python Backend** (`src/config.py`):
+
 - `OPENAI_API_KEY`: OpenAI API key for AI extraction
 - `GOOGLE_CREDENTIALS_FILE`: Path to Google credentials JSON
 - `DRIVE_FOLDER_ID`: Google Drive folder to monitor
 - `SHEET_ID`: Google Sheets document ID
 
 **Web Frontend** (`.env.local`):
+
 - `GOOGLE_SHEETS_SPREADSHEET_ID`: Google Sheet ID
 - `GOOGLE_SERVICE_ACCOUNT_EMAIL`: Service account email
 - `GOOGLE_SERVICE_ACCOUNT_KEY`: Service account private key
@@ -92,7 +97,7 @@ pip install -r requirements.txt
 
 # Configure credentials in src/config.py
 # - Google Drive API credentials
-# - Google Sheets API credentials  
+# - Google Sheets API credentials
 # - OpenAI API key
 ```
 
@@ -124,7 +129,26 @@ cd web
 npm test
 ```
 
-### 4. Google Cloud Setup
+### 4. Supabase Setup
+
+1. Go to [Supabase Dashboard](https://supabase.com/dashboard)
+2. Create a new project (or use existing)
+3. Go to **Project Settings → API** to get your credentials:
+   - **Project URL** → `SUPABASE_URL`
+   - **anon/public key** → `SUPABASE_PUBLISHABLE_KEY`
+   - **service_role key** → `SUPABASE_SECRET_KEY`
+4. Add these to your `.env` file (copy from `.env.example`)
+5. For database migrations, install Supabase CLI:
+
+   ```bash
+   # macOS
+   brew install supabase/tap/supabase
+
+   # Link to your project
+   supabase link --project-ref your-project-id
+   ```
+
+### 5. Google Cloud Setup
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select existing
@@ -136,15 +160,17 @@ npm test
    - Extract email and private key for env vars
 5. Share your Google Sheet with the service account email
 
-### 4. Google Sheets Structure
+### 6. Google Sheets Structure
 
 Your Google Sheet should have two tabs:
 
 **"Looker" tab:**
+
 - Column A: Date (format: MM/DD/YYYY or YYYY-MM-DD)
 - Columns B+: Metric values (e.g., Hemoglobin, Trombosit, etc.)
 
 **"Reference Values" tab:**
+
 - Column A: Metric name
 - Column B: Unit
 - Column C: Low reference value (ref_min)
@@ -231,6 +257,7 @@ vercel
 ### Python Backend Deployment
 
 The Python backend can be deployed on:
+
 - **VPS/Server**: Run as a service with systemd
 - **Cloud Functions**: Google Cloud Functions or AWS Lambda
 - **Docker**: Containerized deployment
@@ -245,13 +272,18 @@ The Python backend can be deployed on:
 
 ## 📊 Environment Variables
 
-### Python Backend (`src/config.py`)
+### Python Backend (`.env` or `src/config.py`)
+
+- `SUPABASE_URL`: Supabase project URL
+- `SUPABASE_PUBLISHABLE_KEY`: Supabase anon/public key
+- `SUPABASE_SECRET_KEY`: Supabase service_role key (for server-side only)
+- `OPENAI_API_KEY`: OpenAI API key for AI extraction
 - `GOOGLE_CREDENTIALS_FILE`: Path to Google credentials JSON
 - `DRIVE_FOLDER_ID`: Google Drive folder to monitor
 - `SHEET_ID`: Google Sheets document ID
-- `OPENAI_API_KEY`: OpenAI API key
 
 ### Web Dashboard (`.env.local`)
+
 - `GOOGLE_SHEETS_SPREADSHEET_ID`: Google Sheet ID
 - `GOOGLE_SERVICE_ACCOUNT_EMAIL`: Service account email
 - `GOOGLE_SERVICE_ACCOUNT_KEY`: Service account private key
@@ -261,6 +293,7 @@ The Python backend can be deployed on:
 ## 🛠️ Development
 
 ### Python Backend
+
 ```bash
 # Install dependencies
 pip install -r requirements.txt
@@ -270,6 +303,7 @@ python -m src.drive_monitor
 ```
 
 ### Web Dashboard
+
 ```bash
 cd web
 
