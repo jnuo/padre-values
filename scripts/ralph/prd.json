@@ -236,7 +236,7 @@
         "Use Chrome MCP to screenshot login page"
       ],
       "priority": 15,
-      "status": "todo",
+      "status": "done",
       "dependencies": ["US-008"]
     },
     {

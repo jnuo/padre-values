@@ -367,3 +367,29 @@ Next steps (Phase 3 - Authentication):
 1. Add `NEXT_PUBLIC_SUPABASE_ANON_KEY` to `web/.env.local` (get from Supabase Dashboard → API)
 2. Enable Google OAuth in Supabase dashboard (see README section 4b)
 3. Test and approve before continuing to US-009 (login page)
+
+---
+
+## 2025-01-07 - US-009: Create login page with Google OAuth
+- Created `web/src/app/login/page.tsx`:
+  - "Sign in with Google" button using Supabase Auth `signInWithOAuth()`
+  - Automatic redirect to /dashboard if user already has valid session
+  - Error handling for OAuth errors and missing Supabase config
+  - Loading state with spinner during OAuth redirect
+  - Wrapped in `<Suspense>` for `useSearchParams()` compatibility
+  - "Demo hesabı ile devam et" fallback button for testing without auth
+  - Turkish UI text matching existing app patterns
+- Created `web/src/app/auth/callback/route.ts`:
+  - OAuth callback handler for Google sign-in
+  - Exchanges authorization code for session
+  - Redirects to /dashboard on success
+  - Redirects back to /login with error params on failure
+- Updated `web/src/app/page.tsx`:
+  - Landing page "Giriş Yap" button now navigates to /login instead of /dashboard
+- Build passes with no TypeScript errors
+- Verified via Chrome MCP: login page renders correctly with Google button, error handling visible
+- Files changed: `web/src/app/login/page.tsx` (new), `web/src/app/auth/callback/route.ts` (new), `web/src/app/page.tsx`
+- **Learnings:**
+  - Next.js 15 requires `useSearchParams()` to be wrapped in `<Suspense>` boundary for static generation
+  - OAuth callback uses code exchange pattern: Google returns code, Supabase exchanges for session
+  - Error messages from OAuth flow can be passed via URL search params

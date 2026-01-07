@@ -9,7 +9,7 @@ export default function Home() {
   const router = useRouter();
 
   const handleLogin = () => {
-    router.push("/dashboard");
+    router.push("/login");
   };
 
   return (
@@ -27,9 +27,13 @@ export default function Home() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4">ViziAI - Tahlil Sonuçlarını Kolayca Anlayın</h2>
+          <h2 className="text-4xl font-bold mb-4">
+            ViziAI - Tahlil Sonuçlarını Kolayca Anlayın
+          </h2>
           <p className="text-xl text-muted-foreground mb-8">
-          e-Nabız veya laboratuvar PDF&apos;lerinizi yükleyin. ViziAI değerleri otomatik çıkarır ve onlarca tahlili tek ekranda, anlaşılır grafiklerle karşılaştırır.
+            e-Nabız veya laboratuvar PDF&apos;lerinizi yükleyin. ViziAI
+            değerleri otomatik çıkarır ve onlarca tahlili tek ekranda, anlaşılır
+            grafiklerle karşılaştırır.
           </p>
         </div>
 
@@ -58,8 +62,9 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                AI&apos;mız PDF raporlarınızdan otomatik olarak veri çıkarır ve yapılandırır, 
-                trendleri ve kalıpları zaman içinde takip etmeyi kolaylaştırır.
+                AI&apos;mız PDF raporlarınızdan otomatik olarak veri çıkarır ve
+                yapılandırır, trendleri ve kalıpları zaman içinde takip etmeyi
+                kolaylaştırır.
               </p>
             </CardContent>
           </Card>
@@ -70,14 +75,13 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Net içgörüler için tasarlanmış sezgisel dashboard&apos;umuzla 
-                birden fazla laboratuvar metriğini zaman içinde tek bakışta karşılaştırın.
+                Net içgörüler için tasarlanmış sezgisel dashboard&apos;umuzla
+                birden fazla laboratuvar metriğini zaman içinde tek bakışta
+                karşılaştırın.
               </p>
             </CardContent>
           </Card>
         </div>
-
-        
       </main>
     </div>
   );
