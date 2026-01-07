@@ -21,6 +21,9 @@ function LoginContent() {
     }
   }, [searchParams]);
 
+  // Get the redirect destination (from middleware or default to dashboard)
+  const redirectTo = searchParams.get("redirect") || "/dashboard";
+
   // Check if user is already logged in
   useEffect(() => {
     const checkSession = async () => {
@@ -30,8 +33,8 @@ function LoginContent() {
           data: { session },
         } = await supabase.auth.getSession();
         if (session) {
-          // User is already logged in, redirect to dashboard
-          router.push("/dashboard");
+          // User is already logged in, redirect to intended destination
+          router.push(redirectTo);
         }
       } catch (err) {
         // If createBrowserClient throws (missing env vars), show error
@@ -42,7 +45,7 @@ function LoginContent() {
       }
     };
     checkSession();
-  }, [router]);
+  }, [router, redirectTo]);
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
@@ -50,10 +53,16 @@ function LoginContent() {
 
     try {
       const supabase = createBrowserClient();
+      // Include the redirect destination in the callback URL
+      const callbackUrl = new URL("/auth/callback", window.location.origin);
+      if (redirectTo !== "/dashboard") {
+        callbackUrl.searchParams.set("redirect", redirectTo);
+      }
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: callbackUrl.toString(),
           queryParams: {
             access_type: "offline",
             prompt: "consent",

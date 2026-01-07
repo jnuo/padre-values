@@ -250,7 +250,7 @@
         "Test: Clear cookies, go to /dashboard, should redirect to /login"
       ],
       "priority": 16,
-      "status": "todo",
+      "status": "done",
       "dependencies": ["US-009"]
     },
     {

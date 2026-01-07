@@ -55,6 +55,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Successful authentication - redirect to dashboard
-  return NextResponse.redirect(new URL("/dashboard", requestUrl.origin));
+  // Successful authentication - redirect to intended destination or dashboard
+  const redirectTo = requestUrl.searchParams.get("redirect") || "/dashboard";
+  return NextResponse.redirect(new URL(redirectTo, requestUrl.origin));
 }

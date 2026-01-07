@@ -393,3 +393,28 @@ Next steps (Phase 3 - Authentication):
   - Next.js 15 requires `useSearchParams()` to be wrapped in `<Suspense>` boundary for static generation
   - OAuth callback uses code exchange pattern: Google returns code, Supabase exchanges for session
   - Error messages from OAuth flow can be passed via URL search params
+
+---
+
+## 2025-01-07 - US-010: Protect dashboard route with auth
+- Installed `@supabase/ssr` package for middleware cookie handling
+- Created `web/src/middleware.ts`:
+  - Checks user authentication using Supabase session
+  - Redirects unauthenticated users from /dashboard to /login
+  - Redirects authenticated users from /login to /dashboard
+  - Returns 401 for protected API routes (/api/metrics, /api/metric-order) if not authenticated
+  - Gracefully passes through when Supabase is not configured (dev mode)
+  - Preserves intended redirect destination via `?redirect=` param
+- Updated `web/src/app/login/page.tsx`:
+  - Reads `redirect` param from URL
+  - Passes redirect destination to OAuth callback
+  - Redirects to intended page after successful login
+- Updated `web/src/app/auth/callback/route.ts`:
+  - Honors `redirect` param for post-login redirect
+- Build passes with no errors, middleware compiles (82.7 kB)
+- Tested: Dev server shows "[Middleware] Supabase not configured, skipping auth check" as expected
+- Files changed: `web/src/middleware.ts` (new), `web/src/app/login/page.tsx`, `web/src/app/auth/callback/route.ts`, `web/package.json`
+- **Learnings:**
+  - `@supabase/ssr` provides `createServerClient()` with cookie handlers for middleware
+  - Middleware matcher should exclude static files, images, and OAuth callback routes
+  - Dev-friendly: pass through when auth isn't configured instead of blocking everything
