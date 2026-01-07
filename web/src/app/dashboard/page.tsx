@@ -60,6 +60,7 @@ import { LoginGate } from "@/components/login-gate";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/toast";
+import { useProfileClaim } from "@/hooks/use-profile-claim";
 
 type ApiData = { metrics: Metric[]; values: MetricValue[] };
 
@@ -245,6 +246,19 @@ export default function Dashboard() {
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [metricOrder, setMetricOrder] = useState<string[]>([]);
+
+  // Check Supabase auth and claim profile if needed
+  const { claimResult } = useProfileClaim();
+
+  // Show toast when a profile is claimed
+  useEffect(() => {
+    if (claimResult?.claimed && claimResult.profile_name) {
+      addToast({
+        message: `${claimResult.profile_name} profili hesabınıza bağlandı.`,
+        type: "success",
+      });
+    }
+  }, [claimResult, addToast]);
 
   // Load metric order from Supabase API on mount
   useEffect(() => {

@@ -205,6 +205,53 @@ After completing these steps:
 - Users can authenticate using their Google accounts
 - Sessions are managed automatically by Supabase
 
+### 4c. Profile Data Association
+
+When a user first logs in with Google OAuth, the system automatically associates existing profile data with their account:
+
+#### How Profile Claiming Works
+
+1. **Pre-configured Email**: When setting up a profile in the database, set the `owner_email` field to the expected user's email address
+2. **First Login**: When a user logs in for the first time, the system checks if their email matches any unclaimed profile
+3. **Automatic Association**: If a match is found:
+   - The profile's `owner_user_id` is set to the user's Supabase auth ID
+   - A `user_access` entry is created with 'owner' access level
+   - A toast notification shows "X profili hesabınıza bağlandı" (Profile X connected to your account)
+
+#### Setting Up Profile Ownership
+
+To prepare a profile for claiming by a specific user:
+
+```sql
+-- In Supabase SQL Editor
+UPDATE profiles
+SET owner_email = 'user@example.com'
+WHERE display_name = 'Patient Name';
+```
+
+Or using the Python backend:
+
+```python
+from src.supabase_client import get_supabase_client
+
+supabase = get_supabase_client()
+supabase.table('profiles').update({
+    'owner_email': 'user@example.com'
+}).eq('display_name', 'Patient Name').execute()
+```
+
+#### Manual Profile Claiming (API)
+
+If automatic claiming doesn't work, users can manually trigger it:
+
+```bash
+# POST to the claim-profile API (requires authentication)
+curl -X POST http://localhost:3000/api/claim-profile \
+  -H "Cookie: <supabase_auth_cookies>"
+```
+
+The claim happens only once per user (tracked via localStorage).
+
 ### 5. Google Cloud Setup
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)

@@ -418,3 +418,54 @@ Next steps (Phase 3 - Authentication):
   - `@supabase/ssr` provides `createServerClient()` with cookie handlers for middleware
   - Middleware matcher should exclude static files, images, and OAuth callback routes
   - Dev-friendly: pass through when auth isn't configured instead of blocking everything
+
+---
+
+## 2025-01-07 - US-011: Associate existing data with authenticated user
+- Created migration `20260107130702_user_profile_claiming.sql`:
+  - Added `owner_email` column to profiles table for pre-login matching
+  - Created `claim_profile_by_email()` PostgreSQL function (SECURITY DEFINER)
+  - Function matches user email to unclaimed profiles and updates ownership
+  - Also creates `user_access` entry with 'owner' access level
+- Created `web/src/app/api/claim-profile/route.ts`:
+  - POST endpoint that calls the claim function for authenticated users
+  - Checks if user already has profile access before attempting claim
+  - Returns claim result with profile name and ID
+- Created `web/src/hooks/use-profile-claim.ts`:
+  - Custom hook for automatic profile claiming on first login
+  - Runs once per user (tracked via localStorage)
+  - Returns claim result, auth status, and loading state
+- Updated `web/src/app/dashboard/page.tsx`:
+  - Uses `useProfileClaim()` hook to trigger claim on mount
+  - Shows toast notification when profile is claimed
+- Updated documentation:
+  - `README.md`: Added section 4c explaining profile data association
+  - `supabase/schema.md`: Added `owner_email` column documentation
+- Build passes with no TypeScript errors
+- Files changed:
+  - `supabase/migrations/20260107130702_user_profile_claiming.sql` (new)
+  - `web/src/app/api/claim-profile/route.ts` (new)
+  - `web/src/hooks/use-profile-claim.ts` (new)
+  - `web/src/app/dashboard/page.tsx`
+  - `README.md`
+  - `supabase/schema.md`
+- **Learnings:**
+  - SECURITY DEFINER functions bypass RLS, useful for cross-table operations
+  - localStorage can track one-time operations per user
+  - PostgreSQL RETURNS TABLE allows returning structured data from functions
+
+---
+
+## ALL_TASKS_COMPLETE
+
+All user stories (US-001 through US-011) have been completed:
+- Phase 1: Supabase migration (US-001 to US-007b)
+- Phase 2: metric_definitions (US-012 to US-016)
+- Phase 3: Authentication (US-008 to US-011)
+
+The ViziAI application now has:
+1. ✅ Supabase database backend with proper schema
+2. ✅ metric_definitions table for consistent reference values and sorting
+3. ✅ Google OAuth authentication via Supabase Auth
+4. ✅ Protected routes with middleware
+5. ✅ Automatic profile claiming for existing data

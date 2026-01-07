@@ -74,13 +74,16 @@ This document describes the Supabase database schema for ViziAI, a blood test tr
 
 Represents a patient whose blood tests are being tracked.
 
-| Column          | Type        | Description                              |
-| --------------- | ----------- | ---------------------------------------- |
-| `id`            | UUID        | Primary key                              |
-| `display_name`  | TEXT        | Patient's display name                   |
-| `owner_user_id` | UUID        | FK to auth.users - who owns this profile |
-| `created_at`    | TIMESTAMPTZ | When the profile was created             |
-| `updated_at`    | TIMESTAMPTZ | Last update timestamp                    |
+| Column          | Type        | Description                                      |
+| --------------- | ----------- | ------------------------------------------------ |
+| `id`            | UUID        | Primary key                                      |
+| `display_name`  | TEXT        | Patient's display name                           |
+| `owner_user_id` | UUID        | FK to auth.users - who owns this profile         |
+| `owner_email`   | TEXT        | Email for claiming - matches user on first login |
+| `created_at`    | TIMESTAMPTZ | When the profile was created                     |
+| `updated_at`    | TIMESTAMPTZ | Last update timestamp                            |
+
+**Profile Claiming**: Set `owner_email` before the user logs in. On first login, if the user's email matches `owner_email` and `owner_user_id` is NULL, the profile is automatically claimed.
 
 ### user_access
 

@@ -264,7 +264,7 @@
         "Document data claiming process in README"
       ],
       "priority": 17,
-      "status": "todo",
+      "status": "done",
       "dependencies": ["US-010"]
     }
   ]
