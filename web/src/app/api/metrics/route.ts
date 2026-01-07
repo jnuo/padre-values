@@ -89,19 +89,44 @@ export async function GET(request: Request) {
 
     const reportIds = reports.map((r) => r.id);
 
-    // Get all metrics for these reports
-    const { data: metricsData, error: metricsError } = await supabase
-      .from("metrics")
-      .select("report_id, name, value, unit, ref_low, ref_high")
-      .in("report_id", reportIds);
+    // Paginate through all metrics (Supabase has a 1000 row default limit)
+    const allMetricsData: Array<{
+      report_id: string;
+      name: string;
+      value: number;
+      unit: string | null;
+      ref_low: number | null;
+      ref_high: number | null;
+    }> = [];
+    const pageSize = 1000;
+    let offset = 0;
+    let hasMore = true;
 
-    if (metricsError) {
-      console.error("Metrics query error:", metricsError);
-      return NextResponse.json(
-        { error: "Failed to fetch metrics" },
-        { status: 500 },
-      );
+    while (hasMore) {
+      const { data: metricsPage, error: metricsError } = await supabase
+        .from("metrics")
+        .select("report_id, name, value, unit, ref_low, ref_high")
+        .in("report_id", reportIds)
+        .range(offset, offset + pageSize - 1);
+
+      if (metricsError) {
+        console.error("Metrics query error:", metricsError);
+        return NextResponse.json(
+          { error: "Failed to fetch metrics" },
+          { status: 500 },
+        );
+      }
+
+      if (metricsPage && metricsPage.length > 0) {
+        allMetricsData.push(...metricsPage);
+        offset += pageSize;
+        hasMore = metricsPage.length === pageSize;
+      } else {
+        hasMore = false;
+      }
     }
+
+    const metricsData = allMetricsData;
 
     // Build report_id -> date map
     const reportDateMap = new Map<string, string>();
@@ -136,6 +161,9 @@ export async function GET(request: Request) {
         });
       }
     }
+
+    // Sort values by date (ascending) for proper chart rendering
+    values.sort((a, b) => a.date.localeCompare(b.date));
 
     // Build metrics array
     const metrics: Metric[] = Array.from(metricsMap.entries()).map(

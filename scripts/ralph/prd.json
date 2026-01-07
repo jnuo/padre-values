@@ -190,7 +190,7 @@
         "Test: Reorder metrics, refresh page, verify order persists"
       ],
       "priority": 12,
-      "status": "todo",
+      "status": "done",
       "dependencies": ["US-012", "US-014"],
       "notes": "Currently sorting saves to localStorage (temporary fix). This moves it to Supabase so order syncs across devices."
     },

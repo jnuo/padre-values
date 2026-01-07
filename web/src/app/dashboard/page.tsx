@@ -245,6 +245,69 @@ export default function Dashboard() {
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [metricOrder, setMetricOrder] = useState<string[]>([]);
+
+  // Load metric order from Supabase API on mount
+  useEffect(() => {
+    if (!currentUser) return;
+
+    // Capture user id to avoid TypeScript null check issues in async function
+    const userId = currentUser.id;
+
+    async function loadMetricOrder() {
+      try {
+        const response = await fetch("/api/metric-order");
+        if (response.ok) {
+          const data = await response.json();
+          if (
+            data.order &&
+            Array.isArray(data.order) &&
+            data.order.length > 0
+          ) {
+            setMetricOrder(data.order);
+            console.log(
+              "[METRIC_ORDER] Loaded from Supabase API:",
+              data.order.length,
+              "metrics",
+            );
+            return;
+          }
+        }
+        // Fallback to localStorage if API returns empty
+        const savedOrder = localStorage.getItem(`metricOrder_${userId}`);
+        if (savedOrder) {
+          try {
+            const parsed = JSON.parse(savedOrder);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setMetricOrder(parsed);
+              console.log(
+                "[METRIC_ORDER] Loaded from localStorage:",
+                parsed.length,
+                "metrics",
+              );
+            }
+          } catch (e) {
+            console.warn("[METRIC_ORDER] Failed to parse saved order:", e);
+          }
+        }
+      } catch (error) {
+        console.warn("[METRIC_ORDER] Failed to load from API:", error);
+        // Fallback to localStorage
+        const savedOrder = localStorage.getItem(`metricOrder_${userId}`);
+        if (savedOrder) {
+          try {
+            const parsed = JSON.parse(savedOrder);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setMetricOrder(parsed);
+            }
+          } catch {
+            // ignore parse errors
+          }
+        }
+      }
+    }
+
+    loadMetricOrder();
+  }, [currentUser]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const sensors = useSensors(
@@ -540,85 +603,74 @@ export default function Dashboard() {
     const { active, over } = event;
     if (!over || active.id === over.id || !currentUser) return;
 
-    // Save the old order for potential rollback
-    const oldOrder = [...metricOrder];
-
-    // Optimistically update UI
+    // Update order
     const oldIndex = metricOrder.indexOf(active.id as string);
     const newIndex = metricOrder.indexOf(over.id as string);
     const newOrder = arrayMove(metricOrder, oldIndex, newIndex);
     setMetricOrder(newOrder);
 
-    // Call API to persist the change
+    // Save to Supabase API (primary storage)
     try {
-      const response = await fetch("/api/reorder-columns", {
-        method: "POST",
+      const response = await fetch("/api/metric-order", {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: currentUser.id,
-          newMetricOrder: newOrder,
-        }),
+        body: JSON.stringify({ order: newOrder }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to reorder columns");
+      if (response.ok) {
+        console.log("[REORDER] Saved to Supabase API");
+      } else {
+        console.warn("[REORDER] Supabase API failed, saving to localStorage");
+        localStorage.setItem(
+          `metricOrder_${currentUser.id}`,
+          JSON.stringify(newOrder),
+        );
       }
-
-      // Success - order is already correct in UI
-      console.log(
-        "[REORDER] Successfully persisted metric order to Google Sheets",
-      );
     } catch (error) {
-      // Error - revert UI to old order
-      console.error("[REORDER] Failed to persist order:", error);
-      setMetricOrder(oldOrder);
-      addToast({
-        type: "error",
-        message: "Sıralama kaydedilemedi. Lütfen tekrar deneyin.",
-        duration: 5000,
-      });
+      // Fallback to localStorage if API fails
+      console.warn("[REORDER] API error, saving to localStorage:", error);
+      localStorage.setItem(
+        `metricOrder_${currentUser.id}`,
+        JSON.stringify(newOrder),
+      );
     }
   };
 
   const resetMetricOrder = async () => {
     if (!data || !currentUser) return;
 
-    const oldOrder = [...metricOrder];
     const defaultOrder = data.metrics.map((m) => m.id);
 
-    // Optimistically update UI
+    // Update UI
     setMetricOrder(defaultOrder);
 
-    // Call API to persist the reset
+    addToast({
+      type: "success",
+      message: "Sıralama varsayılana döndürüldü.",
+      duration: 3000,
+    });
+
+    // Save to Supabase API
     try {
-      const response = await fetch("/api/reorder-columns", {
-        method: "POST",
+      const response = await fetch("/api/metric-order", {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: currentUser.id,
-          newMetricOrder: defaultOrder,
-        }),
+        body: JSON.stringify({ order: defaultOrder }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to reset column order");
+        // Fallback to localStorage
+        localStorage.setItem(
+          `metricOrder_${currentUser.id}`,
+          JSON.stringify(defaultOrder),
+        );
       }
-
-      console.log("[REORDER] Successfully reset metric order");
-      addToast({
-        type: "success",
-        message: "Sıralama varsayılana döndürüldü.",
-        duration: 3000,
-      });
-    } catch (error) {
-      // Error - revert UI
-      console.error("[REORDER] Failed to reset order:", error);
-      setMetricOrder(oldOrder);
-      addToast({
-        type: "error",
-        message: "Sıralama sıfırlanamadı. Lütfen tekrar deneyin.",
-        duration: 5000,
-      });
+    } catch {
+      // Fallback to localStorage
+      localStorage.setItem(
+        `metricOrder_${currentUser.id}`,
+        JSON.stringify(defaultOrder),
+      );
     }
   };
 
@@ -632,10 +684,7 @@ export default function Dashboard() {
     const container = scrollContainerRef.current;
     const scrollTop = container?.scrollTop || 0;
 
-    // Save old order for potential rollback
-    const oldOrder = [...metricOrder];
-
-    // Optimistically update UI - Remove from current position and add to beginning
+    // Update UI - Remove from current position and add to beginning
     const newOrder = [...metricOrder];
     newOrder.splice(index, 1);
     newOrder.unshift(metricId);
@@ -648,33 +697,27 @@ export default function Dashboard() {
       }
     });
 
-    // Call API to persist the change
+    // Save to Supabase API
     try {
-      const response = await fetch("/api/reorder-columns", {
-        method: "POST",
+      const response = await fetch("/api/metric-order", {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: currentUser.id,
-          newMetricOrder: newOrder,
-        }),
+        body: JSON.stringify({ order: newOrder }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to send metric to top");
+        // Fallback to localStorage
+        localStorage.setItem(
+          `metricOrder_${currentUser.id}`,
+          JSON.stringify(newOrder),
+        );
       }
-
-      console.log(
-        "[REORDER] Successfully sent metric to top and persisted to Google Sheets",
+    } catch {
+      // Fallback to localStorage
+      localStorage.setItem(
+        `metricOrder_${currentUser.id}`,
+        JSON.stringify(newOrder),
       );
-    } catch (error) {
-      // Error - revert UI to old order
-      console.error("[REORDER] Failed to persist send-to-top:", error);
-      setMetricOrder(oldOrder);
-      addToast({
-        type: "error",
-        message: "Metrik en üste gönderilemedi. Lütfen tekrar deneyin.",
-        duration: 5000,
-      });
     }
   };
 

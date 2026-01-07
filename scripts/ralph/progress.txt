@@ -275,3 +275,26 @@ Next steps (Phase 2):
   - Backfill used mode() to get most common reference values
   - Some metrics have historical definitions that no longer have values (renamed metrics)
   - Verification should check "all metrics have definitions" not "counts match exactly"
+
+---
+
+## 2025-01-07 - US-015: Implement metric sorting with Supabase storage
+- Created `web/src/app/api/metric-order/route.ts`:
+  - GET /api/metric-order returns metric names in display_order
+  - PUT /api/metric-order updates display_order in metric_definitions
+  - Uses profileName query param, defaults to "Father (Migrated)"
+- Updated `web/src/app/dashboard/page.tsx`:
+  - Load metric order from API on mount (with localStorage fallback)
+  - Save to API when user reorders via drag-and-drop
+  - Updated handleSortDragEnd, resetMetricOrder, sendToTop functions
+- Fixed TypeScript error: captured userId before async function to avoid null check
+- Build passes with no errors
+- Verified via curl:
+  - GET returns order array from metric_definitions
+  - PUT updates display_order for all provided metrics
+  - Order persists across requests (stored in Supabase)
+- Files changed: `web/src/app/api/metric-order/route.ts` (new), `web/src/app/dashboard/page.tsx`
+- **Learnings:**
+  - When updating order, the dashboard sends the FULL metric order (not partial)
+  - All metrics default to display_order=0, so partial updates won't sort correctly
+  - API upsert on (profile_id, name) ensures idempotent updates
