@@ -76,13 +76,27 @@ Add reusable patterns to the TOP of progress.txt under "## Codebase Patterns":
 3. Next.js reads from Supabase
 4. Users authenticate via Supabase Auth
 
-## Stop Condition
+## Visual Verification with Chrome MCP
 
-After completing a story, check `prd.json`:
+For UI-related stories (especially US-007), use Chrome DevTools MCP:
 
-- If ALL stories have `passes: true`, reply with:
-  <promise>COMPLETE</promise>
-- Otherwise, end your response normally (Ralph will start next iteration)
+1. Start dev server: `cd web && npm run dev` (run in background)
+2. Navigate: `mcp__chrome-devtools__navigate_page` to `http://localhost:3000/dashboard`
+3. Screenshot: `mcp__chrome-devtools__take_screenshot` to verify UI
+4. Check: Dark theme, proper layout, charts render, no console errors
+5. Snapshot: `mcp__chrome-devtools__take_snapshot` for accessibility check
+
+## Stop Conditions
+
+**After completing US-007 (Phase 1 complete):**
+
+- Output: `<promise>PHASE1_COMPLETE</promise>`
+- DO NOT continue to US-008
+- User will test, approve, and set up Google OAuth before Phase 2
+
+**After completing US-011 (All stories complete):**
+
+- Output: `<promise>COMPLETE</promise>`
 
 ## Important Notes
 

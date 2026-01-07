@@ -23,7 +23,7 @@
         "Analyze src/sheets_updater.py to understand current data structure (wide format, reference sheet)",
         "Analyze src/pdf_reader.py to see what fields are extracted from PDFs",
         "Run `supabase migration new initial_schema` to create migration file",
-        "Required tables: users (auth), reports (per PDF/date), metrics (test values with refs)",
+        "Required tables: profiles (patients), user_access (who can see whose data), reports (per PDF/date), metrics (test values with refs)",
         "Include all fields from extraction: value, unit, ref_low, ref_high",
         "Add foreign key constraints and RLS policies",
         "Add indexes on user_id, sample_date, and metric name",
@@ -32,7 +32,7 @@
       ],
       "priority": 2,
       "passes": false,
-      "notes": "Analyze codebase first! Current format: rows=metrics, cols=dates. Each metric has value, unit, ref_low, ref_high. Reference ranges stored in separate sheet."
+      "notes": "Analyze codebase first! Schema: profiles (patients being tracked), user_access (many-to-many: users↔profiles), reports (belongs to profile), metrics (belongs to report). This allows multiple family members to access same patient data, and one user to access multiple profiles later."
     },
     {
       "id": "US-003",
@@ -101,11 +101,13 @@
         "Verify charts render correctly with Supabase data",
         "Add loading state while fetching",
         "Add error state if fetch fails",
-        "Test on localhost:3000/dashboard"
+        "Use Chrome MCP to take screenshot of localhost:3000/dashboard",
+        "Verify UI matches existing dark theme and Tailwind patterns",
+        "Ensure existing hardcoded login still works"
       ],
       "priority": 7,
       "passes": false,
-      "notes": "This completes the Supabase migration for read path"
+      "notes": "This completes the Supabase migration for read path. STOP HERE - wait for user to test and approve before continuing to Phase 2."
     },
     {
       "id": "US-008",
