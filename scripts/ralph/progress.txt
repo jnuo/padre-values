@@ -340,7 +340,30 @@ Next steps (Phase 3 - Authentication):
 - US-010: Protect dashboard route with auth
 - US-011: Associate existing data with authenticated user
 
-⏸️ **PAUSED**: US-008 has `requiresUserApproval: true`. User needs to:
-1. Enable Google OAuth in Supabase dashboard
-2. Test current implementation
-3. Approve continuation to Phase 3
+---
+
+## 2025-01-07 - US-008: Set up Supabase Auth configuration
+- Created `web/src/lib/supabase-browser.ts`:
+  - `createBrowserClient()` for client-side auth operations
+  - Singleton pattern to avoid creating multiple clients
+  - Clear error messages for missing env vars
+- Created `web/src/lib/supabase-server.ts`:
+  - `createServiceClient()` for admin operations (bypasses RLS)
+  - `createServerClient()` for user-scoped queries (respects RLS)
+  - Service client uses singleton, server client creates new instance per request
+- Updated `web/.env.example` to include `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- Added comprehensive Google OAuth setup documentation to README (section 4b):
+  - Step 1: Create Google OAuth credentials in GCP
+  - Step 2: Configure Google OAuth in Supabase dashboard
+  - Step 3: Configure Site URL and redirect URLs
+- Verification: Build passes, all 56 Python tests pass, all 18 Jest tests pass
+- Files changed: `web/src/lib/supabase-browser.ts` (new), `web/src/lib/supabase-server.ts` (new), `web/.env.example`, `README.md`
+- **Learnings:**
+  - Browser client needs `detectSessionInUrl: true` for OAuth callbacks
+  - Server client should NOT be singleton when used with user context (different user per request)
+  - Service role client CAN be singleton since it bypasses RLS
+
+⏸️ **CHECKPOINT REACHED**: US-008 is complete. User needs to:
+1. Add `NEXT_PUBLIC_SUPABASE_ANON_KEY` to `web/.env.local` (get from Supabase Dashboard → API)
+2. Enable Google OAuth in Supabase dashboard (see README section 4b)
+3. Test and approve before continuing to US-009 (login page)

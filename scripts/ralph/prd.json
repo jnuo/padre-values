@@ -219,7 +219,7 @@
         "Test: import { createClient } from lib/supabase-browser works"
       ],
       "priority": 14,
-      "status": "todo",
+      "status": "done",
       "dependencies": ["US-016"],
       "requiresUserApproval": true,
       "notes": "CHECKPOINT: User needs to manually enable Google OAuth in Supabase dashboard before this can be fully tested"

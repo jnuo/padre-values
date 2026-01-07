@@ -149,8 +149,8 @@ npm run test:coverage        # run with coverage report
 1. Go to [Supabase Dashboard](https://supabase.com/dashboard)
 2. Create a new project (or use existing)
 3. Go to **Project Settings → API** to get your credentials:
-   - **Project URL** → `SUPABASE_URL`
-   - **anon/public key** → `SUPABASE_PUBLISHABLE_KEY`
+   - **Project URL** → `SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_URL`
+   - **anon/public key** → `SUPABASE_PUBLISHABLE_KEY` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - **service_role key** → `SUPABASE_SECRET_KEY`
 4. Add these to your `.env` file (copy from `.env.example`)
 5. For database migrations, install Supabase CLI:
@@ -162,6 +162,48 @@ npm run test:coverage        # run with coverage report
    # Link to your project
    supabase link --project-ref your-project-id
    ```
+
+### 4b. Supabase Authentication with Google OAuth
+
+To enable Google OAuth for user authentication:
+
+#### Step 1: Create Google OAuth Credentials
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Select your project (or create a new one)
+3. Navigate to **APIs & Services → Credentials**
+4. Click **Create Credentials → OAuth client ID**
+5. Select **Web application**
+6. Add the following authorized redirect URIs:
+   - `https://your-project-ref.supabase.co/auth/v1/callback` (replace `your-project-ref` with your Supabase project reference)
+   - `http://localhost:3000/auth/callback` (for local development)
+7. Click **Create** and note your **Client ID** and **Client Secret**
+
+#### Step 2: Configure Google OAuth in Supabase
+
+1. Go to your [Supabase Dashboard](https://supabase.com/dashboard)
+2. Select your project
+3. Navigate to **Authentication → Providers**
+4. Find **Google** in the list and click to expand
+5. Toggle **Enable Sign in with Google**
+6. Enter your **Client ID** and **Client Secret** from Step 1
+7. Click **Save**
+
+#### Step 3: Configure Site URL (Important for Production)
+
+1. In Supabase Dashboard, go to **Authentication → URL Configuration**
+2. Set **Site URL** to your production domain (e.g., `https://your-app.vercel.app`)
+3. Add any additional redirect URLs under **Redirect URLs**:
+   - `http://localhost:3000/**` (for local development)
+   - `https://your-app.vercel.app/**` (for production)
+
+#### Verification
+
+After completing these steps:
+
+- The login page will show "Sign in with Google" button
+- Users can authenticate using their Google accounts
+- Sessions are managed automatically by Supabase
 
 ### 5. Google Cloud Setup
 
