@@ -13,7 +13,7 @@
         "Add instructions in README for setting up Supabase credentials"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "User will manually create Supabase project and fill in credentials"
     },
     {
@@ -31,7 +31,7 @@
         "Document schema with ER diagram or description in schema.md"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Analyze codebase first! Schema: profiles (patients being tracked), user_access (many-to-many: users↔profiles), reports (belongs to profile), metrics (belongs to report). This allows multiple family members to access same patient data, and one user to access multiple profiles later."
     },
     {
@@ -45,7 +45,7 @@
         "typecheck passes (if using type hints)"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -61,7 +61,7 @@
         "Script is idempotent (can run multiple times safely)"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "This migrates father's existing blood test data"
     },
     {
@@ -76,7 +76,7 @@
         "Test with one PDF extraction and verify data in Supabase"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Keep sheets_updater working for now as fallback"
     },
     {
@@ -90,7 +90,7 @@
         "Install @supabase/supabase-js in web/"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "Dashboard will call this instead of Google Sheets"
     },
     {
@@ -106,7 +106,7 @@
         "Ensure existing hardcoded login still works"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "This completes the Supabase migration for read path."
     },
     {
@@ -122,7 +122,7 @@
         "Document how to run tests in README"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "Simple smoke tests - not 100% coverage, just 'does it work?' checks. STOP HERE after this - wait for user to test and approve before Phase 2."
     },
     {

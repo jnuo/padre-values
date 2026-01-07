@@ -121,13 +121,28 @@ cp .env.example .env.local
 ### 3. Run Tests
 
 ```bash
-# Python backend tests (if available)
-python -m pytest
+# Python backend tests
+source .venv/bin/activate    # if using venv
+pytest tests/ -v             # run all Python tests
 
 # Web frontend tests
 cd web
-npm test
+npm test                     # run all Jest tests
+npm run test:watch           # watch mode for development
+npm run test:coverage        # run with coverage report
 ```
+
+**Python Tests** (`tests/`):
+
+- `test_supabase_client.py` - Tests for Supabase client wrapper
+- `test_migration.py` - Tests for data structures and migration verification
+
+**Web Tests** (`web/src/`):
+
+- `app/api/metrics/route.test.ts` - API endpoint tests
+- `__tests__/basic.test.ts` - Basic functionality tests
+- `__tests__/lib/date.test.ts` - Date utility tests
+- `__tests__/integration/` - Integration tests
 
 ### 4. Supabase Setup
 
@@ -184,8 +199,19 @@ padre-values/
 │   ├── drive_monitor.py          # Google Drive monitoring
 │   ├── pdf_reader.py             # PDF reading and AI extraction
 │   ├── sheets_updater.py         # Google Sheets integration
+│   ├── supabase_client.py        # Supabase client wrapper
+│   ├── supabase_config.py        # Supabase configuration
+│   ├── supabase_updater.py       # Supabase data operations
 │   ├── config.py                 # Configuration and credentials
 │   └── openai_utils.py           # OpenAI API utilities
+├── tests/                        # Python tests
+│   ├── test_supabase_client.py   # Supabase client tests
+│   └── test_migration.py         # Migration verification tests
+├── supabase/                     # Supabase database
+│   ├── migrations/               # SQL migration files
+│   └── schema.md                 # Schema documentation
+├── scripts/                      # Utility scripts
+│   └── migrate_sheets_to_supabase.py  # Data migration script
 ├── web/                          # Next.js web dashboard
 │   ├── src/
 │   │   ├── app/

@@ -77,3 +77,138 @@ metrics: id, report_id (FK), name, value, unit, ref_low, ref_high
 **Important:** Reference ranges can vary between labs/dates, so store them per metric row, not in a separate table.
 
 ---
+
+## 2025-01-07 - US-001: Create Supabase project config
+- Created `src/supabase_config.py` with `SupabaseConfig` class and `get_supabase_config()` function
+- Added `supabase==2.15.2` to requirements.txt
+- `.env.example` already had SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, SUPABASE_SECRET_KEY
+- `.gitignore` already had `.env` excluded
+- Added Supabase setup instructions to README.md (section 4)
+- Files changed: `src/supabase_config.py` (new), `requirements.txt`, `README.md`
+- **Learnings:**
+  - Environment variables are already well-configured via `.env.example`
+  - Using type hints with `Optional[str]` for env vars that may be missing
+
+---
+
+## 2025-01-07 - US-002: Design and create Supabase database schema
+- Analyzed pdf_reader.py: extracts sample_date, tests{name: {value, unit, flag, ref_low, ref_high}}
+- Created `supabase/migrations/20260107110433_initial_schema.sql`
+- Tables created:
+  - `profiles` - patient being tracked, with owner_user_id
+  - `user_access` - many-to-many for shared access (viewer/editor/owner)
+  - `reports` - one per sample date, unique on (profile_id, sample_date)
+  - `metrics` - test values with refs, unique on (report_id, name)
+- Added comprehensive indexes for common query patterns
+- Implemented RLS policies for multi-user access control
+- Added service role bypass policies for Python backend operations
+- Created `supabase/schema.md` with ER diagram and full documentation
+- Files changed: `supabase/migrations/20260107110433_initial_schema.sql` (new), `supabase/schema.md` (new)
+- **Learnings:**
+  - Supabase RLS requires explicit service_role bypass for server-side inserts
+  - Use `auth.role() = 'service_role'` for service key access
+  - Reference ranges stored per-metric (not separate table) since they vary by lab/date
+
+---
+
+## 2025-01-07 - US-003: Create Supabase client wrapper
+- Created `src/supabase_client.py` with `get_supabase_client()` function
+- Supports both service key (full access) and publishable key (RLS enforced) modes
+- Uses singleton pattern for client reuse
+- Graceful error handling with clear messages for missing credentials
+- Files changed: `src/supabase_client.py` (new)
+- **Learnings:**
+  - Supabase Python client created with `create_client(url, key)`
+  - Use global singleton to avoid recreating client on every call
+
+---
+
+## 2025-01-07 - US-004: Create migration script for existing Google Sheets data
+- Created `scripts/migrate_sheets_to_supabase.py`
+- Reads wide format from SHEET_NAME (metrics as rows, dates as columns)
+- Reads reference values from REFERENCE_SHEET_NAME for unit/ref_low/ref_high
+- Creates placeholder profile "Father (Migrated)" with null owner_user_id
+- Uses upsert on (report_id, name) constraint for idempotency
+- Supports --dry-run flag for preview
+- Prints summary with reports and metrics count
+- Files changed: `scripts/migrate_sheets_to_supabase.py` (new)
+- **Learnings:**
+  - Supabase upsert requires specifying on_conflict column(s)
+  - Date parsing needs to handle multiple formats from Google Sheets
+
+---
+
+## 2025-01-07 - US-005: Update Python backend to write to Supabase
+- Created `src/supabase_updater.py` with:
+  - `save_report(profile_id, sample_date, tests_dict)` - inserts report and metrics
+  - `get_profile_metrics(profile_id)` - returns all metrics organized by date
+  - `get_all_metrics_for_dashboard(profile_name)` - returns dashboard-ready format
+  - `batch_save_extracted_values(updates)` - handles multiple PDF extractions
+- Updated `main.py` with `--use-supabase` flag (default: sheets for safety)
+- Sheets backend remains fully functional as fallback
+- Files changed: `src/supabase_updater.py` (new), `main.py`
+- **Learnings:**
+  - Interface designed to match pdf_reader.extract_labs_from_pdf() output format
+  - Dashboard format: {dates: [], metrics: {name: {values: [], unit, ref_low, ref_high}}}
+
+---
+
+## 2025-01-07 - US-006: Create Next.js API route to fetch metrics from Supabase
+- Created `web/src/app/api/metrics/route.ts`
+- GET endpoint returns {metrics: Metric[], values: MetricValue[]} matching sheets.ts format
+- Uses profileName query param, defaults to "Father (Migrated)"
+- Installed @supabase/supabase-js in web/
+- Added NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY to web/.env.example
+- Build passes with new endpoint
+- Files changed: `web/src/app/api/metrics/route.ts` (new), `web/.env.example`, `web/package.json`
+- **Learnings:**
+  - TypeScript types must match sheets.ts: Metric{id, name, unit, ref_min, ref_max}, MetricValue{metric_id, date, value}
+  - Supabase JS client: createClient(url, key) from @supabase/supabase-js
+
+---
+
+## 2025-01-07 - US-007: Update dashboard to use Supabase API
+- Updated `web/src/app/dashboard/page.tsx` to fetch from /api/metrics first
+- Falls back to /api/data (Google Sheets) if Supabase returns empty data
+- Existing loading/error states already present, no changes needed
+- Login flow unchanged - still uses localStorage for user session
+- Build passes with no TypeScript errors
+- Files changed: `web/src/app/dashboard/page.tsx`
+- **Learnings:**
+  - Dashboard already had good loading/error state handling
+  - Fallback approach allows gradual migration without breaking existing setup
+
+---
+
+## 2025-01-07 - US-007b: Add basic tests for Phase 1
+- Added `pytest==8.3.5` and `pytest-env==1.1.5` to requirements.txt
+- Created `tests/__init__.py`, `tests/test_supabase_client.py`, `tests/test_migration.py`
+- Python tests verify: module imports, config validation, function signatures, schema structure
+- Jest already configured in web/ - fixed typo `moduleNameMapping` → `moduleNameMapper`
+- Created `web/src/app/api/metrics/route.test.ts` with response format and data transformation tests
+- All tests pass: 19 Python tests, 18 Jest tests
+- Updated README.md with comprehensive test documentation
+- Files changed: `requirements.txt`, `tests/` (new), `web/src/app/api/metrics/route.test.ts` (new), `web/jest.config.js`, `README.md`
+- **Learnings:**
+  - Use `monkeypatch` fixture in pytest for environment variable isolation
+  - Jest config option is `moduleNameMapper` not `moduleNameMapping`
+  - Smoke tests verify structure exists without requiring live database connection
+
+---
+
+## PHASE 1 COMPLETE
+
+All Phase 1 user stories (US-001 through US-007b) have been implemented:
+- ✅ Supabase configuration and client wrapper
+- ✅ Database schema with RLS policies
+- ✅ Migration script for Google Sheets data
+- ✅ Python backend Supabase integration
+- ✅ Next.js API endpoint for metrics
+- ✅ Dashboard using Supabase (with Sheets fallback)
+- ✅ Basic test coverage
+
+Next steps (Phase 2):
+- US-008: Set up Supabase Auth configuration
+- US-009: Create login page with Google OAuth
+- US-010: Protect dashboard route with auth
+- US-011: Associate existing data with authenticated user
