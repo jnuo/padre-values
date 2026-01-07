@@ -541,6 +541,9 @@ export default function Dashboard() {
     const { active, over } = event;
     if (!over || active.id === over.id || !currentUser) return;
 
+    // Save old order before updating state (for revert on failure)
+    const oldOrder = [...metricOrder];
+
     // Update order
     const oldIndex = metricOrder.indexOf(active.id as string);
     const newIndex = metricOrder.indexOf(over.id as string);
@@ -565,7 +568,7 @@ export default function Dashboard() {
         duration: 5000,
       });
       // Revert to old order on failure
-      setMetricOrder(metricOrder);
+      setMetricOrder(oldOrder);
     }
   };
 
@@ -609,6 +612,9 @@ export default function Dashboard() {
     const index = metricOrder.indexOf(metricId);
     if (index === -1 || index === 0) return; // Already at top or not found
 
+    // Save old order before updating state (for revert on failure)
+    const oldOrder = [...metricOrder];
+
     // Preserve scroll position
     const container = scrollContainerRef.current;
     const scrollTop = container?.scrollTop || 0;
@@ -644,7 +650,7 @@ export default function Dashboard() {
         duration: 5000,
       });
       // Revert on failure
-      setMetricOrder(metricOrder);
+      setMetricOrder(oldOrder);
     }
   };
 

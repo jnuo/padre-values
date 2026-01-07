@@ -83,11 +83,8 @@ export async function GET(request: NextRequest) {
 
       if (checkError || !profileId) {
         // Email not authorized - sign out and reject
+        // supabase.auth.signOut() handles cookie cleanup automatically
         await supabase.auth.signOut();
-
-        // Clear auth cookies from response
-        response.cookies.delete("sb-access-token");
-        response.cookies.delete("sb-refresh-token");
 
         return NextResponse.redirect(
           new URL(
