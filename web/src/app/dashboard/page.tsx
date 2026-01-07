@@ -698,12 +698,11 @@ export default function Dashboard() {
                   variant="outline"
                   size="sm"
                   onClick={async () => {
-                    // Sign out from Supabase and clear cookies
+                    // Sign out from Supabase
                     const supabase = (
                       await import("@/lib/supabase-browser")
                     ).createBrowserClient();
                     await supabase.auth.signOut();
-                    document.cookie = "demo_mode=; path=/; max-age=0";
                     router.push("/login");
                   }}
                 >

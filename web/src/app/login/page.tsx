@@ -165,27 +165,6 @@ function LoginContent() {
           )}
         </Button>
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card px-2 text-muted-foreground">veya</span>
-          </div>
-        </div>
-
-        <Button
-          variant="ghost"
-          className="w-full"
-          onClick={() => {
-            // Set demo mode cookie and redirect
-            document.cookie = "demo_mode=true; path=/; max-age=86400"; // 24 hours
-            router.push("/dashboard");
-          }}
-        >
-          Demo hesabı ile devam et
-        </Button>
-
         <div className="mt-6 text-xs text-muted-foreground text-center">
           <p>
             Giriş yaparak{" "}
