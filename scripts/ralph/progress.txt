@@ -1,0 +1,41 @@
+# Ralph Progress Log for ViziAI
+Started: 2025-01-07
+
+## Project Goal
+Migrate ViziAI from Google Sheets backend to Supabase for:
+- Real database with proper schema
+- User authentication (Google OAuth)
+- Multi-user support
+- Scalable architecture
+
+## Codebase Patterns
+(Add patterns here as you discover them)
+
+- Python config: Use src/config.py for constants, load secrets from environment
+- Google APIs: OAuth tokens stored in token_*.json files
+- PDF caching: Extracted labs cached as .labs.json next to PDF
+- Wide format: Current sheet has metrics as rows, dates as columns
+
+## Key Files
+- src/config.py - All configuration constants
+- src/sheets_updater.py - Current Google Sheets integration (982 lines)
+- src/pdf_reader.py - OpenAI Vision extraction
+- web/src/app/api/ - Next.js API routes
+
+## Existing Data Structure
+Current Google Sheet format (wide):
+```
+| metric      | 2024-01-15 | 2024-02-20 | 2024-03-10 |
+|-------------|------------|------------|------------|
+| Hemoglobin  | 14.2       | 14.5       | 14.1       |
+| Trombosit   | 250000     | 245000     | 252000     |
+```
+
+Target Supabase format (normalized):
+```
+users: id, email, created_at
+reports: id, user_id, file_name, sample_date, created_at
+metrics: id, report_id, name, value, unit, ref_low, ref_high
+```
+
+---

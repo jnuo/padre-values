@@ -4,9 +4,15 @@ __pycache__/
 *.pyc
 .DS_Store
 
+# IDE
+.vscode/
+.idea/
+
 # Local data/artifacts
 downloads/
 *.pdf
+*.labs.json
+data_backup.json
 
 # Secrets/tokens
 .env
@@ -21,7 +27,9 @@ src/config.py
 config.py
 config/
 .env
-.env.*
+.env.local
+.env.*.local
+!.env.example
 secrets/
 token_*.json
 *client_secret*.json
