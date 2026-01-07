@@ -6,52 +6,100 @@ Supports both Google Sheets (default) and Supabase (--use-supabase) backends.
 Debugging guidelines are included below.
 """
 import argparse
+import time
 
 from src import drive_monitor, pdf_reader, sheets_updater
+from src.file_utils import get_file_hash
 
 
 def main():
+    start_time = time.time()
+
     parser = argparse.ArgumentParser(description="Process blood test PDFs and store results")
     parser.add_argument("--use-supabase", action="store_true",
                         help="Use Supabase instead of Google Sheets for storage")
     args = parser.parse_args()
 
+    print("=" * 60)
+    print("🔬 ViziAI - Blood Test PDF Processor")
+    print("=" * 60)
+
     # 1. List PDF files in the Drive folder
-    print("Listing PDF files in Google Drive folder...")
+    print("\n📂 Scanning Google Drive folder...")
     pdf_files = drive_monitor.list_pdf_files()
-    print(f"Found {len(pdf_files)} PDF files.")
+    print(f"   Found {len(pdf_files)} PDF files")
+
     if not pdf_files:
-        print("No PDF files found. Exiting.")
+        print("   No PDF files found. Exiting.")
         return
+
+    # Import supabase_updater early if using Supabase (for hash checking)
+    if args.use_supabase:
+        from src import supabase_updater
 
     # 2. Process all PDF files
     updates = []
     file_names = []
-    for file in pdf_files:
+    content_hashes = []
+    skipped_count = 0
+
+    print("\n📄 Processing files...")
+    for i, file in enumerate(pdf_files, 1):
         file_id = file.get('id')
         file_name = file.get('name')
-        print(f"\n---\nProcessing file: {file_name} (ID: {file_id})")
+        print(f"\n[{i}/{len(pdf_files)}] {file_name}")
+
+        # Download file
         try:
             local_path = drive_monitor.download_file(file_id, file_name)
         except Exception as e:
-            print(f"[ERROR] Failed to download {file_name}: {e}")
+            print(f"  ❌ Download failed: {e}")
             continue
 
+        # Check if this file was already processed (Supabase only)
+        if args.use_supabase:
+            content_hash = get_file_hash(local_path)
+            if supabase_updater.is_file_already_processed(content_hash):
+                print(f"  ⏭️  Already in database (hash match)")
+                skipped_count += 1
+                continue
+        else:
+            content_hash = None
+
+        # Extract lab values
         try:
             values = pdf_reader.extract_labs_from_pdf(local_path)
             updates.append(values)
             file_names.append(file_name)
+            content_hashes.append(content_hash)
         except Exception as e:
-            print(f"[ERROR] Failed to extract labs from {file_name}: {e}")
+            print(f"  ❌ Extraction failed: {e}")
             continue
 
     if args.use_supabase:
         # Use Supabase backend
-        print("\n--- Using Supabase backend ---")
-        from src import supabase_updater
+        print("\n💾 Saving to Supabase...")
 
-        report_ids = supabase_updater.batch_save_extracted_values(updates, file_names)
-        print(f"Saved {len(report_ids)} reports to Supabase.")
+        if not updates:
+            print("   No new reports to save.")
+        else:
+            report_ids = supabase_updater.batch_save_extracted_values(updates, file_names, content_hashes)
+            print(f"   ✅ Saved {len(report_ids)} report(s)")
+
+        # Print summary
+        total_time = time.time() - start_time
+        print("\n" + "=" * 60)
+        print("📊 SUMMARY")
+        print("=" * 60)
+        print(f"   Total files in Drive:    {len(pdf_files)}")
+        print(f"   Already processed:       {skipped_count}")
+        print(f"   Newly processed:         {len(updates)}")
+        print(f"   Total time:              {total_time:.1f}s")
+        if len(updates) > 0:
+            print(f"   Avg time per new file:   {total_time/len(updates):.1f}s")
+        print("=" * 60)
+        print("✅ Done!")
+        print("=" * 60)
     else:
         # Use Google Sheets backend (default)
         print("\n--- Using Google Sheets backend ---")

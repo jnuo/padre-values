@@ -266,6 +266,38 @@
       "priority": 17,
       "status": "done",
       "dependencies": ["US-010"]
+    },
+    {
+      "id": "US-017",
+      "title": "Skip already-processed PDFs to avoid wasting OpenAI API calls",
+      "acceptanceCriteria": [
+        "Add content_hash column to reports table (migration)",
+        "Create file_utils.py with get_file_hash() function using MD5",
+        "Before calling OpenAI extraction, check if content_hash already exists in reports",
+        "If exists, skip extraction and log: 'Skip (already processed): {file_name}'",
+        "If not exists, proceed with extraction and save content_hash with report",
+        "Create backfill script to update existing reports with hashes",
+        "Test: Run main.py twice with same PDFs, second run should skip all"
+      ],
+      "priority": 18,
+      "status": "done",
+      "dependencies": ["US-005"],
+      "notes": "Uses MD5 hash of file content for duplicate detection. More robust than file_id as it works regardless of source."
+    },
+    {
+      "id": "US-018",
+      "title": "Upgrade OpenAI model from GPT-4o-mini to GPT-5-mini",
+      "acceptanceCriteria": [
+        "Update src/pdf_reader.py to use gpt-5-mini model",
+        "Verify extraction still works correctly with new model",
+        "Compare extraction quality: run same PDF through both models",
+        "Update any model-specific prompts if needed",
+        "Document model change in README"
+      ],
+      "priority": 19,
+      "status": "done",
+      "dependencies": [],
+      "notes": "Upgraded from gpt-4o-mini ($0.15/1M input, $0.60/1M output) to gpt-5-mini ($0.25/1M input, $2.00/1M output). GPT-5-mini has better accuracy and 200K context window. User should test extraction quality with next PDF run."
     }
   ]
 }

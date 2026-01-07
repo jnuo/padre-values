@@ -23,6 +23,44 @@ logger = logging.getLogger(__name__)
 DEFAULT_PROFILE_NAME = "Yüksel O."
 
 
+def is_file_already_processed(content_hash: str) -> bool:
+    """
+    Check if a file with this content hash has already been processed.
+
+    Uses the processed_files table which can track multiple files per report
+    (e.g., when multiple PDFs share the same sample_date).
+
+    Args:
+        content_hash: MD5 hash of the file content.
+
+    Returns:
+        True if already processed, False otherwise.
+    """
+    client = get_supabase_client()
+
+    result = client.table("processed_files").select("id").eq("content_hash", content_hash).limit(1).execute()
+
+    return len(result.data) > 0
+
+
+def mark_file_as_processed(profile_id: str, content_hash: str, file_name: Optional[str] = None) -> None:
+    """
+    Mark a file as processed by adding it to the processed_files table.
+
+    Args:
+        profile_id: UUID of the profile.
+        content_hash: MD5 hash of the file content.
+        file_name: Optional source PDF filename.
+    """
+    client = get_supabase_client()
+
+    client.table("processed_files").upsert({
+        "profile_id": profile_id,
+        "content_hash": content_hash,
+        "file_name": file_name,
+    }, on_conflict="profile_id,content_hash").execute()
+
+
 def get_or_create_profile(profile_name: str = DEFAULT_PROFILE_NAME) -> str:
     """
     Get or create a profile by name.
@@ -55,6 +93,7 @@ def save_report(
     sample_date: str,
     tests_dict: dict,
     file_name: Optional[str] = None,
+    content_hash: Optional[str] = None,
     validate: bool = True
 ) -> tuple[str, dict]:
     """
@@ -75,6 +114,7 @@ def save_report(
                 "WBC": {"value": 7500, "unit": "/µL", "ref_low": 4000, "ref_high": 11000}
             }
         file_name: Optional source PDF filename.
+        content_hash: Optional MD5 hash of the PDF file for duplicate detection.
         validate: Whether to validate values against historical data (default: True).
             Set to False for migration/backfill operations.
 
@@ -95,13 +135,21 @@ def save_report(
 
     if result.data:
         report_id = result.data[0]["id"]
+        # Update content_hash if provided and not already set
+        if content_hash:
+            client.table("reports").update({
+                "content_hash": content_hash
+            }).eq("id", report_id).is_("content_hash", "null").execute()
     else:
-        result = client.table("reports").insert({
+        insert_data = {
             "profile_id": profile_id,
             "sample_date": sample_date,
             "file_name": file_name,
             "source": "pdf"
-        }).execute()
+        }
+        if content_hash:
+            insert_data["content_hash"] = content_hash
+        result = client.table("reports").insert(insert_data).execute()
         report_id = result.data[0]["id"]
 
     # Validate and insert metrics
@@ -193,7 +241,11 @@ def save_report(
     return report_id, stats
 
 
-def save_extracted_values(values_dict: dict, file_name: Optional[str] = None) -> Optional[str]:
+def save_extracted_values(
+    values_dict: dict,
+    file_name: Optional[str] = None,
+    content_hash: Optional[str] = None
+) -> Optional[str]:
     """
     Save extracted lab values to Supabase.
 
@@ -209,6 +261,7 @@ def save_extracted_values(values_dict: dict, file_name: Optional[str] = None) ->
                 }
             }
         file_name: Optional source PDF filename.
+        content_hash: Optional MD5 hash of the PDF file for duplicate detection.
 
     Returns:
         The report UUID if successful, None if no data to save.
@@ -224,7 +277,14 @@ def save_extracted_values(values_dict: dict, file_name: Optional[str] = None) ->
     profile_id = get_or_create_profile()
 
     # Save the report and metrics (with validation enabled)
-    report_id, stats = save_report(profile_id, sample_date, tests, file_name, validate=True)
+    report_id, stats = save_report(
+        profile_id, sample_date, tests, file_name,
+        content_hash=content_hash, validate=True
+    )
+
+    # Mark the file as processed (tracks all files, even if they share same date)
+    if content_hash:
+        mark_file_as_processed(profile_id, content_hash, file_name)
 
     # Print summary
     print(f"Saved report {report_id} for {sample_date}:")
@@ -238,13 +298,18 @@ def save_extracted_values(values_dict: dict, file_name: Optional[str] = None) ->
     return report_id
 
 
-def batch_save_extracted_values(updates: list, file_names: Optional[list] = None) -> list:
+def batch_save_extracted_values(
+    updates: list,
+    file_names: Optional[list] = None,
+    content_hashes: Optional[list] = None
+) -> list:
     """
     Save multiple extracted lab values to Supabase.
 
     Args:
         updates: List of dictionaries from pdf_reader.extract_labs_from_pdf().
         file_names: Optional list of source PDF filenames.
+        content_hashes: Optional list of MD5 hashes for duplicate detection.
 
     Returns:
         List of report UUIDs.
@@ -253,7 +318,8 @@ def batch_save_extracted_values(updates: list, file_names: Optional[list] = None
 
     for i, values_dict in enumerate(updates):
         file_name = file_names[i] if file_names and i < len(file_names) else None
-        report_id = save_extracted_values(values_dict, file_name)
+        content_hash = content_hashes[i] if content_hashes and i < len(content_hashes) else None
+        report_id = save_extracted_values(values_dict, file_name, content_hash)
         if report_id:
             report_ids.append(report_id)
 
