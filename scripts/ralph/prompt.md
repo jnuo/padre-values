@@ -88,7 +88,7 @@ For UI-related stories (especially US-007), use Chrome DevTools MCP:
 
 ## Stop Conditions
 
-**After completing US-007 (Phase 1 complete):**
+**After completing US-007b (Phase 1 complete, including tests):**
 
 - Output: `<promise>PHASE1_COMPLETE</promise>`
 - DO NOT continue to US-008

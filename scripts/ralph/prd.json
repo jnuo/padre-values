@@ -107,7 +107,23 @@
       ],
       "priority": 7,
       "passes": false,
-      "notes": "This completes the Supabase migration for read path. STOP HERE - wait for user to test and approve before continuing to Phase 2."
+      "notes": "This completes the Supabase migration for read path."
+    },
+    {
+      "id": "US-007b",
+      "title": "Add basic tests for Phase 1",
+      "acceptanceCriteria": [
+        "Set up pytest for Python: add pytest to requirements.txt",
+        "Create tests/test_supabase_client.py with test for get_supabase_client()",
+        "Create tests/test_migration.py with test that verifies data exists in Supabase",
+        "Set up Jest for Next.js: ensure jest config exists in web/",
+        "Create web/src/app/api/metrics/route.test.ts with basic API test",
+        "Run `pytest` and `cd web && npm test` - all tests pass",
+        "Document how to run tests in README"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "Simple smoke tests - not 100% coverage, just 'does it work?' checks. STOP HERE after this - wait for user to test and approve before Phase 2."
     },
     {
       "id": "US-008",
@@ -119,7 +135,7 @@
         "Add auth-related env vars to web/.env.example",
         "Update README with auth setup instructions"
       ],
-      "priority": 8,
+      "priority": 9,
       "passes": false,
       "notes": "Supabase Auth setup - Google OAuth preferred for simplicity"
     },
@@ -134,7 +150,7 @@
         "Style consistent with existing UI (Tailwind, dark theme)",
         "Test login flow end-to-end"
       ],
-      "priority": 9,
+      "priority": 10,
       "passes": false,
       "notes": ""
     },
@@ -148,7 +164,7 @@
         "Update /api/metrics to require authentication",
         "Return 401 if not authenticated"
       ],
-      "priority": 10,
+      "priority": 11,
       "passes": false,
       "notes": ""
     },
@@ -162,7 +178,7 @@
         "Add 'claim data' flow or auto-claim on first login for owner",
         "Document the data claiming process"
       ],
-      "priority": 11,
+      "priority": 12,
       "passes": false,
       "notes": "This connects the pre-migrated data to the real user account"
     }
