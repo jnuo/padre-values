@@ -14,10 +14,10 @@ def main():
       print("No PDF files found. Exiting.")
       return
 
-   # 2. Read the sheet once
+   # 2. Read the sheet once (also captures original row order for preserving user's sorting)
    # try:
-   sheet_data = sheets_updater.read_sheet_data()
-   print("Loaded sheet data for batch update.")
+   sheet_data, original_row_order = sheets_updater.read_sheet_data()
+   print(f"Loaded sheet data for batch update ({len(original_row_order)} metrics in original order).")
    # except Exception as e:
    #    print(f"[ERROR] Failed to read sheet: {e}")
    #    return
@@ -42,21 +42,21 @@ def main():
          print(f"[ERROR] Failed to extract labs from {file_name}: {e}")
          continue
 
-   # 4. Write back to the sheet once
-   sheets_updater.batch_update_sheet(sheet_data, updates)
+   # 4. Write back to the sheet once (preserving original row order)
+   sheets_updater.batch_update_sheet(sheet_data, updates, original_row_order)
    print("Batch sheet update complete.")
 
-   # 5. Collect all unique column names and identify synonyms using ChatGPT
+   # 5. Collect all unique column names and identify synonyms (rule-based, no AI)
    print("\n--- Identifying duplicate/synonym column names...")
    all_metrics = sheets_updater.get_all_metric_names()
    print(f"Found {len(all_metrics)} unique metric names.")
 
-   synonym_map = sheets_updater.identify_synonyms_with_ai(all_metrics)
-   print(f"AI identified {len(synonym_map)} synonym mappings.")
+   synonym_map = sheets_updater.identify_synonyms(all_metrics)
+   print(f"Identified {len(synonym_map)} synonym mappings.")
 
-   # 6. Consolidate duplicate columns based on AI mapping
+   # 6. Consolidate duplicate columns (passing original_row_order to preserve user's sorting)
    if synonym_map:
-      sheets_updater.consolidate_columns(synonym_map)
+      sheets_updater.consolidate_columns(synonym_map, original_row_order)
       print("Column consolidation complete.")
 
    sheets_updater.rebuild_pivot_sheet()  # uses SHEET_NAME -> LOOKER_SHEET_NAME from config
