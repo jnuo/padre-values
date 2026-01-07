@@ -20,15 +20,18 @@
       "id": "US-002",
       "title": "Design and create Supabase database schema",
       "acceptanceCriteria": [
-        "Create supabase/migrations/001_initial_schema.sql",
-        "Tables: users (id, email, created_at), reports (id, user_id, file_name, sample_date, created_at), metrics (id, report_id, name, value, unit, ref_low, ref_high)",
-        "Add foreign key constraints",
-        "Add indexes on user_id and sample_date",
-        "Document schema in README or schema.md"
+        "Analyze src/sheets_updater.py to understand current data structure (wide format, reference sheet)",
+        "Analyze src/pdf_reader.py to see what fields are extracted from PDFs",
+        "Create supabase/migrations/001_initial_schema.sql with normalized tables",
+        "Required tables: users (auth), reports (per PDF/date), metrics (test values with refs)",
+        "Include all fields from extraction: value, unit, ref_low, ref_high",
+        "Add foreign key constraints and RLS policies",
+        "Add indexes on user_id, sample_date, and metric name",
+        "Document schema with ER diagram or description in schema.md"
       ],
       "priority": 2,
       "passes": false,
-      "notes": "Schema should support multiple users with multiple reports, each report has multiple metrics"
+      "notes": "Analyze codebase first! Current format: rows=metrics, cols=dates. Each metric has value, unit, ref_low, ref_high. Reference ranges stored in separate sheet."
     },
     {
       "id": "US-003",

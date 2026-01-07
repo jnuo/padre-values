@@ -23,7 +23,22 @@ Migrate ViziAI from Google Sheets backend to Supabase for:
 - web/src/app/api/ - Next.js API routes
 
 ## Existing Data Structure
-Current Google Sheet format (wide):
+
+**Source 1: PDF Extraction (see src/pdf_reader.py)**
+OpenAI Vision extracts this JSON from each PDF:
+```json
+{
+  "sample_date": "2024-01-15",
+  "tests": {
+    "Hemoglobin": {"value": 14.2, "unit": "g/dL", "ref_low": 12.0, "ref_high": 16.0},
+    "Trombosit": {"value": 250000, "unit": "10^3/µL", "ref_low": 150000, "ref_high": 400000}
+  }
+}
+```
+Cached as `.labs.json` files in downloads/ folder.
+
+**Source 2: Google Sheet format (see src/sheets_updater.py)**
+Wide format - rows=metrics, columns=dates:
 ```
 | metric      | 2024-01-15 | 2024-02-20 | 2024-03-10 |
 |-------------|------------|------------|------------|
@@ -31,11 +46,27 @@ Current Google Sheet format (wide):
 | Trombosit   | 250000     | 245000     | 252000     |
 ```
 
-Target Supabase format (normalized):
+**Source 3: Reference Sheet (REFERENCE_SHEET_NAME in config)**
+Stores normal ranges per metric:
 ```
-users: id, email, created_at
-reports: id, user_id, file_name, sample_date, created_at
-metrics: id, report_id, name, value, unit, ref_low, ref_high
+| metric     | unit      | low    | high   |
+|------------|-----------|--------|--------|
+| Hemoglobin | g/dL      | 12.0   | 16.0   |
+| Trombosit  | 10^3/µL   | 150000 | 400000 |
 ```
+
+**Target Supabase Schema (normalized):**
+```sql
+-- Users from Supabase Auth
+users: id (uuid), email, created_at
+
+-- One report per PDF/sample date
+reports: id, user_id (FK), file_name, sample_date, created_at
+
+-- Individual test values with their reference ranges
+metrics: id, report_id (FK), name, value, unit, ref_low, ref_high
+```
+
+**Important:** Reference ranges can vary between labs/dates, so store them per metric row, not in a separate table.
 
 ---
