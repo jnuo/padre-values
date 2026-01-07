@@ -65,9 +65,10 @@ def download_file(file_id, file_name, download_dir="downloads"):
 
     local_path = os.path.join(download_dir, file_name)
     if os.path.exists(local_path):
-        print(f"Skip (exists): {local_path}")
+        print(f"  📁 Local cache: {file_name}")
         return local_path
 
+    print(f"  ⬇️  Downloading: {file_name}")
     request = service.files().get_media(fileId=file_id)
     os.makedirs(download_dir, exist_ok=True)
     local_path = os.path.join(download_dir, file_name)
@@ -76,5 +77,8 @@ def download_file(file_id, file_name, download_dir="downloads"):
         done = False
         while not done:
             status, done = downloader.next_chunk()
-            print(f"Download {int(status.progress() * 100)}%.")
+            progress = int(status.progress() * 100)
+            if progress < 100:
+                print(f"     → {progress}%", end="\r")
+    print(f"  ✅ Downloaded: {file_name}")
     return local_path

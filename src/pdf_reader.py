@@ -2,6 +2,7 @@
 import os
 import base64
 import json
+import time
 import fitz  # pymupdf
 from openai import OpenAI
 from src.config import OPENAI_API_KEY
@@ -30,10 +31,19 @@ def extract_labs_from_pdf(pdf_path: str, dpi: int = 220) -> dict:
     Returns:
         Dictionary with 'sample_date' and 'tests' keys.
     """
+    file_name = os.path.basename(pdf_path)
     cache_path = pdf_path + ".labs.json"
+
+    # Check cache first
     if os.path.exists(cache_path):
+        print(f"  📋 Cache hit: {file_name}")
         with open(cache_path, "r", encoding="utf-8") as f:
-            return json.load(f)
+            cached = json.load(f)
+            print(f"     → {len(cached.get('tests', {}))} tests, date: {cached.get('sample_date')}")
+            return cached
+
+    print(f"  🤖 Calling OpenAI API for: {file_name}")
+    start_time = time.time()
 
     client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -44,9 +54,13 @@ def extract_labs_from_pdf(pdf_path: str, dpi: int = 220) -> dict:
 
     out = {"sample_date": None, "tests": {}}
     with fitz.open(pdf_path) as doc:
-        for page in doc:
+        num_pages = len(doc)
+        print(f"     → Processing {num_pages} page(s)...")
+
+        for page_num, page in enumerate(doc, 1):
+            page_start = time.time()
             resp = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="gpt-5-mini",
                 temperature=0,
                 response_format={"type": "json_object"},
                 max_tokens=4000,
@@ -58,15 +72,23 @@ def extract_labs_from_pdf(pdf_path: str, dpi: int = 220) -> dict:
                     ],
                 }],
             )
+            page_time = time.time() - page_start
             data = json.loads(resp.choices[0].message.content)
+            tests_found = len(data.get("tests", {}))
+            print(f"     → Page {page_num}/{num_pages}: {tests_found} tests ({page_time:.1f}s)")
+
             # Merge tests from each page
             out["tests"].update(data.get("tests", {}))
             # Keep the first non-empty sample_date
             if not out["sample_date"]:
                 out["sample_date"] = data.get("sample_date")
 
+    total_time = time.time() - start_time
+    print(f"  ✅ Extracted {len(out['tests'])} tests, date: {out['sample_date']} ({total_time:.1f}s total)")
+
     # Save result for future reuse
     with open(cache_path, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
+    print(f"  💾 Cached to: {os.path.basename(cache_path)}")
 
     return out

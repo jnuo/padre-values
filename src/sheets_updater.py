@@ -287,6 +287,7 @@ def update_sheet_with_values(values_dict):
 def read_sheet_data():
     """
     Reads the entire sheet and returns a 2D list (data) and header row.
+    Also returns the original row order (metric names) to preserve user's sorting.
     """
     gc = get_sheets_client()
     sh = gc.open_by_key(SHEET_ID)
@@ -296,11 +297,42 @@ def read_sheet_data():
         data = [["metric"]]
     width = max(len(r) for r in data)
     data = [r + [""] * (width - len(r)) for r in data]
-    return data
 
-def batch_update_sheet(sheet_data, updates):
+    # Capture original row order (metric names) to preserve user's sorting
+    original_row_order = [(data[i][0] or "").strip() for i in range(1, len(data)) if (data[i][0] or "").strip()]
+
+    return data, original_row_order
+
+
+def _sort_rows_by_original_order(data, original_row_order):
+    """
+    Sort data rows to match the original row order.
+    New metrics (not in original order) are appended at the end.
+    """
+    if not data or len(data) < 2:
+        return data
+
+    header = data[0]
+    rows = data[1:]
+
+    # Build order map: metric_name -> position
+    order_map = {name: idx for idx, name in enumerate(original_row_order)}
+
+    # Sort rows: original metrics in their original order, new ones at the end
+    def sort_key(row):
+        metric = (row[0] or "").strip()
+        if metric in order_map:
+            return (0, order_map[metric])  # Original metrics first, in original order
+        return (1, metric.lower())  # New metrics at end, sorted alphabetically
+
+    sorted_rows = sorted(rows, key=sort_key)
+
+    return [header] + sorted_rows
+
+def batch_update_sheet(sheet_data, updates, original_row_order=None):
     """
     Applies a list of values_dicts (from extract_labs_from_pdf) to the in-memory sheet_data, then writes back once.
+    Preserves the original row order (user's sorting preferences) when writing back.
     """
     import re
     data = sheet_data
@@ -367,6 +399,12 @@ def batch_update_sheet(sheet_data, updates):
     new_data = [header]
     for i in range(1, len(data)):
         new_data.append([data[i][j] for j in order])
+
+    # Preserve original row order (user's sorting preferences)
+    if original_row_order:
+        new_data = _sort_rows_by_original_order(new_data, original_row_order)
+        print(f"Preserved original row order ({len(original_row_order)} metrics).")
+
     # Only update if there are changes
     if updated > 0:
         gc = get_sheets_client()
@@ -392,81 +430,160 @@ def get_all_metric_names():
     metrics = [row[0].strip() for row in data[1:] if row and row[0].strip()]
     return list(set(metrics))  # deduplicate
 
-def identify_synonyms_with_ai(metric_names):
-    """
-    Use ChatGPT to identify which metric names are synonyms (short/long versions, Turkish/English, etc.).
-    Returns a dict mapping original_name -> unified_name.
-    Important: Metrics with different suffixes like 'Bazofil#' vs 'Bazofil%' should NOT be merged.
-    """
-    from src.openai_utils import chat_completion
-    import json
+# Static mapping for known typos and variations that should ALWAYS be merged
+# Format: "wrong_name" -> "correct_name"
+# Add known typos here as you discover them
+STATIC_TYPO_CORRECTIONS = {
+    # Sedimantasyon variants
+    "SEDİMENTASYON": "Sedimantasyon",
+    "Sedimentasyon": "Sedimantasyon",
+    "SEDIMENTASYON": "Sedimantasyon",
 
+    # Hemoglobin variants
+    "HGB": "Hemoglobin",
+    "Hgb": "Hemoglobin",
+
+    # CRP variants -> merge to C-reaktif Protein
+    "CRP": "C-reaktif Protein",
+    "Crp (Turbidimetrik)": "C-reaktif Protein",
+    "CRP Türbidimetrik": "C-reaktif Protein",
+    "Crp (Türbidimetrik)": "C-reaktif Protein",
+
+    # Add more known typos/variations here as needed:
+    # "TypoName": "CorrectName",
+}
+
+
+def _auto_detect_synonyms(metric_names):
+    """
+    Automatically detect obvious synonyms without relying on AI.
+    Rules:
+    1. Base name without suffix should merge to # variant (e.g., Lenfosit -> Lenfosit#)
+    2. Case-insensitive matches should merge to the more common form
+    3. Common medical abbreviations
+    """
+    auto_map = {}
+    metric_set = set(metric_names)
+    metric_lower_map = {m.lower(): m for m in metric_names}
+
+    # Rule 1: Merge base names to their # variants
+    # e.g., "Lenfosit" should merge to "Lenfosit#" if both exist
+    for metric in metric_names:
+        if not metric.endswith('#') and not metric.endswith('%'):
+            hash_variant = metric + "#"
+            if hash_variant in metric_set:
+                auto_map[metric] = hash_variant
+                print(f"  Auto-detect: '{metric}' → '{hash_variant}' (base→# rule)")
+
+    # Rule 2: Common medical abbreviations (bidirectional check)
+    COMMON_ABBREVIATIONS = {
+        "HGB": "Hemoglobin",
+        "Hgb": "Hemoglobin",
+        "PLT": "Trombosit",
+        "WBC": "Lökosit",
+        "RBC": "Eritrosit",
+        "HCT": "Hematokrit",
+        "Hct": "Hematokrit",
+        "MCV": "MCV",
+        "MCH": "MCH",
+        "MCHC": "MCHC",
+        "NEU#": "Nötrofil#",
+        "NEU%": "Nötrofil%",
+        "LYM#": "Lenfosit#",
+        "LYM%": "Lenfosit%",
+        "MON#": "Monosit#",
+        "MON%": "Monosit%",
+        "EOS#": "Eozinofil#",
+        "EOS%": "Eozinofil%",
+        "BASO#": "Bazofil#",
+        "BASO%": "Bazofil%",
+        "ALT": "Alanin aminotransferaz",
+        "AST": "Aspartat transaminaz",
+        "GGT": "GGT - Gamma glutamil transferaz",
+        "ALP": "Alkalen Fosfataz",
+        "BUN": "Kan Üre Azotu",
+        "CRP": "C-reaktif Protein",
+        "TSH": "TSH",
+        "LDH": "LDH - Laktik Dehidrogenaz",
+    }
+
+    for abbrev, full_name in COMMON_ABBREVIATIONS.items():
+        if abbrev in metric_set and full_name in metric_set:
+            auto_map[abbrev] = full_name
+            print(f"  Auto-detect: '{abbrev}' → '{full_name}' (abbreviation rule)")
+
+    # Rule 3: Case-insensitive duplicates (merge to title case or existing)
+    seen_lower = {}
+    for metric in metric_names:
+        lower = metric.lower()
+        if lower in seen_lower:
+            existing = seen_lower[lower]
+            # Prefer the one that's not all caps
+            if metric.isupper() and not existing.isupper():
+                auto_map[metric] = existing
+                print(f"  Auto-detect: '{metric}' → '{existing}' (case rule)")
+            elif not metric.isupper() and existing.isupper():
+                auto_map[existing] = metric
+                print(f"  Auto-detect: '{existing}' → '{metric}' (case rule)")
+        else:
+            seen_lower[lower] = metric
+
+    return auto_map
+
+
+def get_static_synonym_map(metric_names):
+    """
+    Returns a synonym map based on static typo corrections.
+    Only returns mappings for metrics that actually exist in the sheet.
+    """
+    static_map = {}
+    metric_set = set(metric_names)
+
+    for typo, correct in STATIC_TYPO_CORRECTIONS.items():
+        if typo in metric_set:
+            static_map[typo] = correct
+            print(f"  Static correction: '{typo}' → '{correct}'")
+
+    return static_map
+
+
+def identify_synonyms(metric_names):
+    """
+    Identify synonym metrics using rule-based detection and static corrections.
+    No AI calls - faster and more reliable.
+
+    Returns a dict mapping original_name -> unified_name.
+    """
     if not metric_names:
         return {}
 
-    print(f"Sending {len(metric_names)} metric names to AI for analysis...")
-    print(f"Sample metrics: {metric_names[:10]}")
+    print(f"Identifying synonyms for {len(metric_names)} metrics...")
 
-    prompt = f"""Kan tahlili metrik isimlerini analiz ediyorsun. Aşağıda çeşitli laboratuvar raporlarından gelen metrik isimleri listesi var.
-Bazı metrikler farklı isimlendirme kuralları ile tekrar ediyor (örneğin, kısa vs uzun form, Türkçe vs İngilizce isimler).
+    # First, apply static typo corrections
+    static_map = get_static_synonym_map(metric_names)
+    if static_map:
+        print(f"Applied {len(static_map)} static typo corrections.")
 
-KRİTİK KURALLAR:
-1. # ve % SON EKLERİ FARKLI METRİKLERDİR - ASLA BİRLEŞTİRME:
-   - "Nötrofil#" (mutlak sayı, 10^3/µL) ≠ "Nötrofil%" (yüzde, %)
-   - "Bazofil#" ≠ "Bazofil%"
-   - "Lenfosit#" ≠ "Lenfosit%"
-   - ASLA aynı grupta # ve % metriklerini bulundurma
+    # Second, apply automatic rule-based detection
+    auto_map = _auto_detect_synonyms(metric_names)
+    if auto_map:
+        print(f"Applied {len(auto_map)} auto-detected synonyms.")
 
-2. ANCAK, aynı birimdeki metrikler BİRLEŞTİRİLEBİLİR:
-   - "Nötrofil" (10^3/µL) = "Nötrofil#" (10^3/µL) → "Nötrofil#" seç
-   - "Lenfosit" (10^3/µL) = "Lenfosit#" (10^3/µL) → "Lenfosit#" seç
-   - "HGB" = "Hemoglobin" → "Hemoglobin" seç (UZUN ismi tercih et!)
+    # Merge: auto < static (static takes precedence)
+    final_map = {**auto_map, **static_map}
+    print(f"Final synonym map: {len(final_map)} mappings ({len(static_map)} static + {len(auto_map)} auto)")
 
-Görevin:
-1. Aynı teste ve aynı birime atıfta bulunan metrik isim gruplarını belirle
-2. # ile % metriklerini ASLA aynı grupta bulundurma
-3. BIRLEŞIK İSIM SEÇERKEN - MUTLAKA EN UZUN AÇIKLAYICI İSMİ SEÇ:
-   - "HGB" + "Hemoglobin" → "Hemoglobin" seç (HGB DEĞİL!)
-   - "PLT" + "Trombosit" → "Trombosit" seç (PLT DEĞİL!)
-   - "Nötrofil" + "Nötrofil#" → "Nötrofil#" seç (# ekini koru!)
-   - TÜRKÇE tam form tercih et, kısaltmalar kullanma
-4. Her orijinal ismi → birleşik ismine eşle
-5. Eşanlamlısı yoksa çıktıya dahil etme
+    return final_map
 
-Metrik isimleri:
-{json.dumps(metric_names, ensure_ascii=False)}
 
-SADECE geçerli JSON döndür:
-{{
-  "Nötrofil": "Nötrofil#",
-  "HGB": "Hemoglobin",
-  "PLT": "Trombosit",
-  "WBC": "Lökosit",
-  ...
-}}
+def identify_synonyms_with_ai(metric_names):
+    """
+    DEPRECATED: Use identify_synonyms() instead.
+    This function now just calls identify_synonyms() without AI.
+    Kept for backwards compatibility.
+    """
+    return identify_synonyms(metric_names)
 
-KRİTİK: Kısa→Uzun (HGB→Hemoglobin DEĞİL Hemoglobin→HGB!)
-# ve % ASLA AYNI GRUPTA OLMASIN!"""
-
-    response = chat_completion(prompt, model="gpt-4o", max_tokens=2000, temperature=0)
-    print(f"AI Response:\n{response}\n")
-
-    # Parse JSON response
-    try:
-        # Clean response in case it has markdown code blocks
-        response = response.strip()
-        if response.startswith("```"):
-            # Remove markdown code blocks
-            lines = response.split("\n")
-            response = "\n".join([l for l in lines if not l.startswith("```")])
-
-        synonym_map = json.loads(response)
-        print(f"Parsed synonym map: {synonym_map}")
-        return synonym_map
-    except json.JSONDecodeError as e:
-        print(f"[ERROR] Failed to parse AI response as JSON: {e}")
-        print(f"Response was: {response}")
-        return {}
 
 def _validate_synonym_mappings(synonym_map):
     """
@@ -582,7 +699,7 @@ def _validate_synonym_mappings(synonym_map):
     print(f"✓ Validated {len(validated_map)} mappings (rejected {len(synonym_map) - len(validated_map)})")
     return validated_map
 
-def consolidate_columns(synonym_map):
+def consolidate_columns(synonym_map, original_row_order=None):
     """
     Consolidate duplicate columns based on the synonym mapping.
     For each group of synonyms:
@@ -590,6 +707,11 @@ def consolidate_columns(synonym_map):
     2. Delete the duplicate columns
     3. Preserve all data (when multiple synonyms have values for the same date, keep the first non-empty value)
     4. Also consolidate the reference sheet to match
+
+    Args:
+        synonym_map: dict mapping original_name -> unified_name
+        original_row_order: optional list of metric names in the order they should be preserved.
+                           If not provided, captures current order from the sheet.
 
     IMPORTANT: Before merging, validates that metrics have compatible reference ranges.
     Metrics with # vs % suffixes or different reference ranges will NOT be merged.
@@ -621,6 +743,13 @@ def consolidate_columns(synonym_map):
     data = [r + [""] * (width - len(r)) for r in data]
 
     header = data[0]
+
+    # Use provided original_row_order if available, otherwise capture from current sheet
+    if original_row_order is None:
+        original_row_order = [(data[i][0] or "").strip() for i in range(1, len(data)) if (data[i][0] or "").strip()]
+        print(f"Captured current row order ({len(original_row_order)} metrics)")
+    else:
+        print(f"Using provided row order ({len(original_row_order)} metrics)")
 
     # Build metric -> row index map
     row_index = {}
@@ -687,6 +816,26 @@ def consolidate_columns(synonym_map):
     for i in range(1, len(data)):
         if i not in rows_to_remove:
             new_data.append(data[i])
+
+    # Preserve original row order (user's sorting preferences)
+    # Map old metric names to new unified names for proper ordering
+    metric_remap = {}
+    for unified_name, original_names in groups.items():
+        for orig_name in original_names:
+            if orig_name != unified_name:
+                metric_remap[orig_name] = unified_name
+
+    # Update original_row_order to use unified names where applicable
+    updated_row_order = []
+    seen_unified = set()
+    for metric in original_row_order:
+        unified = metric_remap.get(metric, metric)
+        if unified not in seen_unified:
+            updated_row_order.append(unified)
+            seen_unified.add(unified)
+
+    new_data = _sort_rows_by_original_order(new_data, updated_row_order)
+    print(f"Preserved original row order ({len(updated_row_order)} metrics).")
 
     # Write back to data sheet
     ws.clear()
