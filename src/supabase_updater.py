@@ -3,10 +3,20 @@ Supabase updater module.
 Provides functions to save and retrieve blood test data from Supabase.
 """
 
+import logging
 from datetime import datetime
 from typing import Optional
 
 from src.supabase_client import get_supabase_client
+from src.value_validator import (
+    validate_metric_value,
+    validate_reference_change,
+    get_existing_values_for_metric,
+    get_existing_reference,
+)
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 
 # Default profile name used for automated imports
@@ -40,9 +50,21 @@ def get_or_create_profile(profile_name: str = DEFAULT_PROFILE_NAME) -> str:
     return result.data[0]["id"]
 
 
-def save_report(profile_id: str, sample_date: str, tests_dict: dict, file_name: Optional[str] = None) -> str:
+def save_report(
+    profile_id: str,
+    sample_date: str,
+    tests_dict: dict,
+    file_name: Optional[str] = None,
+    validate: bool = True
+) -> tuple[str, dict]:
     """
     Save a blood test report to Supabase.
+
+    This function:
+    1. Creates or finds the report
+    2. Validates each metric value against historical data (if validate=True)
+    3. Inserts valid metrics
+    4. Upserts metric_definitions with reference values
 
     Args:
         profile_id: UUID of the profile this report belongs to.
@@ -53,14 +75,20 @@ def save_report(profile_id: str, sample_date: str, tests_dict: dict, file_name: 
                 "WBC": {"value": 7500, "unit": "/µL", "ref_low": 4000, "ref_high": 11000}
             }
         file_name: Optional source PDF filename.
+        validate: Whether to validate values against historical data (default: True).
+            Set to False for migration/backfill operations.
 
     Returns:
-        The report UUID.
+        Tuple of (report_id, stats) where stats contains:
+        - inserted: number of metrics inserted
+        - skipped: number of metrics skipped due to validation
+        - warnings: list of warning messages
 
     Raises:
         Exception: If the insert fails.
     """
     client = get_supabase_client()
+    stats = {"inserted": 0, "skipped": 0, "warnings": []}
 
     # Create or get the report
     result = client.table("reports").select("id").eq("profile_id", profile_id).eq("sample_date", sample_date).execute()
@@ -76,30 +104,93 @@ def save_report(profile_id: str, sample_date: str, tests_dict: dict, file_name: 
         }).execute()
         report_id = result.data[0]["id"]
 
-    # Insert or update metrics
+    # Validate and insert metrics
     metrics_to_upsert = []
+    definitions_to_upsert = []
+
     for name, data in tests_dict.items():
         value = data.get("value")
         if value is None:
             continue
 
+        try:
+            value = float(value)
+        except (TypeError, ValueError):
+            logger.warning(f"⚠️  Skipping {name}: value '{value}' is not numeric")
+            stats["skipped"] += 1
+            stats["warnings"].append(f"{name}: non-numeric value '{value}'")
+            continue
+
+        # Validate value against historical data (if enabled)
+        if validate:
+            existing_values = get_existing_values_for_metric(profile_id, name)
+            validation = validate_metric_value(name, value, existing_values)
+
+            if not validation.valid:
+                logger.warning(f"⚠️  Skipping {name}: {validation.reason}")
+                stats["skipped"] += 1
+                stats["warnings"].append(f"{name}: {validation.reason}")
+                continue
+
+        # Value is valid - add to upsert list
         metrics_to_upsert.append({
             "report_id": report_id,
             "name": name,
-            "value": float(value),
+            "value": value,
             "unit": data.get("unit"),
             "ref_low": data.get("ref_low"),
             "ref_high": data.get("ref_high"),
             "flag": data.get("flag"),
         })
 
+        # Prepare metric_definition upsert
+        new_ref_low = data.get("ref_low")
+        new_ref_high = data.get("ref_high")
+
+        # Get existing reference values
+        existing_ref_low, existing_ref_high = get_existing_reference(profile_id, name)
+
+        # Validate reference changes
+        ref_low_result = validate_reference_change(existing_ref_low, new_ref_low, "ref_low")
+        ref_high_result = validate_reference_change(existing_ref_high, new_ref_high, "ref_high")
+
+        # Collect warnings
+        if ref_low_result.warning:
+            stats["warnings"].append(f"{name}: {ref_low_result.warning}")
+        if ref_high_result.warning:
+            stats["warnings"].append(f"{name}: {ref_high_result.warning}")
+
+        # Build the definition update
+        definition = {
+            "profile_id": profile_id,
+            "name": name,
+            "unit": data.get("unit"),
+        }
+
+        # Only include refs that should be updated
+        if ref_low_result.should_update and new_ref_low is not None:
+            definition["ref_low"] = new_ref_low
+        if ref_high_result.should_update and new_ref_high is not None:
+            definition["ref_high"] = new_ref_high
+
+        definitions_to_upsert.append(definition)
+
+    # Upsert metrics
     if metrics_to_upsert:
         client.table("metrics").upsert(
             metrics_to_upsert,
             on_conflict="report_id,name"
         ).execute()
+        stats["inserted"] = len(metrics_to_upsert)
 
-    return report_id
+    # Upsert metric_definitions
+    if definitions_to_upsert:
+        client.table("metric_definitions").upsert(
+            definitions_to_upsert,
+            on_conflict="profile_id,name"
+        ).execute()
+
+    return report_id, stats
 
 
 def save_extracted_values(values_dict: dict, file_name: Optional[str] = None) -> Optional[str]:
@@ -132,9 +223,17 @@ def save_extracted_values(values_dict: dict, file_name: Optional[str] = None) ->
     # Get or create the default profile
     profile_id = get_or_create_profile()
 
-    # Save the report and metrics
-    report_id = save_report(profile_id, sample_date, tests, file_name)
-    print(f"Saved report {report_id} with {len(tests)} metrics for {sample_date}")
+    # Save the report and metrics (with validation enabled)
+    report_id, stats = save_report(profile_id, sample_date, tests, file_name, validate=True)
+
+    # Print summary
+    print(f"Saved report {report_id} for {sample_date}:")
+    print(f"  ✅ Inserted: {stats['inserted']} metrics")
+    if stats['skipped'] > 0:
+        print(f"  ⚠️  Skipped: {stats['skipped']} metrics (see warnings above)")
+    if stats['warnings']:
+        for warning in stats['warnings']:
+            print(f"  ⚠️  {warning}")
 
     return report_id
 
@@ -218,6 +317,8 @@ def get_all_metrics_for_dashboard(profile_name: str = DEFAULT_PROFILE_NAME) -> d
     Get all metrics for a profile in a format suitable for the dashboard.
 
     Returns data in the same format as the Google Sheets API endpoint.
+    Reference values come from metric_definitions (canonical) rather than
+    individual metric rows (which may vary by lab).
 
     Args:
         profile_name: Display name of the profile.
@@ -258,7 +359,22 @@ def get_all_metrics_for_dashboard(profile_name: str = DEFAULT_PROFILE_NAME) -> d
     dates = [r["sample_date"] for r in reports_result.data]
     report_ids = [r["id"] for r in reports_result.data]
 
-    # Get all metrics for all reports
+    # Get canonical reference values from metric_definitions
+    definitions_result = client.table("metric_definitions").select(
+        "name, unit, ref_low, ref_high, display_order"
+    ).eq("profile_id", profile_id).order("display_order").execute()
+
+    # Build lookup for definitions
+    definitions_by_name = {}
+    for d in definitions_result.data:
+        definitions_by_name[d["name"]] = {
+            "unit": d["unit"],
+            "ref_low": d["ref_low"],
+            "ref_high": d["ref_high"],
+            "display_order": d["display_order"],
+        }
+
+    # Get all metrics for all reports (values only, refs from definitions)
     metrics_result = client.table("metrics").select(
         "report_id, name, value, unit, ref_low, ref_high"
     ).in_("report_id", report_ids).execute()
@@ -268,17 +384,27 @@ def get_all_metrics_for_dashboard(profile_name: str = DEFAULT_PROFILE_NAME) -> d
     for m in metrics_result.data:
         name = m["name"]
         if name not in metrics_by_name:
+            # Use metric_definitions if available, fallback to metric row
+            definition = definitions_by_name.get(name, {})
             metrics_by_name[name] = {
                 "values_by_report": {},
-                "unit": m["unit"],
-                "ref_low": m["ref_low"],
-                "ref_high": m["ref_high"],
+                "unit": definition.get("unit") or m["unit"],
+                "ref_low": definition.get("ref_low") if definition.get("ref_low") is not None else m["ref_low"],
+                "ref_high": definition.get("ref_high") if definition.get("ref_high") is not None else m["ref_high"],
+                "display_order": definition.get("display_order", 0),
             }
         metrics_by_name[name]["values_by_report"][m["report_id"]] = m["value"]
 
+    # Sort metrics by display_order, then by name
+    sorted_names = sorted(
+        metrics_by_name.keys(),
+        key=lambda n: (metrics_by_name[n]["display_order"], n)
+    )
+
     # Convert to ordered arrays
     result_metrics = {}
-    for name, data in metrics_by_name.items():
+    for name in sorted_names:
+        data = metrics_by_name[name]
         values = []
         for report_id in report_ids:
             value = data["values_by_report"].get(report_id)

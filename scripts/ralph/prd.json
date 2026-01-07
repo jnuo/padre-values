@@ -174,7 +174,7 @@
         "Update get_all_metrics_for_dashboard() to get refs from metric_definitions, not from individual metrics"
       ],
       "priority": 11,
-      "status": "todo",
+      "status": "done",
       "dependencies": ["US-012", "US-013"],
       "notes": "After this, reference values come from metric_definitions (canonical) not from each metric row (which may vary by lab)"
     },

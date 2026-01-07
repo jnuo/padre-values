@@ -252,3 +252,26 @@ Next steps (Phase 2):
   - For percentage-based deviation, low values can't exceed 500% from positive median
     (max deviation when approaching 0 is 100%, so only high values get rejected)
   - Dataclasses make return types clear and testable
+
+---
+
+## 2025-01-07 - US-014: Update supabase_updater to use metric_definitions
+- Updated `src/supabase_updater.py`:
+  - `save_report()` now validates values and upserts metric_definitions
+  - Returns tuple (report_id, stats) with inserted/skipped counts and warnings
+  - Added `validate=False` parameter for migration operations
+  - `get_all_metrics_for_dashboard()` now gets refs from metric_definitions
+    with fallback to metric row refs
+  - Metrics sorted by display_order
+- Created `scripts/backfill_metric_definitions.py`:
+  - Populates metric_definitions from existing metrics data
+  - Uses most common reference values across all reports
+  - Supports --dry-run flag
+  - Includes verification step
+- Ran backfill: 132 definitions (123 active metrics + 9 historical)
+- All 56 Python tests pass
+- Files changed: `src/supabase_updater.py`, `scripts/backfill_metric_definitions.py` (new)
+- **Learnings:**
+  - Backfill used mode() to get most common reference values
+  - Some metrics have historical definitions that no longer have values (renamed metrics)
+  - Verification should check "all metrics have definitions" not "counts match exactly"
