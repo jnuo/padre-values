@@ -204,7 +204,7 @@
         "Test: Compare API response before/after - refs should be consistent across all dates now"
       ],
       "priority": 13,
-      "status": "todo",
+      "status": "done",
       "dependencies": ["US-014", "US-015"],
       "notes": "This ensures consistent reference values regardless of which lab report they came from"
     },

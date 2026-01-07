@@ -298,3 +298,21 @@ Next steps (Phase 2):
   - When updating order, the dashboard sends the FULL metric order (not partial)
   - All metrics default to display_order=0, so partial updates won't sort correctly
   - API upsert on (profile_id, name) ensures idempotent updates
+
+---
+
+## 2025-01-07 - US-016: Update frontend API to use metric_definitions
+- Updated `web/src/app/api/metrics/route.ts`:
+  - Fetches metric_definitions for canonical reference values and display_order
+  - Reference values (ref_min, ref_max) now come from metric_definitions, not individual metrics
+  - Falls back to metric row values if no definition exists (shouldn't happen normally)
+  - Metrics returned sorted by display_order from metric_definitions
+- Build passes with no errors
+- Verified via curl:
+  - 132 metrics returned in display_order (Hemoglobin, Eritrosit first matching custom order)
+  - Reference values come from metric_definitions (e.g., Hemoglobin: 13.7-17.5 g/dL)
+- Files changed: `web/src/app/api/metrics/route.ts`
+- **Learnings:**
+  - Canonical refs from metric_definitions ensure consistent chart reference bands
+  - Even if individual metric rows have varying refs (different labs), the API returns consistent values
+  - display_order is respected in both /api/metrics and /api/metric-order endpoints
