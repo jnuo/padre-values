@@ -48,6 +48,24 @@ This document describes the Supabase database schema for ViziAI, a blood test tr
 │ updated_at      │         │ flag            │
 └─────────────────┘         │ created_at      │
                             └─────────────────┘
+
+         │
+         ▼ (via profile_id)
+
+┌─────────────────────────┐
+│   metric_definitions    │
+├─────────────────────────┤
+│ id (UUID) PK            │
+│ profile_id FK           │───► profiles
+│ name                    │
+│ unit                    │
+│ ref_low                 │
+│ ref_high                │
+│ display_order           │
+│ is_favorite             │
+│ created_at              │
+│ updated_at              │
+└─────────────────────────┘
 ```
 
 ## Tables
@@ -114,6 +132,31 @@ Individual test values with reference ranges. Belongs to a report.
 
 **Constraint:** Unique on (report_id, name)
 
+### metric_definitions
+
+Canonical metric metadata: reference values, display order, favorites. Separates metric configuration from individual test values.
+
+| Column          | Type        | Description                                  |
+| --------------- | ----------- | -------------------------------------------- |
+| `id`            | UUID        | Primary key                                  |
+| `profile_id`    | UUID        | FK to profiles                               |
+| `name`          | TEXT        | Metric name (e.g., "Hemoglobin")             |
+| `unit`          | TEXT        | Unit of measurement (e.g., "g/dL")           |
+| `ref_low`       | NUMERIC     | Canonical reference range low                |
+| `ref_high`      | NUMERIC     | Canonical reference range high               |
+| `display_order` | INTEGER     | Order for display in dashboard (0 = default) |
+| `is_favorite`   | BOOLEAN     | Whether this is a favorite/priority metric   |
+| `created_at`    | TIMESTAMPTZ | When the definition was created              |
+| `updated_at`    | TIMESTAMPTZ | Last update timestamp                        |
+
+**Constraint:** Unique on (profile_id, name)
+
+**Purpose:** Unlike the `metrics` table which stores a reference range for each individual test result (which may vary by lab), `metric_definitions` stores a single canonical reference range per metric per profile. This enables:
+
+- Consistent reference lines on charts
+- User-defined display order
+- Marking favorite metrics
+
 ## Indexes
 
 - `idx_profiles_owner` - profiles(owner_user_id)
@@ -125,6 +168,8 @@ Individual test values with reference ranges. Belongs to a report.
 - `idx_metrics_report` - metrics(report_id)
 - `idx_metrics_name` - metrics(name)
 - `idx_metrics_report_name` - metrics(report_id, name)
+- `idx_metric_definitions_profile` - metric_definitions(profile_id)
+- `idx_metric_definitions_profile_order` - metric_definitions(profile_id, display_order)
 
 ## Row Level Security (RLS)
 
@@ -153,6 +198,12 @@ All tables have RLS enabled with the following policies:
 
 - **View:** Users can view metrics for accessible reports
 - **All operations:** Editors and owners can manage metrics
+- **Service role:** Full access for server-side operations
+
+### metric_definitions
+
+- **View:** Users can view metric definitions for accessible profiles
+- **All operations:** Editors and owners can manage metric definitions
 - **Service role:** Full access for server-side operations
 
 ## Data Flow

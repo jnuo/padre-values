@@ -212,3 +212,20 @@ Next steps (Phase 2):
 - US-009: Create login page with Google OAuth
 - US-010: Protect dashboard route with auth
 - US-011: Associate existing data with authenticated user
+
+---
+
+## 2025-01-07 - US-012: Create metric_definitions table
+- Created migration `supabase/migrations/20260107122246_metric_definitions.sql`
+- Table structure: id (uuid PK), profile_id (FK), name, unit, ref_low, ref_high, display_order, is_favorite, created_at, updated_at
+- Added UNIQUE constraint on (profile_id, name)
+- Added RLS policies matching existing tables (view/manage based on user_access, service_role bypass)
+- Added indexes: idx_metric_definitions_profile, idx_metric_definitions_profile_order
+- Applied migration with `supabase db push`
+- Updated supabase/schema.md with ER diagram update and table documentation
+- Verified table exists via Supabase client query
+- Files changed: `supabase/migrations/20260107122246_metric_definitions.sql` (new), `supabase/schema.md`
+- **Learnings:**
+  - metric_definitions separates canonical reference values from per-test-result references
+  - display_order enables user-customizable metric ordering in dashboard
+  - is_favorite can be used to highlight priority metrics

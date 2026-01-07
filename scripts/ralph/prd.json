@@ -1,6 +1,13 @@
 {
   "branchName": "ralph/supabase-migration",
-  "projectContext": "ViziAI - Blood test tracking app. Currently uses Google Sheets as backend. Migrating to Supabase for real database, auth, and multi-user support.",
+  "projectContext": "ViziAI - Blood test tracking app. Migrating from Google Sheets to Supabase for real database, auth, multi-user support, and better data quality.",
+  "agentInstructions": {
+    "taskSelection": "At each iteration, analyze ALL incomplete tasks. Pick the highest-impact task considering: (1) Does it unblock other tasks? (2) Is it a foundation for future work? (3) Is there a bug affecting users? Dependencies are listed in each task.",
+    "verification": "NEVER mark a task as done until verified. Use pytest for Python, Jest for Next.js, Chrome MCP for visual UI checks. If verification fails, the task is NOT done.",
+    "taskCreation": "If you discover a blocker that prevents completing a task, create a new task for the blocker, work on it first, then return to the original task. Only create tasks for real blockers, not nice-to-haves.",
+    "commits": "Create one git commit per completed task. This makes rollback easy.",
+    "checkpoints": "Tasks marked with 'requiresUserApproval: true' should STOP and wait for user to test and approve before continuing."
+  },
   "userStories": [
     {
       "id": "US-001",
@@ -13,26 +20,26 @@
         "Add instructions in README for setting up Supabase credentials"
       ],
       "priority": 1,
-      "passes": true,
+      "status": "done",
+      "dependencies": [],
       "notes": "User will manually create Supabase project and fill in credentials"
     },
     {
       "id": "US-002",
       "title": "Design and create Supabase database schema",
       "acceptanceCriteria": [
-        "Analyze src/sheets_updater.py to understand current data structure (wide format, reference sheet)",
+        "Analyze src/sheets_updater.py to understand current data structure",
         "Analyze src/pdf_reader.py to see what fields are extracted from PDFs",
-        "Run `supabase migration new initial_schema` to create migration file",
-        "Required tables: profiles (patients), user_access (who can see whose data), reports (per PDF/date), metrics (test values with refs)",
-        "Include all fields from extraction: value, unit, ref_low, ref_high",
+        "Create migration file in supabase/migrations/",
+        "Tables: profiles, user_access, reports, metrics",
         "Add foreign key constraints and RLS policies",
-        "Add indexes on user_id, sample_date, and metric name",
-        "Run `supabase db push` to apply migration to remote database",
-        "Document schema with ER diagram or description in schema.md"
+        "Run `supabase db push` to apply migration",
+        "Document schema in supabase/schema.md"
       ],
       "priority": 2,
-      "passes": true,
-      "notes": "Analyze codebase first! Schema: profiles (patients being tracked), user_access (many-to-many: users↔profiles), reports (belongs to profile), metrics (belongs to report). This allows multiple family members to access same patient data, and one user to access multiple profiles later."
+      "status": "done",
+      "dependencies": ["US-001"],
+      "notes": "Schema will be extended in US-012 to add metric_definitions table"
     },
     {
       "id": "US-003",
@@ -40,147 +47,225 @@
       "acceptanceCriteria": [
         "Create src/supabase_client.py",
         "Function get_supabase_client() returns authenticated Supabase client",
-        "Loads credentials from environment variables",
-        "Handles missing credentials gracefully with clear error message",
-        "typecheck passes (if using type hints)"
+        "Handles missing credentials gracefully with clear error message"
       ],
       "priority": 3,
-      "passes": true,
-      "notes": ""
+      "status": "done",
+      "dependencies": ["US-001"]
     },
     {
       "id": "US-004",
-      "title": "Create migration script for existing Google Sheets data",
+      "title": "Create and RUN migration script for existing data",
       "acceptanceCriteria": [
         "Create scripts/migrate_sheets_to_supabase.py",
-        "Reads all data from current Google Sheet (SHEET_NAME)",
-        "Creates a default user for existing data (owner's email or placeholder)",
-        "Parses the wide format (metrics as rows, dates as columns)",
-        "Inserts reports and metrics into Supabase",
-        "Prints summary: X reports migrated, Y metrics total",
-        "Script is idempotent (can run multiple times safely)"
+        "Script reads all data from Google Sheet",
+        "Script inserts reports and metrics into Supabase",
+        "Script is idempotent (can run multiple times safely)",
+        "ACTUALLY RUN the migration script",
+        "VERIFY data exists in Supabase by querying: SELECT COUNT(*) FROM reports; SELECT COUNT(*) FROM metrics;",
+        "Print summary showing migrated counts match expected"
       ],
       "priority": 4,
-      "passes": true,
-      "notes": "This migrates father's existing blood test data"
+      "status": "done",
+      "dependencies": ["US-002", "US-003"],
+      "notes": "Migration was created but had to be run manually. Future: script should auto-run and verify."
     },
     {
       "id": "US-005",
       "title": "Update Python backend to write to Supabase",
       "acceptanceCriteria": [
-        "Create src/supabase_updater.py with same interface as sheets_updater",
-        "Function save_report(user_id, sample_date, tests_dict) inserts to Supabase",
-        "Function get_user_metrics(user_id) returns all metrics for dashboard",
-        "Update main.py to use supabase_updater instead of sheets_updater",
-        "Add --use-supabase flag to main.py (default: still use sheets for safety)",
-        "Test with one PDF extraction and verify data in Supabase"
+        "Create src/supabase_updater.py",
+        "Function save_report() inserts report and metrics to Supabase",
+        "Function get_profile_metrics() returns all metrics for dashboard",
+        "Add --use-supabase flag to main.py",
+        "Test: Run main.py --use-supabase with a test PDF and verify data appears in Supabase"
       ],
       "priority": 5,
-      "passes": true,
-      "notes": "Keep sheets_updater working for now as fallback"
+      "status": "done",
+      "dependencies": ["US-003"],
+      "notes": "Will be updated in US-014 to also populate metric_definitions"
     },
     {
       "id": "US-006",
       "title": "Create Next.js API route to fetch metrics from Supabase",
       "acceptanceCriteria": [
         "Create web/src/app/api/metrics/route.ts",
-        "GET endpoint returns all metrics for a user (hardcode user_id for now)",
-        "Response format matches current Google Sheets API response",
-        "Add NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY to web/.env.example",
-        "Install @supabase/supabase-js in web/"
+        "GET endpoint returns all metrics for a profile",
+        "Response format matches Google Sheets API format: {metrics: [], values: []}",
+        "Handle Supabase 1000 row limit with pagination",
+        "Sort values by date ascending before returning",
+        "Test: curl localhost:3000/api/metrics returns ALL data (not truncated)"
       ],
       "priority": 6,
-      "passes": true,
-      "notes": "Dashboard will call this instead of Google Sheets"
+      "status": "done",
+      "dependencies": ["US-004"],
+      "notes": "Had bugs: 1000 row limit, values not sorted. Fixed manually. Verification was missing."
     },
     {
       "id": "US-007",
       "title": "Update dashboard to use Supabase API",
       "acceptanceCriteria": [
         "Update web/src/app/dashboard/page.tsx to fetch from /api/metrics",
-        "Verify charts render correctly with Supabase data",
-        "Add loading state while fetching",
-        "Add error state if fetch fails",
-        "Use Chrome MCP to take screenshot of localhost:3000/dashboard",
-        "Verify UI matches existing dark theme and Tailwind patterns",
-        "Ensure existing hardcoded login still works"
+        "Charts render correctly with Supabase data",
+        "Date range in UI matches actual data range",
+        "Use Chrome MCP to verify: take screenshot, check latest date shown matches Supabase data"
       ],
       "priority": 7,
-      "passes": true,
-      "notes": "This completes the Supabase migration for read path."
+      "status": "done",
+      "dependencies": ["US-006"],
+      "notes": "Verify visually that data matches production (Google Sheets) before considering done"
     },
     {
       "id": "US-007b",
       "title": "Add basic tests for Phase 1",
       "acceptanceCriteria": [
-        "Set up pytest for Python: add pytest to requirements.txt",
-        "Create tests/test_supabase_client.py with test for get_supabase_client()",
-        "Create tests/test_migration.py with test that verifies data exists in Supabase",
-        "Set up Jest for Next.js: ensure jest config exists in web/",
-        "Create web/src/app/api/metrics/route.test.ts with basic API test",
-        "Run `pytest` and `cd web && npm test` - all tests pass",
-        "Document how to run tests in README"
+        "pytest tests pass for Python code",
+        "Jest tests pass for Next.js code",
+        "Document test commands in README"
       ],
       "priority": 8,
-      "passes": true,
-      "notes": "Simple smoke tests - not 100% coverage, just 'does it work?' checks. STOP HERE after this - wait for user to test and approve before Phase 2."
+      "status": "done",
+      "dependencies": ["US-006", "US-007"],
+      "requiresUserApproval": true,
+      "notes": "CHECKPOINT: Wait for user to test Phase 1 before continuing to Phase 2"
+    },
+    {
+      "id": "US-012",
+      "title": "Create metric_definitions table",
+      "acceptanceCriteria": [
+        "Create new migration: supabase migration new metric_definitions",
+        "Table structure: id (uuid PK), profile_id (FK), name (text), unit (text), ref_low (numeric nullable), ref_high (numeric nullable), display_order (integer default 0), is_favorite (boolean default false), created_at, updated_at",
+        "Add UNIQUE constraint on (profile_id, name)",
+        "Add RLS policies matching existing tables",
+        "Run `supabase db push` to apply",
+        "Update supabase/schema.md with new table documentation",
+        "Verify table exists: SELECT * FROM metric_definitions LIMIT 1;"
+      ],
+      "priority": 9,
+      "status": "done",
+      "dependencies": ["US-002"],
+      "notes": "This table stores canonical metric info: reference values, sort order, favorites. Separates metric metadata from individual test values."
+    },
+    {
+      "id": "US-013",
+      "title": "Implement smart value validation in PDF extraction",
+      "acceptanceCriteria": [
+        "Create src/value_validator.py with validation logic",
+        "Function validate_metric_value(name, value, existing_values) returns: {valid: bool, reason: string}",
+        "Validation rules: (1) Value must be numeric, (2) If we have historical values for this metric, new value should be within 500% of the median (catches unit errors like g/dL vs mg/dL), (3) Reference ranges: ≤15% diff from stored = OK, 15-50% = warn but accept, >50% = reject",
+        "Function validate_reference_change(existing_ref, new_ref) returns: {should_update: bool, warning: string|null}",
+        "Write pytest tests for edge cases: null refs, first value, suspicious values",
+        "Log warnings clearly so user running main.py sees them"
+      ],
+      "priority": 10,
+      "status": "todo",
+      "dependencies": ["US-012"],
+      "notes": "AI extraction sometimes produces garbage (wrong decimal place, misread values). This prevents bad data from corrupting charts. User should see warnings but bad data should NOT be inserted."
+    },
+    {
+      "id": "US-014",
+      "title": "Update supabase_updater to use metric_definitions",
+      "acceptanceCriteria": [
+        "When saving a metric, also upsert into metric_definitions",
+        "If metric_definition doesn't exist: create it with refs from PDF",
+        "If metric_definition exists: apply validate_reference_change() logic",
+        "Populate metric_definitions from existing metrics data (backfill): create script scripts/backfill_metric_definitions.py",
+        "Run backfill and verify: SELECT COUNT(*) FROM metric_definitions should match SELECT COUNT(DISTINCT name) FROM metrics for each profile",
+        "Update get_all_metrics_for_dashboard() to get refs from metric_definitions, not from individual metrics"
+      ],
+      "priority": 11,
+      "status": "todo",
+      "dependencies": ["US-012", "US-013"],
+      "notes": "After this, reference values come from metric_definitions (canonical) not from each metric row (which may vary by lab)"
+    },
+    {
+      "id": "US-015",
+      "title": "Implement metric sorting with Supabase storage",
+      "acceptanceCriteria": [
+        "Create web/src/app/api/metric-order/route.ts: GET returns order, PUT updates order",
+        "GET /api/metric-order?profileId=X returns array of metric names in display_order",
+        "PUT /api/metric-order with {profileId, order: []} updates display_order in metric_definitions",
+        "Update dashboard to: (1) Load order from API on mount, (2) Save to API when user drags to reorder",
+        "Remove localStorage fallback once Supabase ordering works",
+        "Test: Reorder metrics, refresh page, verify order persists"
+      ],
+      "priority": 12,
+      "status": "todo",
+      "dependencies": ["US-012", "US-014"],
+      "notes": "Currently sorting saves to localStorage (temporary fix). This moves it to Supabase so order syncs across devices."
+    },
+    {
+      "id": "US-016",
+      "title": "Update frontend API to use metric_definitions",
+      "acceptanceCriteria": [
+        "Update web/src/app/api/metrics/route.ts to JOIN with metric_definitions",
+        "Reference values (ref_min, ref_max) should come from metric_definitions, not from metrics table",
+        "Metrics should be returned in display_order from metric_definitions",
+        "Test: Compare API response before/after - refs should be consistent across all dates now"
+      ],
+      "priority": 13,
+      "status": "todo",
+      "dependencies": ["US-014", "US-015"],
+      "notes": "This ensures consistent reference values regardless of which lab report they came from"
     },
     {
       "id": "US-008",
       "title": "Set up Supabase Auth configuration",
       "acceptanceCriteria": [
-        "Document how to enable Google OAuth in Supabase dashboard",
-        "Create web/src/lib/supabase.ts with createClientComponentClient",
+        "Document how to enable Google OAuth in Supabase dashboard (in README)",
+        "Create web/src/lib/supabase-browser.ts for client-side auth",
         "Create web/src/lib/supabase-server.ts for server-side auth",
-        "Add auth-related env vars to web/.env.example",
-        "Update README with auth setup instructions"
+        "Add NEXT_PUBLIC_SUPABASE_ANON_KEY to web/.env.example",
+        "Test: import { createClient } from lib/supabase-browser works"
       ],
-      "priority": 9,
-      "passes": false,
-      "notes": "Supabase Auth setup - Google OAuth preferred for simplicity"
+      "priority": 14,
+      "status": "todo",
+      "dependencies": ["US-016"],
+      "requiresUserApproval": true,
+      "notes": "CHECKPOINT: User needs to manually enable Google OAuth in Supabase dashboard before this can be fully tested"
     },
     {
       "id": "US-009",
       "title": "Create login page with Google OAuth",
       "acceptanceCriteria": [
         "Create web/src/app/login/page.tsx",
-        "Add 'Sign in with Google' button",
+        "Add 'Sign in with Google' button using Supabase Auth",
         "On success, redirect to /dashboard",
         "On error, show error message",
-        "Style consistent with existing UI (Tailwind, dark theme)",
-        "Test login flow end-to-end"
+        "Style matches existing dark theme",
+        "Use Chrome MCP to screenshot login page"
       ],
-      "priority": 10,
-      "passes": false,
-      "notes": ""
+      "priority": 15,
+      "status": "todo",
+      "dependencies": ["US-008"]
     },
     {
       "id": "US-010",
       "title": "Protect dashboard route with auth",
       "acceptanceCriteria": [
-        "Create web/src/middleware.ts for auth protection",
-        "Redirect unauthenticated users from /dashboard to /login",
-        "After login, redirect back to /dashboard",
-        "Update /api/metrics to require authentication",
-        "Return 401 if not authenticated"
+        "Create web/src/middleware.ts",
+        "Unauthenticated users redirected from /dashboard to /login",
+        "After login, redirect back to intended page",
+        "API routes return 401 if not authenticated",
+        "Test: Clear cookies, go to /dashboard, should redirect to /login"
       ],
-      "priority": 11,
-      "passes": false,
-      "notes": ""
+      "priority": 16,
+      "status": "todo",
+      "dependencies": ["US-009"]
     },
     {
       "id": "US-011",
       "title": "Associate existing data with authenticated user",
       "acceptanceCriteria": [
-        "When user first logs in, check if they have data",
-        "If migrated data exists (from US-004), associate with user's Supabase user_id",
-        "Update migration script to use a placeholder user_id that can be claimed",
-        "Add 'claim data' flow or auto-claim on first login for owner",
-        "Document the data claiming process"
+        "On first login, check if user email matches profile owner",
+        "If match, associate profile with user's Supabase auth.users.id",
+        "Update profiles.owner_user_id",
+        "Update user_access table to grant owner access",
+        "Document data claiming process in README"
       ],
-      "priority": 12,
-      "passes": false,
-      "notes": "This connects the pre-migrated data to the real user account"
+      "priority": 17,
+      "status": "todo",
+      "dependencies": ["US-010"]
     }
   ]
 }
