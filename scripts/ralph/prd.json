@@ -6,9 +6,9 @@
       "id": "US-001",
       "title": "Create Supabase project config",
       "acceptanceCriteria": [
-        "Create src/supabase_config.py with SUPABASE_URL and SUPABASE_KEY placeholders",
+        "Create src/supabase_config.py that loads from environment variables",
         "Add supabase-py to requirements.txt",
-        "Create .env.example with SUPABASE_URL and SUPABASE_KEY",
+        "Verify .env.example has SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, SUPABASE_SECRET_KEY",
         "Update .gitignore to exclude .env",
         "Add instructions in README for setting up Supabase credentials"
       ],
@@ -82,7 +82,7 @@
         "Create web/src/app/api/metrics/route.ts",
         "GET endpoint returns all metrics for a user (hardcode user_id for now)",
         "Response format matches current Google Sheets API response",
-        "Add NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_KEY to web/.env.example",
+        "Add NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY to web/.env.example",
         "Install @supabase/supabase-js in web/"
       ],
       "priority": 6,
