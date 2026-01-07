@@ -158,7 +158,7 @@
         "Log warnings clearly so user running main.py sees them"
       ],
       "priority": 10,
-      "status": "todo",
+      "status": "done",
       "dependencies": ["US-012"],
       "notes": "AI extraction sometimes produces garbage (wrong decimal place, misread values). This prevents bad data from corrupting charts. User should see warnings but bad data should NOT be inserted."
     },

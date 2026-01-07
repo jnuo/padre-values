@@ -229,3 +229,26 @@ Next steps (Phase 2):
   - metric_definitions separates canonical reference values from per-test-result references
   - display_order enables user-customizable metric ordering in dashboard
   - is_favorite can be used to highlight priority metrics
+
+---
+
+## 2025-01-07 - US-013: Implement smart value validation
+- Created `src/value_validator.py` with:
+  - `ValidationResult` and `ReferenceUpdateResult` dataclasses
+  - `validate_metric_value(name, value, existing_values)`: checks if new value is reasonable
+    - Returns valid=True for first value (no history)
+    - Returns valid=False if value >500% different from historical median
+    - Uses Python logging with emoji (⚠️) for warnings
+  - `validate_reference_change(existing_ref, new_ref)`: checks if ref update is reasonable
+    - ≤15% diff: accept silently
+    - 15-50% diff: accept with warning
+    - >50% diff: reject with error log
+  - Helper functions: `get_existing_values_for_metric()`, `get_existing_reference()`
+- Created `tests/test_value_validator.py` with 37 comprehensive tests
+- All 56 tests pass (19 existing + 37 new)
+- Files changed: `src/value_validator.py` (new), `tests/test_value_validator.py` (new)
+- **Learnings:**
+  - 500% threshold catches values that are 6x higher than median (e.g., 142 vs 14)
+  - For percentage-based deviation, low values can't exceed 500% from positive median
+    (max deviation when approaching 0 is 100%, so only high values get rejected)
+  - Dataclasses make return types clear and testable
