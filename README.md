@@ -337,6 +337,9 @@ padre-values/
 ```bash
 # Start monitoring Google Drive
 python main.py
+
+# Run with Supabase (loads env vars and activates venv)
+source .venv/bin/activate && set -a && source .env && set +a && python main.py --use-supabase
 ```
 
 ### Running the Web Dashboard

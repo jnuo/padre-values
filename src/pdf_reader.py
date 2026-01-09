@@ -61,9 +61,8 @@ def extract_labs_from_pdf(pdf_path: str, dpi: int = 220) -> dict:
             page_start = time.time()
             resp = client.chat.completions.create(
                 model="gpt-5-mini",
-                temperature=0,
                 response_format={"type": "json_object"},
-                max_tokens=4000,
+                max_completion_tokens=4000,
                 messages=[{
                     "role": "user",
                     "content": [
