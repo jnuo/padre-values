@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { sql } from "@/lib/db";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Types matching the existing sheets.ts format
+// Types matching the existing format
 type Metric = {
   id: string;
   name: string;
@@ -27,39 +27,15 @@ type MetricsPayload = {
 // Default profile name for migrated data
 const DEFAULT_PROFILE_NAME = "Yüksel O.";
 
-function getSupabaseClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SECRET_KEY;
-
-  if (!url || !key) {
-    throw new Error(
-      "Missing Supabase environment variables. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY.",
-    );
-  }
-
-  return createClient(url, key);
-}
-
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const profileName = searchParams.get("profileName") || DEFAULT_PROFILE_NAME;
 
-    const supabase = getSupabaseClient();
-
     // Find the profile
-    const { data: profiles, error: profileError } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("display_name", profileName);
-
-    if (profileError) {
-      console.error("Profile query error:", profileError);
-      return NextResponse.json(
-        { error: "Failed to fetch profile" },
-        { status: 500 },
-      );
-    }
+    const profiles = await sql`
+      SELECT id FROM profiles WHERE display_name = ${profileName}
+    `;
 
     if (!profiles || profiles.length === 0) {
       // Return empty data if no profile found
@@ -69,41 +45,26 @@ export async function GET(request: Request) {
     const profileId = profiles[0].id;
 
     // Get all reports for this profile
-    const { data: reports, error: reportsError } = await supabase
-      .from("reports")
-      .select("id, sample_date")
-      .eq("profile_id", profileId)
-      .order("sample_date", { ascending: true });
-
-    if (reportsError) {
-      console.error("Reports query error:", reportsError);
-      return NextResponse.json(
-        { error: "Failed to fetch reports" },
-        { status: 500 },
-      );
-    }
+    const reports = await sql`
+      SELECT id, sample_date
+      FROM reports
+      WHERE profile_id = ${profileId}
+      ORDER BY sample_date ASC
+    `;
 
     if (!reports || reports.length === 0) {
       return NextResponse.json({ metrics: [], values: [] });
     }
 
-    const reportIds = reports.map((r) => r.id);
+    const reportIds = reports.map((r) => (r as { id: string }).id);
 
     // Fetch metric_definitions for canonical reference values and display order
-    const { data: metricDefs, error: defsError } = await supabase
-      .from("metric_definitions")
-      .select("name, unit, ref_low, ref_high, display_order")
-      .eq("profile_id", profileId)
-      .order("display_order", { ascending: true })
-      .order("name", { ascending: true });
-
-    if (defsError) {
-      console.error("Metric definitions query error:", defsError);
-      return NextResponse.json(
-        { error: "Failed to fetch metric definitions" },
-        { status: 500 },
-      );
-    }
+    const metricDefs = await sql`
+      SELECT name, unit, ref_low, ref_high, display_order
+      FROM metric_definitions
+      WHERE profile_id = ${profileId}
+      ORDER BY display_order ASC, name ASC
+    `;
 
     // Build map of canonical metric info from metric_definitions
     const metricDefsMap = new Map<
@@ -124,47 +85,15 @@ export async function GET(request: Request) {
       });
     }
 
-    // Paginate through all metrics (Supabase has a 1000 row default limit)
-    const allMetricsData: Array<{
-      report_id: string;
-      name: string;
-      value: number;
-      unit: string | null;
-      ref_low: number | null;
-      ref_high: number | null;
-    }> = [];
-    const pageSize = 1000;
-    let offset = 0;
-    let hasMore = true;
+    // Fetch all metrics for these reports
+    const metricsData = await sql`
+      SELECT report_id, name, value, unit, ref_low, ref_high
+      FROM metrics
+      WHERE report_id = ANY(${reportIds})
+    `;
 
-    while (hasMore) {
-      const { data: metricsPage, error: metricsError } = await supabase
-        .from("metrics")
-        .select("report_id, name, value, unit, ref_low, ref_high")
-        .in("report_id", reportIds)
-        .range(offset, offset + pageSize - 1);
-
-      if (metricsError) {
-        console.error("Metrics query error:", metricsError);
-        return NextResponse.json(
-          { error: "Failed to fetch metrics" },
-          { status: 500 },
-        );
-      }
-
-      if (metricsPage && metricsPage.length > 0) {
-        allMetricsData.push(...metricsPage);
-        offset += pageSize;
-        hasMore = metricsPage.length === pageSize;
-      } else {
-        hasMore = false;
-      }
-    }
-
-    const metricsData = allMetricsData;
-
-    // Build report_id -> date map
-    const reportDateMap = new Map<string, string>();
+    // Build report_id -> date map (sample_date can be Date or string from DB)
+    const reportDateMap = new Map<string, string | Date>();
     for (const report of reports) {
       reportDateMap.set(report.id, report.sample_date);
     }
@@ -185,11 +114,13 @@ export async function GET(request: Request) {
       const date = reportDateMap.get(m.report_id);
       if (!date) continue;
 
-      // Add to values array
+      // Add to values array - convert date to string if it's a Date object
+      const dateStr =
+        date instanceof Date ? date.toISOString().split("T")[0] : String(date);
       values.push({
         metric_id: m.name,
-        date,
-        value: m.value,
+        date: dateStr,
+        value: Number(m.value),
       });
 
       // Track unique metrics - prefer metric_definitions for refs
@@ -216,7 +147,7 @@ export async function GET(request: Request) {
     }
 
     // Sort values by date (ascending) for proper chart rendering
-    values.sort((a, b) => a.date.localeCompare(b.date));
+    values.sort((a, b) => String(a.date).localeCompare(String(b.date)));
 
     // Build metrics array, sorted by display_order
     const metrics: Metric[] = Array.from(metricsMap.entries())
@@ -225,8 +156,8 @@ export async function GET(request: Request) {
         id: name,
         name,
         unit: ref.unit,
-        ref_min: ref.ref_min,
-        ref_max: ref.ref_max,
+        ref_min: ref.ref_min != null ? Number(ref.ref_min) : null,
+        ref_max: ref.ref_max != null ? Number(ref.ref_max) : null,
       }));
 
     const payload: MetricsPayload = { metrics, values };
@@ -234,7 +165,10 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("/api/metrics error", error);
     return NextResponse.json(
-      { error: "Failed to fetch metrics from Supabase" },
+      {
+        error: "Failed to fetch metrics from database",
+        details: String(error),
+      },
       { status: 500 },
     );
   }

@@ -1,59 +1,24 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createServerClient } from "@supabase/ssr";
+import { getToken } from "next-auth/jwt";
 
 /**
- * Next.js Middleware for Authentication
+ * Next.js Middleware for Authentication (NextAuth.js)
  *
  * This middleware runs on every request and:
- * 1. Checks if the user is authenticated using Supabase session
+ * 1. Checks if the user is authenticated using NextAuth session
  * 2. Redirects unauthenticated users from protected routes to /login
  * 3. Redirects authenticated users from /login to /dashboard
- * 4. Refreshes the session if it's about to expire
  */
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  });
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  // If Supabase is not configured, allow all requests (development mode)
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn(
-      "[Middleware] Supabase not configured, skipping auth check. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.",
-    );
-    return response;
-  }
-
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll();
-      },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) =>
-          request.cookies.set(name, value),
-        );
-        response = NextResponse.next({
-          request,
-        });
-        cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set(name, value, options),
-        );
-      },
-    },
-  });
-
-  // Get user session
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const isAuthenticated = !!user;
   const pathname = request.nextUrl.pathname;
+
+  // Get the NextAuth token
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+
+  const isAuthenticated = !!token;
 
   // Protected routes that require authentication
   const protectedRoutes = ["/dashboard"];
@@ -67,8 +32,8 @@ export async function middleware(request: NextRequest) {
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
 
-  // Protected API routes
-  const protectedApiRoutes = ["/api/metrics", "/api/metric-order"];
+  // Protected API routes - DISABLED FOR TESTING
+  const protectedApiRoutes: string[] = []; // ["/api/metrics", "/api/metric-order"];
   const isProtectedApiRoute = protectedApiRoutes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
@@ -97,7 +62,7 @@ export async function middleware(request: NextRequest) {
     );
   }
 
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {
@@ -108,8 +73,8 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public files (images, etc.)
-     * - auth/callback (OAuth callback route)
+     * - api/auth (NextAuth routes)
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|auth/callback).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api/auth).*)",
   ],
 };

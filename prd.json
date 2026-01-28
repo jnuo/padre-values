@@ -1,0 +1,878 @@
+{
+  "projectName": "ViziAI Supabase to Neon Migration",
+  "description": "Migrate ViziAI from Supabase to Neon database with NextAuth.js for authentication. Zero changes to frontend behavior, API responses, or error codes.",
+  "branch": "ralph/supabase-migration",
+  "repository": "/Users/onurovali/Documents/code/padre-values",
+  "testingPrinciples": {
+    "dataIntegrity": "Every data migration step must verify row counts and data content match exactly",
+    "apiParity": "Every API endpoint must return identical JSON structure and HTTP status codes",
+    "uiUnchanged": "Frontend must render identically - use headless browser screenshots to verify",
+    "errorCodes": "All error responses must preserve exact status codes: 400, 404, 500"
+  },
+  "stories": [
+    {
+      "id": "NEON-001",
+      "title": "Create Neon project and database",
+      "priority": 1,
+      "description": "Use neonctl CLI to create a new Neon project named 'viziai' in eu-central-1 region.",
+      "implementation": [
+        "Run: neonctl projects create --name viziai --region-id aws-eu-central-1",
+        "Extract connection string from output",
+        "Save to .env.neon (will be gitignored)",
+        "Add .env.neon to .gitignore if not present"
+      ],
+      "testCases": [
+        {
+          "name": "Verify project created",
+          "command": "neonctl projects list --output json | jq '.[] | select(.name==\"viziai\")'",
+          "expected": "Returns project object with name 'viziai' and region 'aws-eu-central-1'"
+        },
+        {
+          "name": "Verify connection works",
+          "command": "source .env.neon && psql $NEON_DATABASE_URL -c 'SELECT 1 as test'",
+          "expected": "Returns: test = 1"
+        },
+        {
+          "name": "Verify .env.neon is gitignored",
+          "command": "grep -q '.env.neon' .gitignore && echo 'OK'",
+          "expected": "OK"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "NEON-002",
+      "title": "Export Supabase schema (tables only, no RLS)",
+      "priority": 2,
+      "description": "Export database schema from Supabase. Must exclude RLS policies, Supabase-specific extensions, and auth schema.",
+      "implementation": [
+        "Get Supabase connection string via: supabase db remote commit --db-url",
+        "Use pg_dump with --schema-only --no-owner --no-privileges",
+        "Exclude: auth schema, storage schema, supabase_functions schema",
+        "Save to supabase/export/schema.sql"
+      ],
+      "testCases": [
+        {
+          "name": "Verify all 8 tables in export",
+          "command": "grep -c 'CREATE TABLE' supabase/export/schema.sql",
+          "expected": "8 (profiles, user_access, reports, metrics, metric_definitions, profile_allowed_emails, metric_aliases, processed_files)"
+        },
+        {
+          "name": "Verify no RLS policies",
+          "command": "grep -c 'CREATE POLICY' supabase/export/schema.sql || echo '0'",
+          "expected": "0"
+        },
+        {
+          "name": "Verify no Supabase extensions",
+          "command": "grep -c 'supabase' supabase/export/schema.sql || echo '0'",
+          "expected": "0 (or only in comments)"
+        },
+        {
+          "name": "List tables in export",
+          "command": "grep 'CREATE TABLE' supabase/export/schema.sql | awk '{print $3}'",
+          "expected": "public.profiles, public.user_access, public.reports, public.metrics, public.metric_definitions, public.profile_allowed_emails, public.metric_aliases, public.processed_files"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "NEON-003",
+      "title": "Export Supabase data",
+      "priority": 3,
+      "description": "Export all data from Supabase tables. Record row counts for verification.",
+      "implementation": [
+        "Use pg_dump with --data-only --inserts",
+        "Export only public schema tables",
+        "Save to supabase/export/data.sql",
+        "Create supabase/export/row_counts_supabase.txt with counts per table"
+      ],
+      "testCases": [
+        {
+          "name": "Record Supabase row counts",
+          "command": "For each table: SELECT count(*) FROM {table}; Save to row_counts_supabase.txt",
+          "expected": "File created with counts for all 8 tables"
+        },
+        {
+          "name": "Verify data.sql has INSERT statements",
+          "command": "grep -c 'INSERT INTO' supabase/export/data.sql",
+          "expected": "Greater than 0"
+        },
+        {
+          "name": "Verify profiles data exported",
+          "command": "grep -c 'INSERT INTO.*profiles' supabase/export/data.sql",
+          "expected": "At least 1"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "NEON-004",
+      "title": "Import schema to Neon",
+      "priority": 4,
+      "description": "Apply schema to Neon. May need to modify for Postgres compatibility.",
+      "implementation": [
+        "Review schema.sql for Supabase-specific syntax",
+        "Remove any remaining Supabase extensions",
+        "Apply schema: psql $NEON_DATABASE_URL < supabase/export/schema.sql",
+        "Verify all tables created"
+      ],
+      "testCases": [
+        {
+          "name": "Verify all 8 tables exist in Neon",
+          "command": "psql $NEON_DATABASE_URL -c \"SELECT table_name FROM information_schema.tables WHERE table_schema='public' ORDER BY table_name\"",
+          "expected": "metric_aliases, metric_definitions, metrics, processed_files, profile_allowed_emails, profiles, reports, user_access"
+        },
+        {
+          "name": "Verify profiles table structure",
+          "command": "psql $NEON_DATABASE_URL -c \"\\d profiles\"",
+          "expected": "Columns: id (uuid), display_name (text), owner_user_id (uuid), owner_email (text), created_at, updated_at"
+        },
+        {
+          "name": "Verify foreign keys exist",
+          "command": "psql $NEON_DATABASE_URL -c \"SELECT count(*) FROM information_schema.table_constraints WHERE constraint_type='FOREIGN KEY'\"",
+          "expected": "Greater than 0"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "NEON-005",
+      "title": "Import data to Neon and verify integrity",
+      "priority": 5,
+      "description": "Import data and verify EXACT match with Supabase.",
+      "implementation": [
+        "Import: psql $NEON_DATABASE_URL < supabase/export/data.sql",
+        "Count rows in each Neon table",
+        "Compare with Supabase counts",
+        "Spot-check specific records"
+      ],
+      "testCases": [
+        {
+          "name": "Verify row counts match exactly",
+          "command": "For each table: Compare Neon count vs supabase/export/row_counts_supabase.txt",
+          "expected": "All counts match exactly"
+        },
+        {
+          "name": "Verify profiles data matches",
+          "command": "psql $NEON_DATABASE_URL -c \"SELECT id, display_name FROM profiles ORDER BY id\" > /tmp/neon_profiles.txt && Compare with Supabase query",
+          "expected": "Identical output"
+        },
+        {
+          "name": "Verify metrics data matches",
+          "command": "SELECT count(*), sum(value) FROM metrics - compare Neon vs Supabase",
+          "expected": "count and sum match exactly"
+        },
+        {
+          "name": "Verify reports data matches",
+          "command": "SELECT count(*), min(sample_date), max(sample_date) FROM reports - compare",
+          "expected": "count, min_date, max_date all match"
+        },
+        {
+          "name": "Verify metric_aliases matches",
+          "command": "SELECT count(*) FROM metric_aliases - compare",
+          "expected": "Count matches (should be 30+ aliases)"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "BASELINE-001",
+      "title": "Capture baseline API responses from Supabase",
+      "priority": 6,
+      "description": "Before changing any code, capture current API responses to use as golden files for comparison.",
+      "implementation": [
+        "Start frontend dev server",
+        "Capture /api/metrics response",
+        "Capture /api/metric-order response",
+        "Save as baseline JSON files"
+      ],
+      "testCases": [
+        {
+          "name": "Capture /api/metrics baseline",
+          "command": "curl -s http://localhost:3000/api/metrics | jq -S . > tests/baseline/api_metrics.json",
+          "expected": "File created with metrics and values arrays"
+        },
+        {
+          "name": "Capture /api/metric-order baseline",
+          "command": "curl -s http://localhost:3000/api/metric-order | jq -S . > tests/baseline/api_metric_order.json",
+          "expected": "File created with order array"
+        },
+        {
+          "name": "Capture error response baseline (404)",
+          "command": "curl -s -w '%{http_code}' http://localhost:3000/api/metrics?profileName=NONEXISTENT > tests/baseline/api_metrics_empty.json",
+          "expected": "Returns {metrics:[], values:[]} with 200 status"
+        },
+        {
+          "name": "Capture PUT validation error baseline",
+          "command": "curl -s -X PUT http://localhost:3000/api/metric-order -H 'Content-Type: application/json' -d '{\"order\": \"not-array\"}' -w '\\n%{http_code}'",
+          "expected": "Returns 400 with error message"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "AUTH-001",
+      "title": "Install and configure NextAuth.js",
+      "priority": 7,
+      "description": "Install next-auth and configure Google OAuth provider.",
+      "implementation": [
+        "cd web && npm install next-auth",
+        "Create web/src/app/api/auth/[...nextauth]/route.ts",
+        "Configure GoogleProvider with existing credentials",
+        "Generate NEXTAUTH_SECRET and add to .env.local"
+      ],
+      "testCases": [
+        {
+          "name": "Verify next-auth installed",
+          "command": "cd web && npm list next-auth",
+          "expected": "Shows next-auth version"
+        },
+        {
+          "name": "Verify auth route exists",
+          "command": "test -f web/src/app/api/auth/\\[...nextauth\\]/route.ts && echo 'OK'",
+          "expected": "OK"
+        },
+        {
+          "name": "Verify NEXTAUTH_SECRET set",
+          "command": "grep -q 'NEXTAUTH_SECRET' web/.env.local && echo 'OK'",
+          "expected": "OK"
+        },
+        {
+          "name": "Verify auth endpoint responds",
+          "command": "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/auth/providers",
+          "expected": "200"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "AUTH-002",
+      "title": "Create NextAuth session provider",
+      "priority": 8,
+      "description": "Wrap app with SessionProvider for client-side session access.",
+      "implementation": [
+        "Create web/src/components/providers.tsx with SessionProvider",
+        "Update web/src/app/layout.tsx to use Providers wrapper",
+        "Ensure 'use client' directive where needed"
+      ],
+      "testCases": [
+        {
+          "name": "Verify providers.tsx exists",
+          "command": "test -f web/src/components/providers.tsx && echo 'OK'",
+          "expected": "OK"
+        },
+        {
+          "name": "Verify SessionProvider in providers",
+          "command": "grep -q 'SessionProvider' web/src/components/providers.tsx && echo 'OK'",
+          "expected": "OK"
+        },
+        {
+          "name": "Verify layout uses Providers",
+          "command": "grep -q 'Providers' web/src/app/layout.tsx && echo 'OK'",
+          "expected": "OK"
+        },
+        {
+          "name": "Verify app still renders",
+          "command": "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000",
+          "expected": "200"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "AUTH-003",
+      "title": "Update login page for NextAuth",
+      "priority": 9,
+      "description": "Replace Supabase auth with NextAuth signIn. Preserve exact UI appearance.",
+      "implementation": [
+        "Replace Supabase signInWithOAuth with next-auth signIn('google')",
+        "Keep all existing UI elements, styling, text unchanged",
+        "Redirect to /dashboard on success (same as before)"
+      ],
+      "testCases": [
+        {
+          "name": "Verify login page renders",
+          "command": "curl -s http://localhost:3000/login | grep -q 'Google' && echo 'OK'",
+          "expected": "OK (Google sign-in button present)"
+        },
+        {
+          "name": "Verify no Supabase imports in login",
+          "command": "grep -c 'supabase' web/src/app/login/page.tsx || echo '0'",
+          "expected": "0"
+        },
+        {
+          "name": "Verify signIn import from next-auth",
+          "command": "grep -q \"from 'next-auth/react'\" web/src/app/login/page.tsx && echo 'OK'",
+          "expected": "OK"
+        },
+        {
+          "name": "Visual regression - login page unchanged",
+          "command": "Use headless browser to screenshot /login, compare with baseline",
+          "expected": "Screenshots match (allow minor rendering differences)"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "AUTH-004",
+      "title": "Update middleware for NextAuth sessions",
+      "priority": 10,
+      "description": "Replace Supabase session checks with NextAuth getToken(). Preserve exact redirect behavior.",
+      "implementation": [
+        "Replace Supabase client with next-auth/jwt getToken",
+        "Keep same protected routes: /dashboard",
+        "Keep same redirect: unauthenticated -> /login",
+        "Keep same behavior: authenticated at /login -> /dashboard"
+      ],
+      "testCases": [
+        {
+          "name": "Verify unauthenticated redirect to /login",
+          "command": "curl -s -o /dev/null -w '%{http_code}' -L http://localhost:3000/dashboard",
+          "expected": "200 (after redirect to /login)"
+        },
+        {
+          "name": "Verify no Supabase imports in middleware",
+          "command": "grep -c 'supabase' web/src/middleware.ts || echo '0'",
+          "expected": "0"
+        },
+        {
+          "name": "Verify getToken import",
+          "command": "grep -q 'getToken' web/src/middleware.ts && echo 'OK'",
+          "expected": "OK"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "AUTH-005",
+      "title": "Implement email allowlist check",
+      "priority": 11,
+      "description": "Check user email against profile_allowed_emails in Neon during sign-in.",
+      "implementation": [
+        "Add signIn callback to NextAuth config",
+        "Query Neon: SELECT 1 FROM profile_allowed_emails WHERE email = ?",
+        "Return false (deny) if email not found",
+        "Return true (allow) if email found"
+      ],
+      "testCases": [
+        {
+          "name": "Verify allowed email in database",
+          "command": "psql $NEON_DATABASE_URL -c \"SELECT email FROM profile_allowed_emails LIMIT 5\"",
+          "expected": "Shows allowed emails"
+        },
+        {
+          "name": "Verify signIn callback exists",
+          "command": "grep -q 'signIn.*callback' web/src/app/api/auth/\\[...nextauth\\]/route.ts && echo 'OK'",
+          "expected": "OK"
+        },
+        {
+          "name": "Verify Neon query in callback",
+          "command": "grep -q 'profile_allowed_emails' web/src/app/api/auth/\\[...nextauth\\]/route.ts && echo 'OK'",
+          "expected": "OK"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "AUTH-006",
+      "title": "Implement profile claiming on sign-in",
+      "priority": 12,
+      "description": "Auto-claim profiles when user signs in. Replicate Supabase RPC logic.",
+      "implementation": [
+        "On successful sign-in, query: SELECT profile_id FROM profile_allowed_emails WHERE email = ?",
+        "For each profile_id, check if user_access entry exists",
+        "If not exists, INSERT into user_access with access_level='owner'",
+        "Use NextAuth jwt or session callback"
+      ],
+      "testCases": [
+        {
+          "name": "Verify user_access table structure",
+          "command": "psql $NEON_DATABASE_URL -c \"\\d user_access\"",
+          "expected": "Columns include: user_id, profile_id, access_level"
+        },
+        {
+          "name": "Verify claiming logic in auth config",
+          "command": "grep -q 'user_access' web/src/app/api/auth/\\[...nextauth\\]/route.ts && echo 'OK'",
+          "expected": "OK"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "FRONTEND-001",
+      "title": "Create Neon client for Next.js API routes",
+      "priority": 13,
+      "description": "Create database client using @neondatabase/serverless.",
+      "implementation": [
+        "cd web && npm install @neondatabase/serverless",
+        "Create web/src/lib/db.ts",
+        "Export sql template tag and/or pool",
+        "Use NEON_DATABASE_URL from env"
+      ],
+      "testCases": [
+        {
+          "name": "Verify @neondatabase/serverless installed",
+          "command": "cd web && npm list @neondatabase/serverless",
+          "expected": "Shows package version"
+        },
+        {
+          "name": "Verify db.ts exists",
+          "command": "test -f web/src/lib/db.ts && echo 'OK'",
+          "expected": "OK"
+        },
+        {
+          "name": "Verify NEON_DATABASE_URL in .env.local",
+          "command": "grep -q 'NEON_DATABASE_URL' web/.env.local && echo 'OK'",
+          "expected": "OK"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "FRONTEND-002",
+      "title": "Update /api/metrics endpoint - MUST RETURN IDENTICAL JSON",
+      "priority": 14,
+      "description": "Replace Supabase with Neon queries. Response MUST be byte-for-byte identical to baseline.",
+      "implementation": [
+        "Replace createClient with Neon sql",
+        "Convert Supabase query builders to raw SQL",
+        "Keep exact same response structure: {metrics: [...], values: [...]}",
+        "Keep exact same error responses and status codes"
+      ],
+      "testCases": [
+        {
+          "name": "API response matches baseline exactly",
+          "command": "curl -s http://localhost:3000/api/metrics | jq -S . > /tmp/new_metrics.json && diff tests/baseline/api_metrics.json /tmp/new_metrics.json",
+          "expected": "No diff output (files identical)"
+        },
+        {
+          "name": "Empty profile returns same response",
+          "command": "curl -s 'http://localhost:3000/api/metrics?profileName=NONEXISTENT' | jq -S .",
+          "expected": "{\"metrics\":[],\"values\":[]}"
+        },
+        {
+          "name": "HTTP status code is 200",
+          "command": "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/metrics",
+          "expected": "200"
+        },
+        {
+          "name": "Error response preserves 500 status",
+          "command": "Temporarily break DB connection, verify returns 500 with {error: '...'} format",
+          "expected": "500 status with JSON error"
+        },
+        {
+          "name": "No Supabase imports remain",
+          "command": "grep -c '@supabase' web/src/app/api/metrics/route.ts || echo '0'",
+          "expected": "0"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "FRONTEND-003",
+      "title": "Update /api/metric-order endpoint - MUST RETURN IDENTICAL JSON",
+      "priority": 15,
+      "description": "Replace Supabase with Neon. Both GET and PUT must work identically.",
+      "implementation": [
+        "Replace Supabase queries with Neon SQL",
+        "GET: Same response structure {order: [...]}",
+        "PUT: Same request format {profileName?, order: [...]}",
+        "Same error codes: 400 for invalid order, 404 for missing profile, 500 for DB errors"
+      ],
+      "testCases": [
+        {
+          "name": "GET response matches baseline",
+          "command": "curl -s http://localhost:3000/api/metric-order | jq -S . > /tmp/new_order.json && diff tests/baseline/api_metric_order.json /tmp/new_order.json",
+          "expected": "No diff (identical)"
+        },
+        {
+          "name": "PUT with invalid order returns 400",
+          "command": "curl -s -X PUT http://localhost:3000/api/metric-order -H 'Content-Type: application/json' -d '{\"order\": \"not-array\"}' -w '\\n%{http_code}'",
+          "expected": "400 status with error message"
+        },
+        {
+          "name": "PUT with valid order returns success",
+          "command": "curl -s -X PUT http://localhost:3000/api/metric-order -H 'Content-Type: application/json' -d '{\"order\": [\"Hemoglobin\", \"WBC\"]}' | jq .",
+          "expected": "{success: true, updated: 2}"
+        },
+        {
+          "name": "PUT with missing profile returns 404",
+          "command": "curl -s -X PUT http://localhost:3000/api/metric-order -H 'Content-Type: application/json' -d '{\"profileName\": \"NONEXISTENT\", \"order\": []}' -w '\\n%{http_code}'",
+          "expected": "404"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "FRONTEND-004",
+      "title": "Update dashboard page for NextAuth session",
+      "priority": 16,
+      "description": "Replace Supabase session with NextAuth. UI must be UNCHANGED.",
+      "implementation": [
+        "Replace Supabase useSession with next-auth useSession",
+        "Keep same user display (name, email, avatar)",
+        "Replace Supabase signOut with next-auth signOut",
+        "No visual changes whatsoever"
+      ],
+      "testCases": [
+        {
+          "name": "No Supabase imports in dashboard",
+          "command": "grep -c 'supabase' web/src/app/dashboard/page.tsx || echo '0'",
+          "expected": "0"
+        },
+        {
+          "name": "Uses next-auth session",
+          "command": "grep -q \"from 'next-auth/react'\" web/src/app/dashboard/page.tsx && echo 'OK'",
+          "expected": "OK"
+        },
+        {
+          "name": "Dashboard renders (unauthenticated redirects)",
+          "command": "curl -s -o /dev/null -w '%{http_code}' -L http://localhost:3000/dashboard",
+          "expected": "200 (at /login after redirect)"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "FRONTEND-005",
+      "title": "Remove Supabase dependencies",
+      "priority": 17,
+      "description": "Remove all Supabase packages and files.",
+      "implementation": [
+        "cd web && npm uninstall @supabase/ssr @supabase/supabase-js",
+        "Delete web/src/lib/supabase-browser.ts",
+        "Delete web/src/lib/supabase-server.ts",
+        "Verify no import errors"
+      ],
+      "testCases": [
+        {
+          "name": "Supabase packages removed",
+          "command": "cd web && npm list @supabase/ssr 2>&1 | grep -q 'empty' && echo 'OK'",
+          "expected": "OK (not found)"
+        },
+        {
+          "name": "supabase-browser.ts deleted",
+          "command": "test ! -f web/src/lib/supabase-browser.ts && echo 'OK'",
+          "expected": "OK"
+        },
+        {
+          "name": "supabase-server.ts deleted",
+          "command": "test ! -f web/src/lib/supabase-server.ts && echo 'OK'",
+          "expected": "OK"
+        },
+        {
+          "name": "No Supabase references in codebase",
+          "command": "grep -r '@supabase' web/src/ || echo 'CLEAN'",
+          "expected": "CLEAN"
+        },
+        {
+          "name": "TypeScript compiles without errors",
+          "command": "cd web && npm run build 2>&1 | tail -5",
+          "expected": "Build succeeds"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "CLEANUP-001",
+      "title": "Remove old Supabase auth callback route",
+      "priority": 18,
+      "description": "Delete Supabase OAuth callback, verify no broken imports.",
+      "implementation": [
+        "Delete web/src/app/auth/callback/route.ts",
+        "Delete web/src/app/auth/ directory if empty",
+        "Verify build still works"
+      ],
+      "testCases": [
+        {
+          "name": "Old callback deleted",
+          "command": "test ! -f web/src/app/auth/callback/route.ts && echo 'OK'",
+          "expected": "OK"
+        },
+        {
+          "name": "Build succeeds",
+          "command": "cd web && npm run build 2>&1 | grep -q 'error' && echo 'FAIL' || echo 'OK'",
+          "expected": "OK"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "BACKEND-001",
+      "title": "Create Neon database client for Python backend",
+      "priority": 19,
+      "description": "Replace Supabase Python SDK with psycopg2 for direct Postgres access.",
+      "implementation": [
+        "pip install psycopg2-binary",
+        "Create src/db_client.py with connection pool",
+        "Read NEON_DATABASE_URL from environment",
+        "Provide execute() and fetch() helper functions"
+      ],
+      "testCases": [
+        {
+          "name": "psycopg2 installed",
+          "command": "source .venv/bin/activate && pip show psycopg2-binary",
+          "expected": "Shows package info"
+        },
+        {
+          "name": "db_client.py exists",
+          "command": "test -f src/db_client.py && echo 'OK'",
+          "expected": "OK"
+        },
+        {
+          "name": "Can connect to Neon",
+          "command": "source .venv/bin/activate && python -c \"from src.db_client import get_connection; c=get_connection(); print('OK')\"",
+          "expected": "OK"
+        },
+        {
+          "name": "Can execute query",
+          "command": "source .venv/bin/activate && python -c \"from src.db_client import execute_query; r=execute_query('SELECT 1'); print(r)\"",
+          "expected": "Returns [(1,)]"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "BACKEND-002",
+      "title": "Migrate supabase_updater.py to Neon",
+      "priority": 20,
+      "description": "Replace all Supabase SDK calls with raw SQL using db_client.",
+      "implementation": [
+        "Replace supabase client imports with db_client",
+        "Convert .from().select().eq() to SELECT ... WHERE",
+        "Convert .insert() to INSERT",
+        "Convert .upsert() to INSERT ... ON CONFLICT",
+        "Test each function individually"
+      ],
+      "testCases": [
+        {
+          "name": "No Supabase imports",
+          "command": "grep -c 'supabase' src/supabase_updater.py || echo '0'",
+          "expected": "0 (or only in comments/docstrings)"
+        },
+        {
+          "name": "is_file_already_processed works",
+          "command": "source .venv/bin/activate && python -c \"from src.supabase_updater import is_file_already_processed; print(is_file_already_processed('test-profile-id', 'nonexistent-hash'))\"",
+          "expected": "False"
+        },
+        {
+          "name": "get_profile_metrics works",
+          "command": "source .venv/bin/activate && python -c \"from src.supabase_updater import get_profile_metrics; print(type(get_profile_metrics()))\"",
+          "expected": "Returns dict or list"
+        },
+        {
+          "name": "Data matches Supabase baseline",
+          "command": "Compare get_profile_metrics() output with baseline captured earlier",
+          "expected": "Identical data"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "BACKEND-003",
+      "title": "Update backend tests",
+      "priority": 21,
+      "description": "Update tests to work with Neon client.",
+      "implementation": [
+        "Rename test_supabase_client.py to test_db_client.py",
+        "Update imports to use new db_client",
+        "Run tests and fix any failures"
+      ],
+      "testCases": [
+        {
+          "name": "Tests renamed",
+          "command": "test -f tests/test_db_client.py && echo 'OK'",
+          "expected": "OK"
+        },
+        {
+          "name": "All tests pass",
+          "command": "source .venv/bin/activate && pytest tests/test_db_client.py -v",
+          "expected": "All tests pass"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "DEPLOY-001",
+      "title": "Update all environment variables",
+      "priority": 22,
+      "description": "Update .env files with Neon credentials, remove Supabase vars.",
+      "implementation": [
+        "Add NEON_DATABASE_URL to .env (backend)",
+        "Add NEON_DATABASE_URL to web/.env.local (frontend)",
+        "Add NEXTAUTH_URL=http://localhost:3000",
+        "Add NEXTAUTH_SECRET",
+        "Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET",
+        "Comment out SUPABASE_* variables (don't delete yet)"
+      ],
+      "testCases": [
+        {
+          "name": "NEON_DATABASE_URL in backend .env",
+          "command": "grep -q 'NEON_DATABASE_URL' .env && echo 'OK'",
+          "expected": "OK"
+        },
+        {
+          "name": "NEON_DATABASE_URL in frontend .env.local",
+          "command": "grep -q 'NEON_DATABASE_URL' web/.env.local && echo 'OK'",
+          "expected": "OK"
+        },
+        {
+          "name": "NextAuth vars set",
+          "command": "grep -q 'NEXTAUTH_SECRET' web/.env.local && grep -q 'NEXTAUTH_URL' web/.env.local && echo 'OK'",
+          "expected": "OK"
+        },
+        {
+          "name": "Google OAuth vars set",
+          "command": "grep -q 'GOOGLE_CLIENT_ID' web/.env.local && echo 'OK'",
+          "expected": "OK"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "DEPLOY-002",
+      "title": "Full local integration test",
+      "priority": 23,
+      "description": "Test complete flow locally with Neon + NextAuth.",
+      "implementation": [
+        "Start frontend: cd web && npm run dev",
+        "Test all API endpoints with curl",
+        "Test auth flow with headless browser",
+        "Verify data displays correctly"
+      ],
+      "testCases": [
+        {
+          "name": "API /metrics returns data",
+          "command": "curl -s http://localhost:3000/api/metrics | jq '.metrics | length'",
+          "expected": "Greater than 0"
+        },
+        {
+          "name": "API /metrics matches baseline exactly",
+          "command": "curl -s http://localhost:3000/api/metrics | jq -S . | diff tests/baseline/api_metrics.json -",
+          "expected": "No diff"
+        },
+        {
+          "name": "API /metric-order returns data",
+          "command": "curl -s http://localhost:3000/api/metric-order | jq '.order | length'",
+          "expected": "Greater than 0"
+        },
+        {
+          "name": "Login page loads",
+          "command": "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/login",
+          "expected": "200"
+        },
+        {
+          "name": "Auth providers endpoint works",
+          "command": "curl -s http://localhost:3000/api/auth/providers | jq 'keys'",
+          "expected": "[\"google\"]"
+        },
+        {
+          "name": "Headless browser: Dashboard redirects when not logged in",
+          "command": "Use agent-browser to navigate to /dashboard, verify redirect to /login",
+          "expected": "Ends up at /login"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "DEPLOY-003",
+      "title": "Deploy to Vercel",
+      "priority": 24,
+      "description": "Update Vercel env vars and deploy.",
+      "implementation": [
+        "Update Vercel environment variables via CLI or dashboard",
+        "Set: NEON_DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL (production URL), GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET",
+        "Trigger deployment",
+        "Test production site"
+      ],
+      "testCases": [
+        {
+          "name": "Vercel deployment succeeds",
+          "command": "vercel --prod (or check Vercel dashboard)",
+          "expected": "Deployment successful"
+        },
+        {
+          "name": "Production API /metrics works",
+          "command": "curl -s https://[production-url]/api/metrics | jq '.metrics | length'",
+          "expected": "Greater than 0"
+        },
+        {
+          "name": "Production login page loads",
+          "command": "curl -s -o /dev/null -w '%{http_code}' https://[production-url]/login",
+          "expected": "200"
+        },
+        {
+          "name": "Production auth flow works",
+          "command": "Manual test: Sign in with Google, verify redirect to dashboard",
+          "expected": "User can sign in and see dashboard"
+        }
+      ],
+      "passes": false
+    },
+    {
+      "id": "CLEANUP-002",
+      "title": "Final cleanup - remove temporary files and old code",
+      "priority": 25,
+      "description": "After confirming migration success, clean up all temporary files, old Supabase code, and migration artifacts.",
+      "implementation": [
+        "Delete supabase/export/ directory (schema and data dumps)",
+        "Delete .env.neon (merged into .env)",
+        "Delete tests/baseline/ (keep only final test suite)",
+        "Remove commented SUPABASE_* variables from .env files",
+        "Delete src/supabase_config.py",
+        "Delete src/supabase_client.py",
+        "Rename src/supabase_updater.py to src/db_updater.py",
+        "Remove any TODO or MIGRATION comments",
+        "Run final lint and format"
+      ],
+      "testCases": [
+        {
+          "name": "No supabase/export directory",
+          "command": "test ! -d supabase/export && echo 'OK'",
+          "expected": "OK"
+        },
+        {
+          "name": "No .env.neon file",
+          "command": "test ! -f .env.neon && echo 'OK'",
+          "expected": "OK"
+        },
+        {
+          "name": "No old Supabase Python files",
+          "command": "test ! -f src/supabase_config.py && test ! -f src/supabase_client.py && echo 'OK'",
+          "expected": "OK"
+        },
+        {
+          "name": "No SUPABASE references in .env",
+          "command": "grep -c 'SUPABASE' .env || echo '0'",
+          "expected": "0"
+        },
+        {
+          "name": "No SUPABASE references in web/.env.local",
+          "command": "grep -c 'SUPABASE' web/.env.local || echo '0'",
+          "expected": "0"
+        },
+        {
+          "name": "Lint passes",
+          "command": "cd web && npm run lint",
+          "expected": "No errors"
+        },
+        {
+          "name": "Python lint passes",
+          "command": "source .venv/bin/activate && ruff check src/",
+          "expected": "No errors"
+        },
+        {
+          "name": "Build still works",
+          "command": "cd web && npm run build",
+          "expected": "Build succeeds"
+        },
+        {
+          "name": "All tests still pass",
+          "command": "./tests/run_integration_tests.sh",
+          "expected": "All pass"
+        }
+      ],
+      "passes": false
+    }
+  ]
+}
