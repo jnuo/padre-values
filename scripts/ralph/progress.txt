@@ -1,0 +1,471 @@
+# Ralph Progress Log for ViziAI
+Started: 2025-01-07
+
+## Project Goal
+Migrate ViziAI from Google Sheets backend to Supabase for:
+- Real database with proper schema
+- User authentication (Google OAuth)
+- Multi-user support
+- Scalable architecture
+
+## Codebase Patterns
+(Add patterns here as you discover them)
+
+- Python config: Use src/config.py for constants, load secrets from environment
+- Google APIs: OAuth tokens stored in token_*.json files
+- PDF caching: Extracted labs cached as .labs.json next to PDF
+- Wide format: Current sheet has metrics as rows, dates as columns
+
+## Supabase CLI (available and linked!)
+Project is linked to ViziAI (umrhdgqvyipnraapshhl). Use these commands:
+- `supabase migration new <name>` - create migration file in supabase/migrations/
+- `supabase db push` - apply migrations to remote database
+- `supabase db diff` - see schema differences
+- `supabase gen types typescript --local > web/src/types/supabase.ts` - generate types
+
+## Key Files
+- src/config.py - All configuration constants
+- src/sheets_updater.py - Current Google Sheets integration (982 lines)
+- src/pdf_reader.py - OpenAI Vision extraction
+- web/src/app/api/ - Next.js API routes
+
+## Existing Data Structure
+
+**Source 1: PDF Extraction (see src/pdf_reader.py)**
+OpenAI Vision extracts this JSON from each PDF:
+```json
+{
+  "sample_date": "2024-01-15",
+  "tests": {
+    "Hemoglobin": {"value": 14.2, "unit": "g/dL", "ref_low": 12.0, "ref_high": 16.0},
+    "Trombosit": {"value": 250000, "unit": "10^3/µL", "ref_low": 150000, "ref_high": 400000}
+  }
+}
+```
+Cached as `.labs.json` files in downloads/ folder.
+
+**Source 2: Google Sheet format (see src/sheets_updater.py)**
+Wide format - rows=metrics, columns=dates:
+```
+| metric      | 2024-01-15 | 2024-02-20 | 2024-03-10 |
+|-------------|------------|------------|------------|
+| Hemoglobin  | 14.2       | 14.5       | 14.1       |
+| Trombosit   | 250000     | 245000     | 252000     |
+```
+
+**Source 3: Reference Sheet (REFERENCE_SHEET_NAME in config)**
+Stores normal ranges per metric:
+```
+| metric     | unit      | low    | high   |
+|------------|-----------|--------|--------|
+| Hemoglobin | g/dL      | 12.0   | 16.0   |
+| Trombosit  | 10^3/µL   | 150000 | 400000 |
+```
+
+**Target Supabase Schema (normalized):**
+```sql
+-- Users from Supabase Auth
+users: id (uuid), email, created_at
+
+-- One report per PDF/sample date
+reports: id, user_id (FK), file_name, sample_date, created_at
+
+-- Individual test values with their reference ranges
+metrics: id, report_id (FK), name, value, unit, ref_low, ref_high
+```
+
+**Important:** Reference ranges can vary between labs/dates, so store them per metric row, not in a separate table.
+
+---
+
+## 2025-01-07 - US-001: Create Supabase project config
+- Created `src/supabase_config.py` with `SupabaseConfig` class and `get_supabase_config()` function
+- Added `supabase==2.15.2` to requirements.txt
+- `.env.example` already had SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, SUPABASE_SECRET_KEY
+- `.gitignore` already had `.env` excluded
+- Added Supabase setup instructions to README.md (section 4)
+- Files changed: `src/supabase_config.py` (new), `requirements.txt`, `README.md`
+- **Learnings:**
+  - Environment variables are already well-configured via `.env.example`
+  - Using type hints with `Optional[str]` for env vars that may be missing
+
+---
+
+## 2025-01-07 - US-002: Design and create Supabase database schema
+- Analyzed pdf_reader.py: extracts sample_date, tests{name: {value, unit, flag, ref_low, ref_high}}
+- Created `supabase/migrations/20260107110433_initial_schema.sql`
+- Tables created:
+  - `profiles` - patient being tracked, with owner_user_id
+  - `user_access` - many-to-many for shared access (viewer/editor/owner)
+  - `reports` - one per sample date, unique on (profile_id, sample_date)
+  - `metrics` - test values with refs, unique on (report_id, name)
+- Added comprehensive indexes for common query patterns
+- Implemented RLS policies for multi-user access control
+- Added service role bypass policies for Python backend operations
+- Created `supabase/schema.md` with ER diagram and full documentation
+- Files changed: `supabase/migrations/20260107110433_initial_schema.sql` (new), `supabase/schema.md` (new)
+- **Learnings:**
+  - Supabase RLS requires explicit service_role bypass for server-side inserts
+  - Use `auth.role() = 'service_role'` for service key access
+  - Reference ranges stored per-metric (not separate table) since they vary by lab/date
+
+---
+
+## 2025-01-07 - US-003: Create Supabase client wrapper
+- Created `src/supabase_client.py` with `get_supabase_client()` function
+- Supports both service key (full access) and publishable key (RLS enforced) modes
+- Uses singleton pattern for client reuse
+- Graceful error handling with clear messages for missing credentials
+- Files changed: `src/supabase_client.py` (new)
+- **Learnings:**
+  - Supabase Python client created with `create_client(url, key)`
+  - Use global singleton to avoid recreating client on every call
+
+---
+
+## 2025-01-07 - US-004: Create migration script for existing Google Sheets data
+- Created `scripts/migrate_sheets_to_supabase.py`
+- Reads wide format from SHEET_NAME (metrics as rows, dates as columns)
+- Reads reference values from REFERENCE_SHEET_NAME for unit/ref_low/ref_high
+- Creates placeholder profile "Father (Migrated)" with null owner_user_id
+- Uses upsert on (report_id, name) constraint for idempotency
+- Supports --dry-run flag for preview
+- Prints summary with reports and metrics count
+- Files changed: `scripts/migrate_sheets_to_supabase.py` (new)
+- **Learnings:**
+  - Supabase upsert requires specifying on_conflict column(s)
+  - Date parsing needs to handle multiple formats from Google Sheets
+
+---
+
+## 2025-01-07 - US-005: Update Python backend to write to Supabase
+- Created `src/supabase_updater.py` with:
+  - `save_report(profile_id, sample_date, tests_dict)` - inserts report and metrics
+  - `get_profile_metrics(profile_id)` - returns all metrics organized by date
+  - `get_all_metrics_for_dashboard(profile_name)` - returns dashboard-ready format
+  - `batch_save_extracted_values(updates)` - handles multiple PDF extractions
+- Updated `main.py` with `--use-supabase` flag (default: sheets for safety)
+- Sheets backend remains fully functional as fallback
+- Files changed: `src/supabase_updater.py` (new), `main.py`
+- **Learnings:**
+  - Interface designed to match pdf_reader.extract_labs_from_pdf() output format
+  - Dashboard format: {dates: [], metrics: {name: {values: [], unit, ref_low, ref_high}}}
+
+---
+
+## 2025-01-07 - US-006: Create Next.js API route to fetch metrics from Supabase
+- Created `web/src/app/api/metrics/route.ts`
+- GET endpoint returns {metrics: Metric[], values: MetricValue[]} matching sheets.ts format
+- Uses profileName query param, defaults to "Father (Migrated)"
+- Installed @supabase/supabase-js in web/
+- Added NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY to web/.env.example
+- Build passes with new endpoint
+- Files changed: `web/src/app/api/metrics/route.ts` (new), `web/.env.example`, `web/package.json`
+- **Learnings:**
+  - TypeScript types must match sheets.ts: Metric{id, name, unit, ref_min, ref_max}, MetricValue{metric_id, date, value}
+  - Supabase JS client: createClient(url, key) from @supabase/supabase-js
+
+---
+
+## 2025-01-07 - US-007: Update dashboard to use Supabase API
+- Updated `web/src/app/dashboard/page.tsx` to fetch from /api/metrics first
+- Falls back to /api/data (Google Sheets) if Supabase returns empty data
+- Existing loading/error states already present, no changes needed
+- Login flow unchanged - still uses localStorage for user session
+- Build passes with no TypeScript errors
+- Files changed: `web/src/app/dashboard/page.tsx`
+- **Learnings:**
+  - Dashboard already had good loading/error state handling
+  - Fallback approach allows gradual migration without breaking existing setup
+
+---
+
+## 2025-01-07 - US-007b: Add basic tests for Phase 1
+- Added `pytest==8.3.5` and `pytest-env==1.1.5` to requirements.txt
+- Created `tests/__init__.py`, `tests/test_supabase_client.py`, `tests/test_migration.py`
+- Python tests verify: module imports, config validation, function signatures, schema structure
+- Jest already configured in web/ - fixed typo `moduleNameMapping` → `moduleNameMapper`
+- Created `web/src/app/api/metrics/route.test.ts` with response format and data transformation tests
+- All tests pass: 19 Python tests, 18 Jest tests
+- Updated README.md with comprehensive test documentation
+- Files changed: `requirements.txt`, `tests/` (new), `web/src/app/api/metrics/route.test.ts` (new), `web/jest.config.js`, `README.md`
+- **Learnings:**
+  - Use `monkeypatch` fixture in pytest for environment variable isolation
+  - Jest config option is `moduleNameMapper` not `moduleNameMapping`
+  - Smoke tests verify structure exists without requiring live database connection
+
+---
+
+## PHASE 1 COMPLETE
+
+All Phase 1 user stories (US-001 through US-007b) have been implemented:
+- ✅ Supabase configuration and client wrapper
+- ✅ Database schema with RLS policies
+- ✅ Migration script for Google Sheets data
+- ✅ Python backend Supabase integration
+- ✅ Next.js API endpoint for metrics
+- ✅ Dashboard using Supabase (with Sheets fallback)
+- ✅ Basic test coverage
+
+Next steps (Phase 2):
+- US-008: Set up Supabase Auth configuration
+- US-009: Create login page with Google OAuth
+- US-010: Protect dashboard route with auth
+- US-011: Associate existing data with authenticated user
+
+---
+
+## 2025-01-07 - US-012: Create metric_definitions table
+- Created migration `supabase/migrations/20260107122246_metric_definitions.sql`
+- Table structure: id (uuid PK), profile_id (FK), name, unit, ref_low, ref_high, display_order, is_favorite, created_at, updated_at
+- Added UNIQUE constraint on (profile_id, name)
+- Added RLS policies matching existing tables (view/manage based on user_access, service_role bypass)
+- Added indexes: idx_metric_definitions_profile, idx_metric_definitions_profile_order
+- Applied migration with `supabase db push`
+- Updated supabase/schema.md with ER diagram update and table documentation
+- Verified table exists via Supabase client query
+- Files changed: `supabase/migrations/20260107122246_metric_definitions.sql` (new), `supabase/schema.md`
+- **Learnings:**
+  - metric_definitions separates canonical reference values from per-test-result references
+  - display_order enables user-customizable metric ordering in dashboard
+  - is_favorite can be used to highlight priority metrics
+
+---
+
+## 2025-01-07 - US-013: Implement smart value validation
+- Created `src/value_validator.py` with:
+  - `ValidationResult` and `ReferenceUpdateResult` dataclasses
+  - `validate_metric_value(name, value, existing_values)`: checks if new value is reasonable
+    - Returns valid=True for first value (no history)
+    - Returns valid=False if value >500% different from historical median
+    - Uses Python logging with emoji (⚠️) for warnings
+  - `validate_reference_change(existing_ref, new_ref)`: checks if ref update is reasonable
+    - ≤15% diff: accept silently
+    - 15-50% diff: accept with warning
+    - >50% diff: reject with error log
+  - Helper functions: `get_existing_values_for_metric()`, `get_existing_reference()`
+- Created `tests/test_value_validator.py` with 37 comprehensive tests
+- All 56 tests pass (19 existing + 37 new)
+- Files changed: `src/value_validator.py` (new), `tests/test_value_validator.py` (new)
+- **Learnings:**
+  - 500% threshold catches values that are 6x higher than median (e.g., 142 vs 14)
+  - For percentage-based deviation, low values can't exceed 500% from positive median
+    (max deviation when approaching 0 is 100%, so only high values get rejected)
+  - Dataclasses make return types clear and testable
+
+---
+
+## 2025-01-07 - US-014: Update supabase_updater to use metric_definitions
+- Updated `src/supabase_updater.py`:
+  - `save_report()` now validates values and upserts metric_definitions
+  - Returns tuple (report_id, stats) with inserted/skipped counts and warnings
+  - Added `validate=False` parameter for migration operations
+  - `get_all_metrics_for_dashboard()` now gets refs from metric_definitions
+    with fallback to metric row refs
+  - Metrics sorted by display_order
+- Created `scripts/backfill_metric_definitions.py`:
+  - Populates metric_definitions from existing metrics data
+  - Uses most common reference values across all reports
+  - Supports --dry-run flag
+  - Includes verification step
+- Ran backfill: 132 definitions (123 active metrics + 9 historical)
+- All 56 Python tests pass
+- Files changed: `src/supabase_updater.py`, `scripts/backfill_metric_definitions.py` (new)
+- **Learnings:**
+  - Backfill used mode() to get most common reference values
+  - Some metrics have historical definitions that no longer have values (renamed metrics)
+  - Verification should check "all metrics have definitions" not "counts match exactly"
+
+---
+
+## 2025-01-07 - US-015: Implement metric sorting with Supabase storage
+- Created `web/src/app/api/metric-order/route.ts`:
+  - GET /api/metric-order returns metric names in display_order
+  - PUT /api/metric-order updates display_order in metric_definitions
+  - Uses profileName query param, defaults to "Father (Migrated)"
+- Updated `web/src/app/dashboard/page.tsx`:
+  - Load metric order from API on mount (with localStorage fallback)
+  - Save to API when user reorders via drag-and-drop
+  - Updated handleSortDragEnd, resetMetricOrder, sendToTop functions
+- Fixed TypeScript error: captured userId before async function to avoid null check
+- Build passes with no errors
+- Verified via curl:
+  - GET returns order array from metric_definitions
+  - PUT updates display_order for all provided metrics
+  - Order persists across requests (stored in Supabase)
+- Files changed: `web/src/app/api/metric-order/route.ts` (new), `web/src/app/dashboard/page.tsx`
+- **Learnings:**
+  - When updating order, the dashboard sends the FULL metric order (not partial)
+  - All metrics default to display_order=0, so partial updates won't sort correctly
+  - API upsert on (profile_id, name) ensures idempotent updates
+
+---
+
+## 2025-01-07 - US-016: Update frontend API to use metric_definitions
+- Updated `web/src/app/api/metrics/route.ts`:
+  - Fetches metric_definitions for canonical reference values and display_order
+  - Reference values (ref_min, ref_max) now come from metric_definitions, not individual metrics
+  - Falls back to metric row values if no definition exists (shouldn't happen normally)
+  - Metrics returned sorted by display_order from metric_definitions
+- Build passes with no errors
+- Verified via curl:
+  - 132 metrics returned in display_order (Hemoglobin, Eritrosit first matching custom order)
+  - Reference values come from metric_definitions (e.g., Hemoglobin: 13.7-17.5 g/dL)
+- Files changed: `web/src/app/api/metrics/route.ts`
+- **Learnings:**
+  - Canonical refs from metric_definitions ensure consistent chart reference bands
+  - Even if individual metric rows have varying refs (different labs), the API returns consistent values
+  - display_order is respected in both /api/metrics and /api/metric-order endpoints
+
+---
+
+## PHASE 2 COMPLETE (Data Quality & Metric Management)
+
+All Phase 2 user stories have been implemented:
+- ✅ US-012: metric_definitions table created with RLS policies
+- ✅ US-013: Value validation for PDF extraction (500% deviation threshold, reference change validation)
+- ✅ US-014: supabase_updater uses metric_definitions, backfill script created and run
+- ✅ US-015: Metric sorting persists to Supabase (API + dashboard integration)
+- ✅ US-016: Frontend API uses canonical refs from metric_definitions
+
+Key improvements:
+- Reference values are now canonical (consistent across all dates)
+- Metric ordering syncs across devices (stored in Supabase, not localStorage)
+- Value validation prevents bad AI extraction data from corrupting charts
+- 56 Python tests pass, build passes with no TypeScript errors
+
+Next steps (Phase 3 - Authentication):
+- US-008: Set up Supabase Auth configuration (CHECKPOINT - requires user approval)
+- US-009: Create login page with Google OAuth
+- US-010: Protect dashboard route with auth
+- US-011: Associate existing data with authenticated user
+
+---
+
+## 2025-01-07 - US-008: Set up Supabase Auth configuration
+- Created `web/src/lib/supabase-browser.ts`:
+  - `createBrowserClient()` for client-side auth operations
+  - Singleton pattern to avoid creating multiple clients
+  - Clear error messages for missing env vars
+- Created `web/src/lib/supabase-server.ts`:
+  - `createServiceClient()` for admin operations (bypasses RLS)
+  - `createServerClient()` for user-scoped queries (respects RLS)
+  - Service client uses singleton, server client creates new instance per request
+- Updated `web/.env.example` to include `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- Added comprehensive Google OAuth setup documentation to README (section 4b):
+  - Step 1: Create Google OAuth credentials in GCP
+  - Step 2: Configure Google OAuth in Supabase dashboard
+  - Step 3: Configure Site URL and redirect URLs
+- Verification: Build passes, all 56 Python tests pass, all 18 Jest tests pass
+- Files changed: `web/src/lib/supabase-browser.ts` (new), `web/src/lib/supabase-server.ts` (new), `web/.env.example`, `README.md`
+- **Learnings:**
+  - Browser client needs `detectSessionInUrl: true` for OAuth callbacks
+  - Server client should NOT be singleton when used with user context (different user per request)
+  - Service role client CAN be singleton since it bypasses RLS
+
+⏸️ **CHECKPOINT REACHED**: US-008 is complete. User needs to:
+1. Add `NEXT_PUBLIC_SUPABASE_ANON_KEY` to `web/.env.local` (get from Supabase Dashboard → API)
+2. Enable Google OAuth in Supabase dashboard (see README section 4b)
+3. Test and approve before continuing to US-009 (login page)
+
+---
+
+## 2025-01-07 - US-009: Create login page with Google OAuth
+- Created `web/src/app/login/page.tsx`:
+  - "Sign in with Google" button using Supabase Auth `signInWithOAuth()`
+  - Automatic redirect to /dashboard if user already has valid session
+  - Error handling for OAuth errors and missing Supabase config
+  - Loading state with spinner during OAuth redirect
+  - Wrapped in `<Suspense>` for `useSearchParams()` compatibility
+  - "Demo hesabı ile devam et" fallback button for testing without auth
+  - Turkish UI text matching existing app patterns
+- Created `web/src/app/auth/callback/route.ts`:
+  - OAuth callback handler for Google sign-in
+  - Exchanges authorization code for session
+  - Redirects to /dashboard on success
+  - Redirects back to /login with error params on failure
+- Updated `web/src/app/page.tsx`:
+  - Landing page "Giriş Yap" button now navigates to /login instead of /dashboard
+- Build passes with no TypeScript errors
+- Verified via Chrome MCP: login page renders correctly with Google button, error handling visible
+- Files changed: `web/src/app/login/page.tsx` (new), `web/src/app/auth/callback/route.ts` (new), `web/src/app/page.tsx`
+- **Learnings:**
+  - Next.js 15 requires `useSearchParams()` to be wrapped in `<Suspense>` boundary for static generation
+  - OAuth callback uses code exchange pattern: Google returns code, Supabase exchanges for session
+  - Error messages from OAuth flow can be passed via URL search params
+
+---
+
+## 2025-01-07 - US-010: Protect dashboard route with auth
+- Installed `@supabase/ssr` package for middleware cookie handling
+- Created `web/src/middleware.ts`:
+  - Checks user authentication using Supabase session
+  - Redirects unauthenticated users from /dashboard to /login
+  - Redirects authenticated users from /login to /dashboard
+  - Returns 401 for protected API routes (/api/metrics, /api/metric-order) if not authenticated
+  - Gracefully passes through when Supabase is not configured (dev mode)
+  - Preserves intended redirect destination via `?redirect=` param
+- Updated `web/src/app/login/page.tsx`:
+  - Reads `redirect` param from URL
+  - Passes redirect destination to OAuth callback
+  - Redirects to intended page after successful login
+- Updated `web/src/app/auth/callback/route.ts`:
+  - Honors `redirect` param for post-login redirect
+- Build passes with no errors, middleware compiles (82.7 kB)
+- Tested: Dev server shows "[Middleware] Supabase not configured, skipping auth check" as expected
+- Files changed: `web/src/middleware.ts` (new), `web/src/app/login/page.tsx`, `web/src/app/auth/callback/route.ts`, `web/package.json`
+- **Learnings:**
+  - `@supabase/ssr` provides `createServerClient()` with cookie handlers for middleware
+  - Middleware matcher should exclude static files, images, and OAuth callback routes
+  - Dev-friendly: pass through when auth isn't configured instead of blocking everything
+
+---
+
+## 2025-01-07 - US-011: Associate existing data with authenticated user
+- Created migration `20260107130702_user_profile_claiming.sql`:
+  - Added `owner_email` column to profiles table for pre-login matching
+  - Created `claim_profile_by_email()` PostgreSQL function (SECURITY DEFINER)
+  - Function matches user email to unclaimed profiles and updates ownership
+  - Also creates `user_access` entry with 'owner' access level
+- Created `web/src/app/api/claim-profile/route.ts`:
+  - POST endpoint that calls the claim function for authenticated users
+  - Checks if user already has profile access before attempting claim
+  - Returns claim result with profile name and ID
+- Created `web/src/hooks/use-profile-claim.ts`:
+  - Custom hook for automatic profile claiming on first login
+  - Runs once per user (tracked via localStorage)
+  - Returns claim result, auth status, and loading state
+- Updated `web/src/app/dashboard/page.tsx`:
+  - Uses `useProfileClaim()` hook to trigger claim on mount
+  - Shows toast notification when profile is claimed
+- Updated documentation:
+  - `README.md`: Added section 4c explaining profile data association
+  - `supabase/schema.md`: Added `owner_email` column documentation
+- Build passes with no TypeScript errors
+- Files changed:
+  - `supabase/migrations/20260107130702_user_profile_claiming.sql` (new)
+  - `web/src/app/api/claim-profile/route.ts` (new)
+  - `web/src/hooks/use-profile-claim.ts` (new)
+  - `web/src/app/dashboard/page.tsx`
+  - `README.md`
+  - `supabase/schema.md`
+- **Learnings:**
+  - SECURITY DEFINER functions bypass RLS, useful for cross-table operations
+  - localStorage can track one-time operations per user
+  - PostgreSQL RETURNS TABLE allows returning structured data from functions
+
+---
+
+## ALL_TASKS_COMPLETE
+
+All user stories (US-001 through US-011) have been completed:
+- Phase 1: Supabase migration (US-001 to US-007b)
+- Phase 2: metric_definitions (US-012 to US-016)
+- Phase 3: Authentication (US-008 to US-011)
+
+The ViziAI application now has:
+1. ✅ Supabase database backend with proper schema
+2. ✅ metric_definitions table for consistent reference values and sorting
+3. ✅ Google OAuth authentication via Supabase Auth
+4. ✅ Protected routes with middleware
+5. ✅ Automatic profile claiming for existing data

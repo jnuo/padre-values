@@ -1,0 +1,34 @@
+{
+  "profiles": {
+    "supabase": 1,
+    "neon": 1
+  },
+  "user_access": {
+    "supabase": 2,
+    "neon": 2
+  },
+  "reports": {
+    "supabase": 34,
+    "neon": 34
+  },
+  "metrics": {
+    "supabase": 1000,
+    "neon": 1000
+  },
+  "metric_definitions": {
+    "supabase": 156,
+    "neon": 156
+  },
+  "profile_allowed_emails": {
+    "supabase": 2,
+    "neon": 2
+  },
+  "metric_aliases": {
+    "supabase": 54,
+    "neon": 54
+  },
+  "processed_files": {
+    "supabase": 44,
+    "neon": 44
+  }
+}

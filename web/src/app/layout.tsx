@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ToastProvider } from "@/components/ui/toast";
+import { Providers } from "@/components/providers";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -12,7 +13,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "ViziAI - Tahlil Sonuçlarınızı Kolayca Anlamlandırın",
-  description: "E-nabız'dan veya laboratuar sayfalarından indirdiğiniz tahlil sonuçlarını PDF (veya herhangi bir formatta) yükleyin. ViziAI yapay zeka ile bu verileri düzenli bir formata ta analiz eder, farklıl değerleri kolayca annlaşılır ve karşılaştırılabilir bir arayüzde incelemenizi sağlar.",
+  description:
+    "E-nabız'dan veya laboratuar sayfalarından indirdiğiniz tahlil sonuçlarını PDF (veya herhangi bir formatta) yükleyin. ViziAI yapay zeka ile bu verileri düzenli bir formata ta analiz eder, farklıl değerleri kolayca annlaşılır ve karşılaştırılabilir bir arayüzde incelemenizi sağlar.",
 };
 
 export default function RootLayout({
@@ -38,11 +40,11 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={`${inter.variable} antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          <ToastProvider>
-            {children}
-          </ToastProvider>
-        </ThemeProvider>
+        <Providers>
+          <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+            <ToastProvider>{children}</ToastProvider>
+          </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
