@@ -1,0 +1,1 @@
+pg_dump: error: could not translate host name "db.umrhdgqvyipnraapshhl.supabase.co" to address: nodename nor servname provided, or not known

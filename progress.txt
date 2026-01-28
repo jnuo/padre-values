@@ -1,0 +1,23 @@
+# ViziAI Migration Progress Log
+
+## Codebase Patterns
+(Updated as learnings are discovered)
+
+- Neon CLI: `neonctl` for project/database management
+- Supabase CLI: `supabase` for schema export
+- Google OAuth credentials: client_secret_*.json in project root
+- Frontend: Next.js 14+ with App Router in web/
+- Backend: Python with FastAPI in src/
+- Vercel deployment for frontend
+
+---
+
+## Migration Started: 2026-01-28
+
+### Context
+- Supabase free tier pauses after 7 days inactivity
+- Migrating to Neon (Postgres, no pause) + NextAuth.js (auth)
+- 8 tables to migrate, Google OAuth to preserve
+
+---
+

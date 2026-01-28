@@ -1,0 +1,37 @@
+============================================================
+RALPH MIGRATION - Started at Wed Jan 28 11:07:46 CET 2026
+============================================================
+
+>>> PHASE 1: Creating Neon Project...
+Creating Neon project 'viziai'...
+Created project: bold-wave-74350239
+Getting Neon connection string...
+Saved connection string to .env.neon
+
+>>> PHASE 2: Capturing API Baselines...
+Starting dev server...
+
+> web@0.1.0 dev
+> next dev --turbopack
+
+ ⚠ Port 3000 is in use by process 54910, using available port 3002 instead.
+   ▲ Next.js 15.5.9 (Turbopack)
+   - Local:        http://localhost:3002
+   - Network:      http://192.168.1.131:3002
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Compiled middleware in 102ms
+ ✓ Ready in 766ms
+Using dev server on port 3000
+Capturing /api/metrics baseline...
+jq: parse error: Invalid numeric literal at line 1, column 10
+ ✓ Compiled middleware in 2ms
+ ✓ Compiled in 2ms
+ ✓ Compiled middleware in 2ms
+ ✓ Compiled in 2ms
+ ✓ Compiled middleware in 4ms
+ ✓ Compiled middleware in 8ms
+ ✓ Compiled in 151ms
+   Reload env: .env.local
+[?25h
