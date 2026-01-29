@@ -21,9 +21,11 @@ interface HeaderProps {
  */
 function ViziAILogo({ onClick }: { onClick?: () => void }) {
   return (
-    <div
-      className="text-xl sm:text-2xl font-bold cursor-pointer select-none flex items-baseline"
+    <button
+      type="button"
+      className="text-xl sm:text-2xl font-bold cursor-pointer select-none flex items-baseline bg-transparent border-none outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
       onClick={onClick}
+      aria-label="ViziAI - Ana sayfa"
     >
       <span className="text-primary hover:text-primary/80 transition-colors">
         Vizi
@@ -31,7 +33,7 @@ function ViziAILogo({ onClick }: { onClick?: () => void }) {
       <span className="text-secondary hover:text-secondary/80 transition-colors">
         AI
       </span>
-    </div>
+    </button>
   );
 }
 
@@ -112,7 +114,10 @@ export function Header({ profileName, onLogout, onLogin }: HeaderProps) {
 
   return (
     <header className="border-b bg-card">
-      <div className="flex items-center justify-between px-4 py-3 sm:px-6 md:px-8">
+      <nav
+        className="flex items-center justify-between px-4 py-3 sm:px-6 md:px-8"
+        aria-label="Ana navigasyon"
+      >
         <ViziAILogo onClick={handleLogoClick} />
 
         <div className="flex items-center gap-2 sm:gap-3">
@@ -138,7 +143,7 @@ export function Header({ profileName, onLogout, onLogin }: HeaderProps) {
             </Button>
           )}
         </div>
-      </div>
+      </nav>
     </header>
   );
 }
