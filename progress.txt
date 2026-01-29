@@ -1,0 +1,25 @@
+# ViziAI UI Redesign - Progress Log
+
+## Project Overview
+- Goal: Redesign ViziAI UI with new brand guidelines
+- Brand: Teal primary, Coral secondary, health-focused calm design
+- Tech: Next.js 15, React 19, Tailwind CSS 4, Radix UI
+
+## Codebase Patterns
+- Components in `web/src/components/`
+- UI primitives in `web/src/components/ui/`
+- Pages in `web/src/app/`
+- Theme provider already exists at `web/src/components/theme-provider.tsx`
+- Uses next-themes for dark mode
+
+---
+
+## Progress Entries
+
+(Entries will be appended below as stories complete)
+
+## 2026-01-29 - PHASE0-001: Rename repository from padre-values to viziai
+- Files changed: web/package.json, README.md, REQUIREMENTS.md, product/PROJECT-ROADMAP.md
+- Summary: GitHub repo already renamed to viziai, git remote URL already updated. Updated package.json name from "web" to "viziai". Updated all documentation references from padre-values to viziai. Build verified successfully.
+- Learnings: GitHub repo and git remote were already updated prior to this iteration. Local folder still named padre-values (requires user manual action).
+

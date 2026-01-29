@@ -283,7 +283,7 @@ Your Google Sheet should have two tabs:
 ## 📁 Project Structure
 
 ```
-padre-values/
+viziai/
 ├── src/                          # Python backend
 │   ├── drive_monitor.py          # Google Drive monitoring
 │   ├── pdf_reader.py             # PDF reading and AI extraction

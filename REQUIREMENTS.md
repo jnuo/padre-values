@@ -7,12 +7,14 @@ This document lists all dependencies for the complete blood test analysis system
 The Python backend handles PDF processing, AI extraction, and Google Sheets integration.
 
 ### Installation
+
 ```bash
-cd /Users/onurovali/Documents/code/padre-values
+cd /Users/onurovali/Documents/code/viziai
 pip install -r requirements.txt
 ```
 
 ### Dependencies
+
 See `requirements.txt` for the complete list of Python packages.
 
 ## Web Frontend Requirements
@@ -20,14 +22,16 @@ See `requirements.txt` for the complete list of Python packages.
 The Next.js web application provides the dashboard interface for viewing blood test results.
 
 ### Installation
+
 ```bash
-cd /Users/onurovali/Documents/code/padre-values/web
+cd /Users/onurovali/Documents/code/viziai/web
 npm install
 ```
 
 ### Dependencies
 
 #### Production Dependencies
+
 - **Next.js 15.5.3** - React framework
 - **React 19.1.0** - UI library
 - **TypeScript 5** - Type safety
@@ -39,6 +43,7 @@ npm install
 - **Google APIs 160.0.0** - Google Sheets integration
 
 #### Development Dependencies
+
 - **Jest 30.1.3** - Testing framework
 - **React Testing Library** - Component testing
 - **ESLint** - Code linting
@@ -47,6 +52,7 @@ npm install
 ## Environment Variables
 
 ### Python Backend (.env or config.py)
+
 ```
 OPENAI_API_KEY=your_openai_key
 GOOGLE_CREDENTIALS_FILE=path_to_credentials.json
@@ -55,6 +61,7 @@ SHEET_ID=your_google_sheet_id
 ```
 
 ### Web Frontend (.env.local)
+
 ```
 GOOGLE_SHEETS_SPREADSHEET_ID=your_sheet_id
 GOOGLE_SERVICE_ACCOUNT_EMAIL=your_service_account_email
@@ -66,6 +73,7 @@ NEXT_PUBLIC_LOGIN_PASSWORD=your_password
 ## Quick Start
 
 ### 1. Python Backend
+
 ```bash
 # Install Python dependencies
 pip install -r requirements.txt
@@ -75,6 +83,7 @@ python main.py
 ```
 
 ### 2. Web Frontend
+
 ```bash
 # Install Node.js dependencies
 cd web

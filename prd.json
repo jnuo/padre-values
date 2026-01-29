@@ -1,0 +1,161 @@
+{
+  "project": "ViziAI UI Redesign",
+  "branch": "feature/ui-redesign",
+  "stories": [
+    {
+      "id": "PHASE0-001",
+      "title": "Rename repository from padre-values to viziai",
+      "priority": 1,
+      "passes": true,
+      "acceptance": "GitHub repo renamed, local folder renamed, all references updated (CLAUDE.md, README, package.json, etc.)",
+      "suggestedTools": ["Bash", "Edit", "Grep"],
+      "tasks": [
+        "Rename GitHub repo using gh CLI",
+        "Update git remote URL",
+        "Update package.json name field",
+        "Update CLAUDE.md references",
+        "Update README.md references",
+        "Verify build still works"
+      ]
+    },
+    {
+      "id": "UI-001",
+      "title": "Set up brand color CSS variables and theme configuration",
+      "priority": 2,
+      "passes": false,
+      "acceptance": "CSS variables for all brand colors in globals.css, working light/dark mode toggle",
+      "suggestedTools": ["frontend-design", "Edit"],
+      "tasks": [
+        "Add brand color CSS variables to globals.css",
+        "Configure light mode palette",
+        "Configure dark mode palette",
+        "Update tailwind.config with brand colors",
+        "Verify theme toggle works"
+      ]
+    },
+    {
+      "id": "UI-002",
+      "title": "Redesign header component with brand colors and logo",
+      "priority": 3,
+      "passes": false,
+      "acceptance": "Header shows ViziAI logo (if available) + two-color wordmark (Vizi in teal, AI in coral), dark mode toggle button, user menu",
+      "suggestedTools": ["frontend-design", "claude-in-chrome", "Edit"],
+      "tasks": [
+        "Update header with two-color ViziAI wordmark",
+        "Add dark/light mode toggle button",
+        "Style user menu with brand colors",
+        "Test on mobile and desktop",
+        "Visual verification with claude-in-chrome"
+      ]
+    },
+    {
+      "id": "UI-003",
+      "title": "Redesign metric cards with brand status colors",
+      "priority": 4,
+      "passes": false,
+      "acceptance": "Metric cards use brand colors: green for normal, amber for warning, terracotta for critical. Cards have consistent spacing and typography.",
+      "suggestedTools": [
+        "frontend-design",
+        "react-best-practices",
+        "claude-in-chrome"
+      ],
+      "tasks": [
+        "Update metric card status indicator colors",
+        "Apply brand typography (Inter)",
+        "Add subtle hover/selected states",
+        "Ensure accessibility (contrast ratios)",
+        "Visual verification"
+      ]
+    },
+    {
+      "id": "UI-004",
+      "title": "Redesign line charts with brand colors",
+      "priority": 5,
+      "passes": false,
+      "acceptance": "Charts use brand colors for lines, reference areas use status colors, tooltips styled consistently",
+      "suggestedTools": ["frontend-design", "Edit"],
+      "tasks": [
+        "Update chart line colors to brand palette",
+        "Style reference area with status-normal green",
+        "Update tooltip styling",
+        "Ensure chart colors work in dark mode"
+      ]
+    },
+    {
+      "id": "UI-005",
+      "title": "Redesign buttons and form inputs",
+      "priority": 6,
+      "passes": false,
+      "acceptance": "All buttons use brand primary/secondary colors, inputs have consistent styling, focus states are visible",
+      "suggestedTools": ["frontend-design", "web-design-guidelines"],
+      "tasks": [
+        "Update button component with brand colors",
+        "Style form inputs consistently",
+        "Add clear focus indicators for accessibility",
+        "Test keyboard navigation"
+      ]
+    },
+    {
+      "id": "UI-006",
+      "title": "Add loading and error states",
+      "priority": 7,
+      "passes": false,
+      "acceptance": "Loading spinner uses brand colors, error messages are styled consistently and not alarming",
+      "suggestedTools": ["frontend-design"],
+      "tasks": [
+        "Create/update loading spinner component",
+        "Style error messages (calm, not alarming)",
+        "Add skeleton loading states for cards",
+        "Test loading states"
+      ]
+    },
+    {
+      "id": "UI-007",
+      "title": "Dark mode and light mode polish",
+      "priority": 8,
+      "passes": false,
+      "acceptance": "Both themes look polished, colors adapt properly, no contrast issues, toggle persists preference",
+      "suggestedTools": [
+        "frontend-design",
+        "claude-in-chrome",
+        "web-design-guidelines"
+      ],
+      "tasks": [
+        "Audit all components in dark mode",
+        "Fix any contrast issues",
+        "Ensure status colors visible in both modes",
+        "Persist theme preference in localStorage",
+        "Visual verification in both modes"
+      ]
+    },
+    {
+      "id": "UI-008",
+      "title": "Landing page redesign",
+      "priority": 9,
+      "passes": false,
+      "acceptance": "Landing page uses brand colors, clear CTA, professional appearance",
+      "suggestedTools": ["frontend-design", "claude-in-chrome"],
+      "tasks": [
+        "Update hero section with brand styling",
+        "Style feature cards consistently",
+        "Update CTA button with brand colors",
+        "Ensure responsive design"
+      ]
+    },
+    {
+      "id": "UI-009",
+      "title": "Final accessibility audit and polish",
+      "priority": 10,
+      "passes": false,
+      "acceptance": "WCAG AA compliance, all interactive elements keyboard accessible, screen reader friendly",
+      "suggestedTools": ["web-design-guidelines", "claude-in-chrome"],
+      "tasks": [
+        "Run accessibility audit",
+        "Fix any contrast issues",
+        "Add ARIA labels where needed",
+        "Test with keyboard navigation",
+        "Final visual review"
+      ]
+    }
+  ]
+}

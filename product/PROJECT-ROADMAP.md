@@ -12,9 +12,9 @@
 
 ### 0.1 Rename Repository
 
-- [ ] Rename GitHub repo from `padre-values` to `viziai`
-- [ ] Rename local folder from `padre-values` to `viziai`
-- [ ] Update all references (CLAUDE.md, README, package.json, etc.)
+- [x] Rename GitHub repo from `padre-values` to `viziai`
+- [ ] Rename local folder from `padre-values` to `viziai` (user action required)
+- [x] Update all references (CLAUDE.md, README, package.json, etc.)
 - [ ] Update Vercel project settings if needed
 
 ---
