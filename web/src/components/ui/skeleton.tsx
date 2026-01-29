@@ -4,7 +4,10 @@ import { cn } from "@/lib/utils";
 
 type SkeletonProps = React.HTMLAttributes<HTMLDivElement>;
 
-export function Skeleton({ className, ...props }: SkeletonProps) {
+export function Skeleton({
+  className,
+  ...props
+}: SkeletonProps): React.ReactElement {
   return (
     <div
       className={cn("animate-pulse rounded-md bg-muted/50", className)}
@@ -13,8 +16,7 @@ export function Skeleton({ className, ...props }: SkeletonProps) {
   );
 }
 
-// Skeleton for metric cards matching the dashboard grid
-export function MetricCardSkeleton() {
+export function MetricCardSkeleton(): React.ReactElement {
   return (
     <div className="rounded-lg border border-l-4 border-l-muted p-2 space-y-2">
       <div className="flex items-start justify-between">
@@ -27,8 +29,11 @@ export function MetricCardSkeleton() {
   );
 }
 
-// Grid of skeleton cards for the dashboard
-export function MetricGridSkeleton({ count = 12 }: { count?: number }) {
+export function MetricGridSkeleton({
+  count = 12,
+}: {
+  count?: number;
+}): React.ReactElement {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
       {Array.from({ length: count }).map((_, i) => (
@@ -38,8 +43,7 @@ export function MetricGridSkeleton({ count = 12 }: { count?: number }) {
   );
 }
 
-// Skeleton for the chart area
-export function ChartSkeleton() {
+export function ChartSkeleton(): React.ReactElement {
   return (
     <div className="rounded-xl border p-4 space-y-4">
       <div className="flex items-center justify-between">

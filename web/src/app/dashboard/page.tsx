@@ -44,14 +44,6 @@ import {
 } from "@/components/ui/sheet";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-
-type UserConfig = {
-  id: string;
-  name: string;
-  username: string;
-  dataSheetName: string;
-  referenceSheetName: string;
-};
 import { compareDateAsc, parseToISO, formatTR } from "@/lib/date";
 import { MetricChart } from "@/components/metric-chart";
 import { Button } from "@/components/ui/button";
@@ -60,11 +52,35 @@ import { useProfileClaim } from "@/hooks/use-profile-claim";
 import { Header } from "@/components/header";
 import { LoadingState, ErrorState } from "@/components/ui/spinner";
 
+type UserConfig = {
+  id: string;
+  name: string;
+  username: string;
+  dataSheetName: string;
+  referenceSheetName: string;
+};
+
 type ApiData = { metrics: Metric[]; values: MetricValue[] };
 
 type DateRange = "all" | "15" | "30" | "90";
 
-// Normalize Turkish characters for search
+/**
+ * Check if a value is within the metric's reference range.
+ */
+function isValueInRange(
+  value: number | undefined,
+  refMin: number | null,
+  refMax: number | null,
+): boolean {
+  if (value === undefined) return false;
+  const aboveMin = refMin == null || value >= refMin;
+  const belowMax = refMax == null || value <= refMax;
+  return aboveMin && belowMax;
+}
+
+/**
+ * Normalize Turkish characters for case-insensitive search.
+ */
 function normalizeTurkish(str: string): string {
   return str
     .replace(/İ/g, "i") // Turkish uppercase İ → i (must be before toLowerCase)
@@ -821,20 +837,23 @@ export default function Dashboard() {
                   {displayedMetrics.map((m) => {
                     const latest = valuesByMetric.get(m.id);
                     const value = latest?.value;
-                    const inRange =
-                      typeof value === "number" &&
-                      (m.ref_min == null || value >= m.ref_min) &&
-                      (m.ref_max == null || value <= m.ref_max);
+                    const inRange = isValueInRange(value, m.ref_min, m.ref_max);
                     const isSelected = selectedMetrics.includes(m.id);
 
-                    // Determine flag status
+                    // Determine flag status for tooltip
                     let flagStatus = "";
-                    if (typeof value === "number") {
-                      if (m.ref_min != null && value < m.ref_min) {
-                        flagStatus = "Düşük";
-                      } else if (m.ref_max != null && value > m.ref_max) {
-                        flagStatus = "Yüksek";
-                      }
+                    if (
+                      value !== undefined &&
+                      m.ref_min != null &&
+                      value < m.ref_min
+                    ) {
+                      flagStatus = "Düşük";
+                    } else if (
+                      value !== undefined &&
+                      m.ref_max != null &&
+                      value > m.ref_max
+                    ) {
+                      flagStatus = "Yüksek";
                     }
 
                     return (
@@ -974,11 +993,11 @@ export default function Dashboard() {
 
                         const latest = valuesByMetric.get(metricId);
                         const value = latest?.value;
-                        const inRange =
-                          typeof value === "number" &&
-                          (metric.ref_min == null || value >= metric.ref_min) &&
-                          (metric.ref_max == null || value <= metric.ref_max);
-
+                        const inRange = isValueInRange(
+                          value,
+                          metric.ref_min,
+                          metric.ref_max,
+                        );
                         const isFirst = index === 0;
 
                         return (

@@ -7,18 +7,21 @@ interface SpinnerProps {
   size?: "sm" | "md" | "lg";
 }
 
-export function Spinner({ className, size = "md" }: SpinnerProps) {
-  const sizeClasses = {
-    sm: "h-4 w-4 border-2",
-    md: "h-8 w-8 border-3",
-    lg: "h-12 w-12 border-4",
-  };
+const SIZE_CLASSES = {
+  sm: "h-4 w-4 border-2",
+  md: "h-8 w-8 border-3",
+  lg: "h-12 w-12 border-4",
+} as const;
 
+export function Spinner({
+  className,
+  size = "md",
+}: SpinnerProps): React.ReactElement {
   return (
     <div
       className={cn(
         "animate-spin rounded-full border-solid border-primary border-t-transparent",
-        sizeClasses[size],
+        SIZE_CLASSES[size],
         className,
       )}
       role="status"
@@ -37,7 +40,7 @@ interface LoadingStateProps {
 export function LoadingState({
   message = "Yükleniyor...",
   className,
-}: LoadingStateProps) {
+}: LoadingStateProps): React.ReactElement {
   return (
     <div
       className={cn(
@@ -63,7 +66,7 @@ export function ErrorState({
   message,
   onRetry,
   className,
-}: ErrorStateProps) {
+}: ErrorStateProps): React.ReactElement {
   return (
     <div
       role="alert"

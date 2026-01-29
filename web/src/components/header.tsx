@@ -19,7 +19,7 @@ interface HeaderProps {
  * ViziAI Logo Wordmark
  * "Vizi" in brand primary (teal), "AI" in brand secondary (coral)
  */
-function ViziAILogo({ onClick }: { onClick?: () => void }) {
+function ViziAILogo({ onClick }: { onClick?: () => void }): React.ReactElement {
   return (
     <button
       type="button"
@@ -41,14 +41,19 @@ function ViziAILogo({ onClick }: { onClick?: () => void }) {
  * Theme toggle button
  * Switches between light and dark mode
  */
-function ThemeToggle() {
+function ThemeToggle(): React.ReactElement {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // Avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const isDark = theme === "dark";
+
+  function toggleTheme(): void {
+    setTheme(isDark ? "light" : "dark");
+  }
 
   if (!mounted) {
     return (
@@ -59,14 +64,12 @@ function ThemeToggle() {
     );
   }
 
-  const isDark = theme === "dark";
-
   return (
     <Button
       variant="ghost"
       size="icon"
       className="h-9 w-9"
-      onClick={() => setTheme(isDark ? "light" : "dark")}
+      onClick={toggleTheme}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
       {isDark ? (
@@ -85,32 +88,34 @@ function ThemeToggle() {
  * - Dark/light mode toggle
  * - User menu or login button depending on auth state
  */
-export function Header({ profileName, onLogout, onLogin }: HeaderProps) {
+export function Header({
+  profileName,
+  onLogout,
+  onLogin,
+}: HeaderProps): React.ReactElement {
   const router = useRouter();
+  const isLoggedIn = profileName != null;
 
-  const handleLogoClick = () => {
+  function handleLogoClick(): void {
     router.push("/");
-  };
+  }
 
-  const handleLoginClick = () => {
+  function handleLoginClick(): void {
     if (onLogin) {
       onLogin();
-    } else {
-      router.push("/login");
+      return;
     }
-  };
+    router.push("/login");
+  }
 
-  const handleLogoutClick = async () => {
+  async function handleLogoutClick(): Promise<void> {
     if (onLogout) {
       onLogout();
-    } else {
-      // Default logout behavior using NextAuth
-      const { signOut } = await import("next-auth/react");
-      await signOut({ callbackUrl: "/login" });
+      return;
     }
-  };
-
-  const isLoggedIn = profileName !== undefined && profileName !== null;
+    const { signOut } = await import("next-auth/react");
+    await signOut({ callbackUrl: "/login" });
+  }
 
   return (
     <header className="border-b bg-card">

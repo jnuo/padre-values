@@ -5,19 +5,84 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/header";
-import { FileText, BarChart3, Shield, Zap } from "lucide-react";
+import { FileText, BarChart3, Shield, Zap, LucideIcon } from "lucide-react";
 
-export default function Home() {
+type FeatureCardProps = {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  colorClass: string;
+};
+
+function FeatureCard({
+  icon: Icon,
+  title,
+  description,
+  colorClass,
+}: FeatureCardProps): React.ReactElement {
+  return (
+    <Card
+      className={`border-l-4 border-l-${colorClass} hover:shadow-lg transition-all duration-200`}
+    >
+      <CardHeader className="pb-2">
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-lg bg-${colorClass}/10`}>
+            <Icon className={`h-5 w-5 text-${colorClass}`} />
+          </div>
+          <CardTitle className="text-lg">{title}</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <p className="text-muted-foreground">{description}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+const FEATURES: FeatureCardProps[] = [
+  {
+    icon: Zap,
+    title: "AI Destekli Analiz",
+    description:
+      "AI'mız PDF raporlarınızdan otomatik olarak veri çıkarır ve yapılandırır, trendleri ve kalıpları zaman içinde takip etmeyi kolaylaştırır.",
+    colorClass: "primary",
+  },
+  {
+    icon: BarChart3,
+    title: "Görsel Dashboard",
+    description:
+      "Net içgörüler için tasarlanmış sezgisel dashboard'umuzla birden fazla laboratuvar metriğini zaman içinde tek bakışta karşılaştırın.",
+    colorClass: "secondary",
+  },
+  {
+    icon: FileText,
+    title: "Kolay PDF Yükleme",
+    description:
+      "e-Nabız'dan veya herhangi bir laboratuvardan aldığınız PDF raporlarını sürükleyip bırakın. Sistem otomatik olarak verileri tanır ve işler.",
+    colorClass: "status-normal",
+  },
+  {
+    icon: Shield,
+    title: "Güvenli ve Özel",
+    description:
+      "Verileriniz şifreli olarak saklanır ve sadece sizinle paylaşılır. Gizliliğiniz bizim için en önemli önceliktir.",
+    colorClass: "primary",
+  },
+];
+
+export default function Home(): React.ReactElement {
   const router = useRouter();
+
+  const navigateToLogin = (): void => {
+    router.push("/login");
+  };
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <Header />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        {/* Subtle gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5" />
 
         <div className="container relative mx-auto px-4 py-12 md:py-16 max-w-4xl">
@@ -33,7 +98,7 @@ export default function Home() {
             </p>
             <Button
               size="lg"
-              onClick={() => router.push("/login")}
+              onClick={navigateToLogin}
               className="px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
             >
               Hemen Başla
@@ -68,76 +133,9 @@ export default function Home() {
           </h2>
 
           <div className="grid md:grid-cols-2 gap-6">
-            <Card className="border-l-4 border-l-primary hover:shadow-lg transition-all duration-200">
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Zap className="h-5 w-5 text-primary" />
-                  </div>
-                  <CardTitle className="text-lg">AI Destekli Analiz</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  AI&apos;mız PDF raporlarınızdan otomatik olarak veri çıkarır
-                  ve yapılandırır, trendleri ve kalıpları zaman içinde takip
-                  etmeyi kolaylaştırır.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-l-4 border-l-secondary hover:shadow-lg transition-all duration-200">
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-secondary/10">
-                    <BarChart3 className="h-5 w-5 text-secondary" />
-                  </div>
-                  <CardTitle className="text-lg">Görsel Dashboard</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Net içgörüler için tasarlanmış sezgisel dashboard&apos;umuzla
-                  birden fazla laboratuvar metriğini zaman içinde tek bakışta
-                  karşılaştırın.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-l-4 border-l-status-normal hover:shadow-lg transition-all duration-200">
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-status-normal/10">
-                    <FileText className="h-5 w-5 text-status-normal" />
-                  </div>
-                  <CardTitle className="text-lg">Kolay PDF Yükleme</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  e-Nabız&apos;dan veya herhangi bir laboratuvardan aldığınız
-                  PDF raporlarını sürükleyip bırakın. Sistem otomatik olarak
-                  verileri tanır ve işler.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-l-4 border-l-primary hover:shadow-lg transition-all duration-200">
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Shield className="h-5 w-5 text-primary" />
-                  </div>
-                  <CardTitle className="text-lg">Güvenli ve Özel</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Verileriniz şifreli olarak saklanır ve sadece sizinle
-                  paylaşılır. Gizliliğiniz bizim için en önemli önceliktir.
-                </p>
-              </CardContent>
-            </Card>
+            {FEATURES.map((feature) => (
+              <FeatureCard key={feature.title} {...feature} />
+            ))}
           </div>
         </div>
       </section>
@@ -153,7 +151,7 @@ export default function Home() {
           </p>
           <Button
             size="lg"
-            onClick={() => router.push("/login")}
+            onClick={navigateToLogin}
             className="px-8 py-6 text-lg font-semibold"
           >
             Ücretsiz Deneyin

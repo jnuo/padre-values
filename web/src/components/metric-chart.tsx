@@ -20,8 +20,28 @@ import type { Metric, MetricValue } from "@/lib/sheets";
 import { compareDateAsc, parseToISO, formatTR } from "@/lib/date";
 import { cn } from "@/lib/utils";
 
-// Hook to get CSS variable colors for charts (Recharts needs actual color values)
-function useChartColors() {
+/**
+ * Check if a value is within the metric's reference range.
+ * Returns true if value is within bounds (or bounds are not defined).
+ */
+function isValueInRange(
+  value: number | null,
+  refMin: number | null,
+  refMax: number | null,
+): boolean {
+  if (value === null) return false;
+  const aboveMin = refMin == null || value >= refMin;
+  const belowMax = refMax == null || value <= refMax;
+  return aboveMin && belowMax;
+}
+
+type ChartColors = {
+  statusNormal: string;
+  statusCritical: string;
+  chartPrimary: string;
+};
+
+function useChartColors(): ChartColors {
   const [colors, setColors] = useState({
     statusNormal: "#22c55e",
     statusCritical: "#dc6843",
@@ -80,7 +100,7 @@ export function MetricChart({
   onHover,
   onRemove,
   className,
-}: MetricChartProps) {
+}: MetricChartProps): React.ReactElement {
   const colors = useChartColors();
 
   // Sort values by date and create chart data
@@ -131,12 +151,8 @@ export function MetricChart({
   const yMin = Math.max(0, rangeMin - padding); // Clamp to 0 if metric can't be negative
   const yMax = rangeMax + padding;
 
-  // Determine if value is in range
-  const latestValue = chartData[chartData.length - 1]?.value;
-  const inRange =
-    latestValue !== null &&
-    (metric.ref_min == null || latestValue >= metric.ref_min) &&
-    (metric.ref_max == null || latestValue <= metric.ref_max);
+  const latestValue = chartData[chartData.length - 1]?.value ?? null;
+  const inRange = isValueInRange(latestValue, metric.ref_min, metric.ref_max);
 
   return (
     <Card className={cn("rounded-xl", className)}>
@@ -251,11 +267,11 @@ export function MetricChart({
                 content={({ active, payload, label }) => {
                   if (active && payload && payload.length > 0) {
                     const data = payload[0].payload as ChartData;
-                    const valueInRange =
-                      data.value !== null &&
-                      (metric.ref_min == null ||
-                        data.value >= metric.ref_min) &&
-                      (metric.ref_max == null || data.value <= metric.ref_max);
+                    const valueInRange = isValueInRange(
+                      data.value,
+                      metric.ref_min,
+                      metric.ref_max,
+                    );
                     return (
                       <div className="rounded-lg border bg-popover p-3 shadow-lg">
                         <p className="font-medium text-popover-foreground">
