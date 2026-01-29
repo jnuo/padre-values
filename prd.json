@@ -71,7 +71,7 @@
       "id": "UI-004",
       "title": "Redesign line charts with brand colors",
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "acceptance": "Charts use brand colors for lines, reference areas use status colors, tooltips styled consistently",
       "suggestedTools": ["frontend-design", "Edit"],
       "tasks": [
@@ -85,7 +85,7 @@
       "id": "UI-005",
       "title": "Redesign buttons and form inputs",
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "acceptance": "All buttons use brand primary/secondary colors, inputs have consistent styling, focus states are visible",
       "suggestedTools": ["frontend-design", "web-design-guidelines"],
       "tasks": [
@@ -99,7 +99,7 @@
       "id": "UI-006",
       "title": "Add loading and error states",
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "acceptance": "Loading spinner uses brand colors, error messages are styled consistently and not alarming",
       "suggestedTools": ["frontend-design"],
       "tasks": [
@@ -113,7 +113,7 @@
       "id": "UI-007",
       "title": "Dark mode and light mode polish",
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "acceptance": "Both themes look polished, colors adapt properly, no contrast issues, toggle persists preference",
       "suggestedTools": [
         "frontend-design",
@@ -132,7 +132,7 @@
       "id": "UI-008",
       "title": "Landing page redesign",
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "acceptance": "Landing page uses brand colors, clear CTA, professional appearance",
       "suggestedTools": ["frontend-design", "claude-in-chrome"],
       "tasks": [
@@ -146,7 +146,7 @@
       "id": "UI-009",
       "title": "Final accessibility audit and polish",
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "acceptance": "WCAG AA compliance, all interactive elements keyboard accessible, screen reader friendly",
       "suggestedTools": ["web-design-guidelines", "claude-in-chrome"],
       "tasks": [

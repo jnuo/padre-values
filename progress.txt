@@ -60,3 +60,59 @@
   - Inter font was already applied globally via layout.tsx
 - Learnings: Tailwind CSS 4 with @theme inline allows mapping CSS variables to color utilities. Using opacity modifiers like /15 creates nice subtle backgrounds for badges.
 
+
+## 2026-01-29 - UI-004: Redesign line charts with brand colors
+- Files changed: web/src/components/metric-chart.tsx
+- Summary: Added useChartColors hook for theme-aware Recharts colors. Updated reference lines/areas to use brand status colors. Improved tooltip styling with popover background, colored values, and range info. Line and dot colors now adapt to light/dark mode using brand-primary (teal) for in-range and status-critical for out-of-range values.
+- Learnings: Recharts doesn't read CSS variables directly - need to use a hook with MutationObserver to watch for theme class changes and update colors accordingly.
+
+## 2026-01-30 - UI-005: Redesign buttons and form inputs
+- Files changed: web/src/components/ui/button.tsx, web/src/components/ui/input.tsx
+- Summary: Updated button component with active:scale-[0.98] for tactile feedback, transition-all duration-200 for smoother animations, and hover:border-primary/50 on outline variant. Updated input component with focus-visible:border-primary, focus-visible:ring-primary/30, and hover:border-primary/50 for consistent brand styling.
+- Learnings: Small tactile feedback (scale 0.98) on button press makes UI feel more responsive.
+
+## 2026-01-30 - UI-006: Add loading and error states
+- Files changed: web/src/components/ui/spinner.tsx (new), web/src/components/ui/skeleton.tsx (new), web/src/app/dashboard/page.tsx
+- Summary: Created Spinner component with brand primary color (teal) and three sizes (sm, md, lg). Created LoadingState with spinner and animated message. Created ErrorState with warning icon, title, message, and retry button. Created Skeleton, MetricCardSkeleton, MetricGridSkeleton, and ChartSkeleton components for loading placeholders. Updated dashboard to use LoadingState and ErrorState components with full-screen centered layout.
+- Learnings: Using border-primary with border-t-transparent creates a clean CSS-only spinner. Turkish translations used throughout (Yükleniyor, Tekrar dene, Bir şeyler yanlış gitti).
+
+## 2026-01-30 - UI-007: Dark mode and light mode polish
+- Files changed: None (visual audit only)
+- Summary: Audited all components in both light and dark modes using claude-in-chrome. Verified:
+  - Theme toggle works correctly in header
+  - Theme preference persists via localStorage (next-themes handles this automatically)
+  - Status colors (green, amber, terracotta) visible and distinct in both modes
+  - Charts adapt colors properly via useChartColors hook
+  - No contrast issues found - all text readable, status indicators clear
+  - Dark mode uses proper blue-tinted dark backgrounds for depth
+- Learnings: next-themes with attribute="class" and defaultTheme="light" provides smooth theme switching with automatic localStorage persistence.
+
+## 2026-01-30 - UI-008: Landing page redesign
+- Files changed: web/src/app/page.tsx
+- Summary: Complete landing page redesign with brand styling:
+  - Hero section with "Kolayca" highlighted in brand primary (teal)
+  - Subtle gradient background (primary/5 to secondary/5)
+  - Prominent "Hemen Başla" CTA button in teal
+  - Dashboard preview with teal border accent
+  - "Neden ViziAI?" section with 4 feature cards:
+    - AI Destekli Analiz (teal icon, Zap)
+    - Görsel Dashboard (coral icon, BarChart3)
+    - Kolay PDF Yükleme (green icon, FileText)
+    - Güvenli ve Özel (teal icon, Shield)
+  - Each card has colored left border matching its icon color
+  - Secondary CTA section "Sağlığınızı Takip Etmeye Başlayın" with "Ücretsiz Deneyin" button
+  - Footer with copyright
+  - All works in both light and dark modes
+- Learnings: Using lucide-react icons with brand colors creates visual consistency. Left border accents (border-l-4) add subtle but effective brand touches.
+
+## 2026-01-30 - UI-009: Final accessibility audit and polish
+- Files changed: web/src/components/header.tsx, web/src/components/ui/spinner.tsx
+- Summary: Accessibility improvements for WCAG AA compliance:
+  - Logo: Changed from div to button with aria-label="ViziAI - Ana sayfa" and visible focus ring
+  - Header: Added nav landmark with aria-label="Ana navigasyon"
+  - ErrorState: Added role="alert" for screen reader announcement
+  - ErrorState: Added aria-hidden="true" to decorative warning icon
+  - Retry button: Added focus-visible ring styles
+  - Verified keyboard navigation works throughout the app
+  - All interactive elements have visible focus states
+- Learnings: Using semantic HTML (button, nav, header) with ARIA labels improves screen reader experience. focus-visible:ring provides keyboard users with clear navigation feedback without affecting mouse users.
