@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   LineChart,
   Line,
@@ -18,6 +19,47 @@ import { Button } from "@/components/ui/button";
 import type { Metric, MetricValue } from "@/lib/sheets";
 import { compareDateAsc, parseToISO, formatTR } from "@/lib/date";
 import { cn } from "@/lib/utils";
+
+// Hook to get CSS variable colors for charts (Recharts needs actual color values)
+function useChartColors() {
+  const [colors, setColors] = useState({
+    statusNormal: "#22c55e",
+    statusCritical: "#dc6843",
+    chartPrimary: "#0d9488",
+  });
+
+  useEffect(() => {
+    const updateColors = () => {
+      // Detect theme via class (OKLCH parsing is complex, using direct hex values)
+      const isDark = document.documentElement.classList.contains("dark");
+
+      setColors({
+        statusNormal: isDark ? "#4ade80" : "#22c55e",
+        statusCritical: isDark ? "#f87171" : "#dc6843",
+        chartPrimary: isDark ? "#2dd4bf" : "#0d9488",
+      });
+    };
+
+    updateColors();
+
+    // Listen for theme changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (
+          mutation.attributeName === "class" &&
+          mutation.target === document.documentElement
+        ) {
+          updateColors();
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, { attributes: true });
+    return () => observer.disconnect();
+  }, []);
+
+  return colors;
+}
 
 type ChartData = {
   date: string; // original date string from API
@@ -39,6 +81,8 @@ export function MetricChart({
   onRemove,
   className,
 }: MetricChartProps) {
+  const colors = useChartColors();
+
   // Sort values by date and create chart data
   const chartData: ChartData[] = values
     .filter((v) => v.metric_id === metric.id)
@@ -145,12 +189,11 @@ export function MetricChart({
                   x2="dataMax"
                   y1={metric.ref_min}
                   y2={metric.ref_max}
-                  fill="#22c55e"
-                  fillOpacity={0.3}
-                  stroke="#22c55e"
+                  fill={colors.statusNormal}
+                  fillOpacity={0.15}
+                  stroke={colors.statusNormal}
                   strokeDasharray="2 2"
-                  strokeOpacity={0.7}
-                  className="drop-shadow-sm"
+                  strokeOpacity={0.5}
                 />
               )}
 
@@ -158,19 +201,29 @@ export function MetricChart({
               {metric.ref_min !== null && (
                 <ReferenceLine
                   y={metric.ref_min}
-                  stroke="#22c55e"
+                  stroke={colors.statusNormal}
                   strokeDasharray="2 2"
-                  strokeOpacity={0.8}
-                  label={{ value: `Min: ${metric.ref_min}`, position: "top" }}
+                  strokeOpacity={0.6}
+                  label={{
+                    value: `Min: ${metric.ref_min}`,
+                    position: "insideTopRight",
+                    fill: colors.statusNormal,
+                    fontSize: 10,
+                  }}
                 />
               )}
               {metric.ref_max !== null && (
                 <ReferenceLine
                   y={metric.ref_max}
-                  stroke="#22c55e"
+                  stroke={colors.statusNormal}
                   strokeDasharray="2 2"
-                  strokeOpacity={0.8}
-                  label={{ value: `Max: ${metric.ref_max}`, position: "top" }}
+                  strokeOpacity={0.6}
+                  label={{
+                    value: `Max: ${metric.ref_max}`,
+                    position: "insideBottomRight",
+                    fill: colors.statusNormal,
+                    fontSize: 10,
+                  }}
                 />
               )}
 
@@ -198,10 +251,24 @@ export function MetricChart({
                 content={({ active, payload, label }) => {
                   if (active && payload && payload.length > 0) {
                     const data = payload[0].payload as ChartData;
+                    const valueInRange =
+                      data.value !== null &&
+                      (metric.ref_min == null ||
+                        data.value >= metric.ref_min) &&
+                      (metric.ref_max == null || data.value <= metric.ref_max);
                     return (
-                      <div className="rounded-lg border bg-background p-2 shadow-md">
-                        <p className="font-medium">{metric.name}</p>
-                        <p className="text-sm text-muted-foreground">
+                      <div className="rounded-lg border bg-popover p-3 shadow-lg">
+                        <p className="font-medium text-popover-foreground">
+                          {metric.name}
+                        </p>
+                        <p
+                          className={cn(
+                            "text-lg font-semibold",
+                            valueInRange
+                              ? "text-brand-primary"
+                              : "text-status-critical",
+                          )}
+                        >
                           {data.value !== null
                             ? `${data.value} ${metric.unit}`
                             : "No data"}
@@ -209,6 +276,12 @@ export function MetricChart({
                         <p className="text-xs text-muted-foreground">
                           {formatTR(label as string)}
                         </p>
+                        {metric.ref_min !== null && metric.ref_max !== null && (
+                          <p className="mt-1 text-xs text-status-normal">
+                            Range: {metric.ref_min} - {metric.ref_max}{" "}
+                            {metric.unit}
+                          </p>
+                        )}
                       </div>
                     );
                   }
@@ -218,14 +291,20 @@ export function MetricChart({
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke={inRange ? "rgb(34, 197, 94)" : "rgb(239, 68, 68)"}
+                stroke={inRange ? colors.chartPrimary : colors.statusCritical}
                 strokeWidth={2}
                 dot={{
-                  fill: inRange ? "rgb(34, 197, 94)" : "rgb(239, 68, 68)",
+                  fill: inRange ? colors.chartPrimary : colors.statusCritical,
+                  stroke: inRange ? colors.chartPrimary : colors.statusCritical,
                   strokeWidth: 2,
                   r: 4,
                 }}
-                activeDot={{ r: 6, strokeWidth: 2 }}
+                activeDot={{
+                  r: 6,
+                  strokeWidth: 2,
+                  fill: inRange ? colors.chartPrimary : colors.statusCritical,
+                  stroke: inRange ? colors.chartPrimary : colors.statusCritical,
+                }}
                 connectNulls={false}
               />
             </LineChart>
