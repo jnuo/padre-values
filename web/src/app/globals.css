@@ -42,12 +42,19 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* ViziAI Brand Colors */
+  /* ViziAI Brand Colors - Tailwind utilities */
   --color-brand-primary: var(--brand-primary);
   --color-brand-secondary: var(--brand-secondary);
+
+  /* Status Colors - for text-status-normal, bg-status-normal, etc. */
   --color-status-normal: var(--status-normal);
   --color-status-warning: var(--status-warning);
   --color-status-critical: var(--status-critical);
+
+  /* Status Colors with foreground for contrast */
+  --color-status-normal-foreground: oklch(0.145 0 0);
+  --color-status-warning-foreground: oklch(0.145 0 0);
+  --color-status-critical-foreground: oklch(0.985 0 0);
 }
 
 :root {

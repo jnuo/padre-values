@@ -105,8 +105,8 @@ export function MetricChart({
               className={cn(
                 "text-xs",
                 inRange
-                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300"
-                  : "bg-rose-100 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300",
+                  ? "bg-status-normal/15 text-status-normal"
+                  : "bg-status-critical/15 text-status-critical",
               )}
             >
               {latestValue !== null

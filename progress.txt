@@ -47,3 +47,16 @@
   - Removed unused router import from dashboard after refactoring
 - Learnings: Using useTheme() from next-themes with mounted state to avoid hydration mismatch. Brand colors automatically adapt in dark mode via CSS variables.
 
+## 2026-01-29 - UI-003: Redesign metric cards with brand status colors
+- Files changed: web/src/app/globals.css, web/src/app/dashboard/page.tsx, web/src/components/metric-chart.tsx
+- Summary: Updated metric cards to use brand status colors:
+  - Replaced hardcoded emerald/rose colors with brand status colors (text-status-normal, text-status-critical)
+  - Added Tailwind CSS utilities for status colors in @theme inline block
+  - Added left border status indicator (border-l-4 with status color) for visual hierarchy
+  - Enhanced hover states with transition-all and border-primary/50 on hover
+  - Updated selected state with ring-offset-background for cleaner look
+  - Updated tooltip flag status text to use text-status-critical
+  - Updated chart badge to use bg-status-normal/15 and bg-status-critical/15 backgrounds
+  - Inter font was already applied globally via layout.tsx
+- Learnings: Tailwind CSS 4 with @theme inline allows mapping CSS variables to color utilities. Using opacity modifiers like /15 creates nice subtle backgrounds for badges.
+

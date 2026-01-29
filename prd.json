@@ -52,7 +52,7 @@
       "id": "UI-003",
       "title": "Redesign metric cards with brand status colors",
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "acceptance": "Metric cards use brand colors: green for normal, amber for warning, terracotta for critical. Cards have consistent spacing and typography.",
       "suggestedTools": [
         "frontend-design",

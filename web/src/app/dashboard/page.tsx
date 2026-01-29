@@ -170,9 +170,7 @@ function SortableMetricItem({
         <div
           className={cn(
             "text-sm font-semibold",
-            inRange
-              ? "text-emerald-700 dark:text-emerald-300"
-              : "text-rose-700 dark:text-rose-300",
+            inRange ? "text-status-normal" : "text-status-critical",
           )}
         >
           {typeof value === "number" ? value.toFixed(1) : "—"}
@@ -834,12 +832,18 @@ export default function Dashboard() {
                       <Card
                         key={m.id}
                         className={cn(
-                          "rounded-lg transition cursor-pointer hover:shadow-md",
-                          isSelected && "ring-2 ring-primary ring-offset-2",
+                          "rounded-lg transition-all duration-200 cursor-pointer",
+                          "hover:shadow-md hover:border-primary/50",
+                          "border-l-4",
+                          inRange
+                            ? "border-l-status-normal"
+                            : "border-l-status-critical",
+                          isSelected &&
+                            "ring-2 ring-primary ring-offset-2 ring-offset-background",
                         )}
                         onClick={() => toggleMetric(m.id)}
                       >
-                        <CardContent className="px-1.5 py-0.5 space-y-0">
+                        <CardContent className="px-1.5 py-1 space-y-0">
                           <div className="flex items-start justify-between mb-1">
                             <div className="text-xs text-muted-foreground line-clamp-1 flex-1">
                               {m.name}
@@ -866,7 +870,7 @@ export default function Dashboard() {
                                     </div>
                                   ) : null}
                                   {flagStatus && (
-                                    <div className="text-sm font-medium text-rose-600">
+                                    <div className="text-sm font-medium text-status-critical">
                                       Durum: {flagStatus}
                                     </div>
                                   )}
@@ -878,8 +882,8 @@ export default function Dashboard() {
                             className={cn(
                               "text-lg font-semibold leading-none",
                               inRange
-                                ? "text-emerald-700 dark:text-emerald-300"
-                                : "text-rose-700 dark:text-rose-300",
+                                ? "text-status-normal"
+                                : "text-status-critical",
                             )}
                           >
                             {typeof value === "number" ? value.toFixed(1) : "—"}
