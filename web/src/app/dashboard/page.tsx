@@ -58,6 +58,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { useProfileClaim } from "@/hooks/use-profile-claim";
 import { Header } from "@/components/header";
+import { LoadingState, ErrorState } from "@/components/ui/spinner";
 
 type ApiData = { metrics: Metric[]; values: MetricValue[] };
 
@@ -663,10 +664,18 @@ export default function Dashboard() {
   }, [showSearchInput]);
 
   if (loading) {
-    return <div className="p-6">Loading…</div>;
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <LoadingState message="Veriler yükleniyor..." />
+      </div>
+    );
   }
   if (error) {
-    return <div className="p-6 text-red-600">{error}</div>;
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <ErrorState message={error} onRetry={() => window.location.reload()} />
+      </div>
+    );
   }
   if (!data) return null;
 
