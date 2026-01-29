@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ViziAI Brand Preview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #0d9488;
+        --primary-hover: #0f766e;
+        --secondary: #f97066;
+        --bg-canvas: #fafafa;
+        --bg-surface: #ffffff;
+        --text-primary: #0f172a;
+        --text-secondary: #64748b;
+        --border: #e2e8f0;
+        --status-normal: #22c55e;
+        --status-warning: #f59e0b;
+        --status-critical: #dc6843;
+        --chart-1: #2563eb;
+        --chart-2: #ea580c;
+        --chart-3: #16a34a;
+        --chart-4: #9333ea;
+        --chart-5: #a16207;
+        --chart-6: #db2777;
+      }
+
+      [data-theme="dark"] {
+        --primary: #2dd4bf;
+        --primary-hover: #5eead4;
+        --secondary: #fda4af;
+        --bg-canvas: #0f172a;
+        --bg-surface: #1e293b;
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --border: #334155;
+        --status-normal: #4ade80;
+        --status-warning: #fbbf24;
+        --status-critical: #f87171;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: var(--bg-canvas);
+        color: var(--text-primary);
+        padding: 2rem;
+        transition:
+          background 0.3s,
+          color 0.3s;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 3rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      h1 {
+        font-size: 2rem;
+        font-weight: 700;
+      }
+
+      .theme-toggle {
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+      }
+
+      section {
+        margin-bottom: 3rem;
+      }
+
+      h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      /* Tagline Options */
+      .taglines {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .tagline-option {
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .tagline-option.recommended {
+        border-color: var(--primary);
+        border-width: 2px;
+      }
+
+      .tagline-text {
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      .tagline-meta {
+        text-align: right;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+      }
+
+      .badge {
+        background: var(--primary);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+
+      /* Color Swatches */
+      .color-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+      }
+
+      .color-swatch {
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        overflow: hidden;
+      }
+
+      .color-swatch .color {
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      }
+
+      .color-swatch .info {
+        padding: 0.75rem;
+      }
+
+      .color-swatch .name {
+        font-weight: 600;
+        font-size: 0.875rem;
+      }
+
+      .color-swatch .hex {
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+        font-family: monospace;
+      }
+
+      /* Typography */
+      .type-samples {
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        padding: 2rem;
+      }
+
+      .type-sample {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .type-sample:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+
+      .type-label {
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.5rem;
+      }
+
+      .type-h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+      }
+      .type-h2 {
+        font-size: 2rem;
+        font-weight: 600;
+      }
+      .type-h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+      .type-body {
+        font-size: 1rem;
+        line-height: 1.6;
+      }
+      .type-small {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+      }
+      .type-data {
+        font-size: 2rem;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* Sample Metric Cards */
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+
+      .metric-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .metric-card::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+      }
+
+      .metric-card.normal::before {
+        background: var(--status-normal);
+      }
+      .metric-card.warning::before {
+        background: var(--status-warning);
+      }
+      .metric-card.critical::before {
+        background: var(--status-critical);
+      }
+
+      .metric-name {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+      }
+
+      .metric-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        margin-bottom: 0.25rem;
+      }
+
+      .metric-card.normal .metric-value {
+        color: var(--status-normal);
+      }
+      .metric-card.warning .metric-value {
+        color: var(--status-warning);
+      }
+      .metric-card.critical .metric-value {
+        color: var(--status-critical);
+      }
+
+      .metric-range {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+      }
+
+      /* Chart Colors */
+      .chart-colors {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .chart-color {
+        width: 60px;
+        height: 60px;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.875rem;
+      }
+
+      /* Buttons */
+      .button-row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-family: inherit;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-hover);
+      }
+
+      .btn-secondary {
+        background: var(--secondary);
+        color: white;
+      }
+
+      .btn-outline {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text-primary);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1 style="display: flex; align-items: center; gap: 0.5rem">
+          <img
+            src="logos/viziai-caduceus-openai.png"
+            alt="ViziAI logo"
+            style="height: 2.5rem; width: auto"
+          />
+          <span
+            ><span style="color: var(--primary)">Vizi</span
+            ><span style="color: var(--secondary)">AI</span></span
+          >
+        </h1>
+        <button class="theme-toggle" onclick="toggleTheme()">
+          Toggle Dark Mode
+        </button>
+      </header>
+
+      <!-- Tagline -->
+      <section>
+        <h2>Tagline</h2>
+        <div class="tagline-option recommended">
+          <div>
+            <div class="tagline-text">Tahlil Sonuçlarını Görselleştir</div>
+            <div class="tagline-meta" style="margin-top: 0.5rem">
+              English: "Visualize Your Test Results"
+            </div>
+          </div>
+          <div class="tagline-meta">
+            <span class="badge">Approved</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Logo -->
+      <section>
+        <h2>Logo (1024x1024, Transparent PNG)</h2>
+        <div
+          style="
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+          "
+        >
+          Caduceus • Two snakes + staff + wings
+        </div>
+          <div style="display: flex; gap: 1rem">
+            <div
+              style="
+                flex: 1;
+                background: #ffffff;
+                border-radius: 0.75rem;
+                padding: 2rem;
+                text-align: center;
+              "
+            >
+              <img
+                src="logos/viziai-caduceus-openai.png"
+                alt="OpenAI logo on white"
+                style="height: 150px; object-fit: contain"
+              />
+              <div style="font-size: 0.75rem; color: #666; margin-top: 0.5rem">
+                On White
+              </div>
+            </div>
+            <div
+              style="
+                flex: 1;
+                background: #1e293b;
+                border-radius: 0.75rem;
+                padding: 2rem;
+                text-align: center;
+              "
+            >
+              <img
+                src="logos/viziai-caduceus-openai.png"
+                alt="OpenAI logo on dark"
+                style="height: 150px; object-fit: contain"
+              />
+              <div
+                style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem"
+              >
+                On Dark
+              </div>
+            </div>
+            <div
+              style="
+                flex: 1;
+                background: #0d9488;
+                border-radius: 0.75rem;
+                padding: 2rem;
+                text-align: center;
+              "
+            >
+              <img
+                src="logos/viziai-caduceus-openai.png"
+                alt="OpenAI logo on brand"
+                style="height: 150px; object-fit: contain"
+              />
+              <div
+                style="
+                  font-size: 0.75rem;
+                  color: rgba(255, 255, 255, 0.8);
+                  margin-top: 0.5rem;
+                "
+              >
+                On Brand Teal
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Colors -->
+      <section>
+        <h2>Brand Colors</h2>
+        <div class="color-grid">
+          <div class="color-swatch">
+            <div class="color" style="background: #0d9488">Primary</div>
+            <div class="info">
+              <div class="name">Teal</div>
+              <div class="hex">#0D9488</div>
+            </div>
+          </div>
+          <div class="color-swatch">
+            <div class="color" style="background: #f97066">Secondary</div>
+            <div class="info">
+              <div class="name">Coral</div>
+              <div class="hex">#F97066</div>
+            </div>
+          </div>
+          <div class="color-swatch">
+            <div class="color" style="background: #22c55e">Normal</div>
+            <div class="info">
+              <div class="name">Sage Green</div>
+              <div class="hex">#22C55E</div>
+            </div>
+          </div>
+          <div class="color-swatch">
+            <div class="color" style="background: #f59e0b">Warning</div>
+            <div class="info">
+              <div class="name">Amber</div>
+              <div class="hex">#F59E0B</div>
+            </div>
+          </div>
+          <div class="color-swatch">
+            <div class="color" style="background: #dc6843">Critical</div>
+            <div class="info">
+              <div class="name">Terracotta</div>
+              <div class="hex">#DC6843</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chart Colors -->
+      <section>
+        <h2>Chart Colors (Colorblind Safe)</h2>
+        <div class="chart-colors">
+          <div class="chart-color" style="background: #2563eb">1</div>
+          <div class="chart-color" style="background: #ea580c">2</div>
+          <div class="chart-color" style="background: #16a34a">3</div>
+          <div class="chart-color" style="background: #9333ea">4</div>
+          <div class="chart-color" style="background: #a16207">5</div>
+          <div class="chart-color" style="background: #db2777">6</div>
+        </div>
+      </section>
+
+      <!-- Typography -->
+      <section>
+        <h2>Typography - Inter</h2>
+        <div class="type-samples">
+          <div class="type-sample">
+            <div class="type-label">Heading 1 (2.5rem / Bold)</div>
+            <div class="type-h1">Sağlık Verileriniz</div>
+          </div>
+          <div class="type-sample">
+            <div class="type-label">Heading 2 (2rem / Semibold)</div>
+            <div class="type-h2">Kan Tahlili Sonuçları</div>
+          </div>
+          <div class="type-sample">
+            <div class="type-label">Heading 3 (1.5rem / Semibold)</div>
+            <div class="type-h3">Kolesterol Değerleri</div>
+          </div>
+          <div class="type-sample">
+            <div class="type-label">Body Text (1rem)</div>
+            <div class="type-body">
+              Tahlil sonuçlarınızı görselleştirin ve zaman içindeki değişimleri
+              takip edin. ViziAI, karmaşık sağlık verilerinizi anlaşılır
+              grafiklere dönüştürür.
+            </div>
+          </div>
+          <div class="type-sample">
+            <div class="type-label">Data Display (2rem / Bold / Tabular)</div>
+            <div class="type-data">142 mg/dL</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sample Metric Cards -->
+      <section>
+        <h2>Sample Metric Cards</h2>
+        <div class="metric-grid">
+          <div class="metric-card normal">
+            <div class="metric-name">Hemoglobin</div>
+            <div class="metric-value">14.2</div>
+            <div class="metric-range">Ref: 12.0 - 16.0 g/dL</div>
+          </div>
+          <div class="metric-card warning">
+            <div class="metric-name">LDL Kolesterol</div>
+            <div class="metric-value">142</div>
+            <div class="metric-range">Ref: &lt;130 mg/dL</div>
+          </div>
+          <div class="metric-card critical">
+            <div class="metric-name">Trigliserit</div>
+            <div class="metric-value">285</div>
+            <div class="metric-range">Ref: &lt;150 mg/dL</div>
+          </div>
+          <div class="metric-card normal">
+            <div class="metric-name">Glukoz</div>
+            <div class="metric-value">92</div>
+            <div class="metric-range">Ref: 70 - 100 mg/dL</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Buttons -->
+      <section>
+        <h2>Buttons</h2>
+        <div class="button-row">
+          <button class="btn btn-primary">Rapor Yükle</button>
+          <button class="btn btn-secondary">Yeni Profil</button>
+          <button class="btn btn-outline">İptal</button>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      function toggleTheme() {
+        document.body.dataset.theme =
+          document.body.dataset.theme === "dark" ? "" : "dark";
+      }
+    </script>
+  </body>
+</html>
