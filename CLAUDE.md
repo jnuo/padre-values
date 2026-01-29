@@ -50,6 +50,33 @@ Users must be in `profile_allowed_emails` table to login:
 - hulyaovaliyil@gmail.com
 - ovaliolcay@yahoo.com
 
+## Deployment Checklist
+
+Before deploying to production, complete these steps:
+
+### 1. Set Vercel Environment Variables
+
+In Vercel project settings, add:
+
+- `NEON_DATABASE_URL` - Neon connection string (from Neon dashboard)
+- `NEXTAUTH_URL` - Production URL (e.g., `https://viziai.vercel.app`)
+- `NEXTAUTH_SECRET` - Generate with `openssl rand -base64 32`
+- `GOOGLE_CLIENT_ID` - From Google Cloud Console
+- `GOOGLE_CLIENT_SECRET` - From Google Cloud Console
+
+### 2. Update Google OAuth Redirect URIs
+
+In Google Cloud Console > APIs & Services > Credentials > OAuth 2.0 Client:
+
+- Add authorized redirect URI: `https://viziai.vercel.app/api/auth/callback/google`
+- Remove old Supabase callback URLs if present
+
+### 3. Test Production Deployment
+
+- [ ] Login flow works with Google OAuth
+- [ ] User data loads correctly from Neon
+- [ ] All allowed emails can access the app
+
 ## Notes
 
 - Low-activity personal project
