@@ -4,30 +4,14 @@
  * These are basic smoke tests to verify the API endpoint structure.
  */
 
-// Mock the Supabase client
-jest.mock("@supabase/supabase-js", () => ({
-  createClient: jest.fn(() => ({
-    from: jest.fn(() => ({
-      select: jest.fn(() => ({
-        eq: jest.fn(() => ({
-          execute: jest.fn().mockResolvedValue({ data: [], error: null }),
-        })),
-        in: jest.fn(() => ({
-          execute: jest.fn().mockResolvedValue({ data: [], error: null }),
-        })),
-        order: jest.fn(() => ({
-          execute: jest.fn().mockResolvedValue({ data: [], error: null }),
-        })),
-        execute: jest.fn().mockResolvedValue({ data: [], error: null }),
-      })),
-    })),
-  })),
+// Mock the Neon client
+jest.mock("@neondatabase/serverless", () => ({
+  neon: jest.fn(() => async () => []),
 }));
 
 // Mock environment variables
 const mockEnv = {
-  NEXT_PUBLIC_SUPABASE_URL: "https://test.supabase.co",
-  SUPABASE_SECRET_KEY: "test-secret-key",
+  NEON_DATABASE_URL: "postgresql://test:test@test.neon.tech/test",
 };
 
 describe("/api/metrics", () => {
@@ -86,7 +70,7 @@ describe("/api/metrics", () => {
 
   describe("Profile name handling", () => {
     it("should use default profile name when not specified", () => {
-      const DEFAULT_PROFILE_NAME = "Father (Migrated)";
+      const DEFAULT_PROFILE_NAME = "Yüksel O.";
 
       // Simulate URL parsing
       const url = new URL("http://localhost:3000/api/metrics");
@@ -97,7 +81,7 @@ describe("/api/metrics", () => {
     });
 
     it("should use provided profile name from query params", () => {
-      const DEFAULT_PROFILE_NAME = "Father (Migrated)";
+      const DEFAULT_PROFILE_NAME = "Yüksel O.";
 
       // Simulate URL parsing with profileName param
       const url = new URL(
@@ -111,9 +95,9 @@ describe("/api/metrics", () => {
   });
 
   describe("Data transformation", () => {
-    it("should transform Supabase metric to API format", () => {
-      // Supabase format from database
-      const supabaseMetric = {
+    it("should transform database metric to API format", () => {
+      // Database format
+      const dbMetric = {
         report_id: "report-123",
         name: "Hemoglobin",
         value: 14.2,
@@ -124,11 +108,11 @@ describe("/api/metrics", () => {
 
       // Transform to API format
       const apiMetric = {
-        id: supabaseMetric.name,
-        name: supabaseMetric.name,
-        unit: supabaseMetric.unit || "",
-        ref_min: supabaseMetric.ref_low,
-        ref_max: supabaseMetric.ref_high,
+        id: dbMetric.name,
+        name: dbMetric.name,
+        unit: dbMetric.unit || "",
+        ref_min: dbMetric.ref_low,
+        ref_max: dbMetric.ref_high,
       };
 
       expect(apiMetric.id).toBe("Hemoglobin");
@@ -138,8 +122,8 @@ describe("/api/metrics", () => {
       expect(apiMetric.ref_max).toBe(16.0);
     });
 
-    it("should create MetricValue from Supabase data", () => {
-      const supabaseMetric = {
+    it("should create MetricValue from database data", () => {
+      const dbMetric = {
         report_id: "report-123",
         name: "Hemoglobin",
         value: 14.2,
@@ -147,9 +131,9 @@ describe("/api/metrics", () => {
       const date = "2024-01-15";
 
       const metricValue = {
-        metric_id: supabaseMetric.name,
+        metric_id: dbMetric.name,
         date,
-        value: supabaseMetric.value,
+        value: dbMetric.value,
       };
 
       expect(metricValue.metric_id).toBe("Hemoglobin");

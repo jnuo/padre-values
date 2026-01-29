@@ -1,6 +1,10 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { sql } from "@/lib/db";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 /**
  * Claim Profile API
@@ -8,95 +12,77 @@ import { NextResponse } from "next/server";
  * POST /api/claim-profile
  *
  * After a user logs in for the first time, this endpoint checks if there's
- * an existing profile with their email and associates it with their account.
+ * an existing profile with their email in profile_allowed_emails and
+ * associates it with their account via user_access.
  *
  * This enables existing data (migrated from Google Sheets) to be linked to
  * the correct user when they first authenticate with Google OAuth.
  */
 export async function POST() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  try {
+    const session = await getServerSession(authOptions);
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return NextResponse.json(
-      { error: "Supabase not configured" },
-      { status: 500 },
-    );
-  }
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
 
-  // Create Supabase client with user's session
-  const cookieStore = await cookies();
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      getAll() {
-        return cookieStore.getAll();
-      },
-      setAll(cookiesToSet) {
-        try {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options),
-          );
-        } catch {
-          // Ignore errors when setting cookies in Server Components
-        }
-      },
-    },
-  });
+    const userEmail = session.user.email;
 
-  // Get authenticated user
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+    // Check if user already has access to any profile
+    const existingAccess = await sql`
+      SELECT ua.profile_id, p.display_name
+      FROM user_access ua
+      JOIN profiles p ON ua.profile_id = p.id
+      WHERE ua.user_email = ${userEmail}
+      LIMIT 1
+    `;
 
-  if (authError || !user) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
+    if (existingAccess && existingAccess.length > 0) {
+      return NextResponse.json({
+        claimed: false,
+        message: "User already has profile access",
+        profile_id: existingAccess[0].profile_id,
+        profile_name: existingAccess[0].display_name,
+      });
+    }
 
-  // Check if user already has a profile
-  const { data: existingAccess } = await supabase
-    .from("user_access")
-    .select("profile_id")
-    .eq("user_id", user.id)
-    .limit(1);
+    // Find profile by allowed email
+    const allowedProfile = await sql`
+      SELECT pae.profile_id, p.display_name
+      FROM profile_allowed_emails pae
+      JOIN profiles p ON pae.profile_id = p.id
+      WHERE pae.email = ${userEmail}
+      LIMIT 1
+    `;
 
-  if (existingAccess && existingAccess.length > 0) {
-    return NextResponse.json({
-      claimed: false,
-      message: "User already has profile access",
-      profile_id: existingAccess[0].profile_id,
-    });
-  }
+    if (!allowedProfile || allowedProfile.length === 0) {
+      return NextResponse.json({
+        claimed: false,
+        message: "No unclaimed profile found for your email",
+      });
+    }
 
-  // Call the claim function
-  const { data: claimResult, error: claimError } = await supabase.rpc(
-    "claim_profile_by_email",
-    {
-      p_user_id: user.id,
-      p_user_email: user.email,
-    },
-  );
+    const profileId = allowedProfile[0].profile_id;
+    const profileName = allowedProfile[0].display_name;
 
-  if (claimError) {
-    console.error("Error claiming profile:", claimError);
-    return NextResponse.json(
-      { error: "Failed to claim profile", details: claimError.message },
-      { status: 500 },
-    );
-  }
+    // Create user_access entry to claim the profile
+    await sql`
+      INSERT INTO user_access (profile_id, user_email, access_level)
+      VALUES (${profileId}, ${userEmail}, 'owner')
+      ON CONFLICT (profile_id, user_email) DO NOTHING
+    `;
 
-  if (claimResult && claimResult.length > 0) {
-    const claimed = claimResult[0];
     return NextResponse.json({
       claimed: true,
-      message: `Successfully claimed profile: ${claimed.profile_name}`,
-      profile_id: claimed.claimed_profile_id,
-      profile_name: claimed.profile_name,
+      message: `Successfully claimed profile: ${profileName}`,
+      profile_id: profileId,
+      profile_name: profileName,
     });
+  } catch (error) {
+    console.error("/api/claim-profile error", error);
+    return NextResponse.json(
+      { error: "Failed to claim profile", details: String(error) },
+      { status: 500 },
+    );
   }
-
-  return NextResponse.json({
-    claimed: false,
-    message: "No unclaimed profile found for your email",
-  });
 }

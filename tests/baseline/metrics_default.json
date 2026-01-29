@@ -1,0 +1,8483 @@
+{
+  "metrics": [
+    {
+      "id": "Hemoglobin",
+      "name": "Hemoglobin",
+      "ref_max": 17.5,
+      "ref_min": 13.7,
+      "unit": "gr/dL"
+    },
+    {
+      "id": "Trombosit",
+      "name": "Trombosit",
+      "ref_max": 340,
+      "ref_min": 160,
+      "unit": "10^3/µL"
+    },
+    {
+      "id": "Sedimentasyon",
+      "name": "Sedimentasyon",
+      "ref_max": 20,
+      "ref_min": null,
+      "unit": "mm/h"
+    },
+    {
+      "id": "Sedimantasyon",
+      "name": "Sedimantasyon",
+      "ref_max": 20,
+      "ref_min": null,
+      "unit": "mm/h"
+    },
+    {
+      "id": "Eozinofil#",
+      "name": "Eozinofil#",
+      "ref_max": 0.54,
+      "ref_min": 0.04,
+      "unit": "10^3/µL"
+    },
+    {
+      "id": "Ürik asit",
+      "name": "Ürik asit",
+      "ref_max": 6,
+      "ref_min": 2.6,
+      "unit": "mg/dL"
+    },
+    {
+      "id": "Üre",
+      "name": "Üre",
+      "ref_max": 43,
+      "ref_min": 13,
+      "unit": "mg/dL"
+    },
+    {
+      "id": "Eritrosit",
+      "name": "Eritrosit",
+      "ref_max": 6.08,
+      "ref_min": 4.63,
+      "unit": "10^3/µL"
+    },
+    {
+      "id": "Kreatinin",
+      "name": "Kreatinin",
+      "ref_max": 1.25,
+      "ref_min": 0.72,
+      "unit": "mg/dL"
+    },
+    {
+      "id": "Monosit#",
+      "name": "Monosit#",
+      "ref_max": 0.82,
+      "ref_min": 0.3,
+      "unit": "10^3/µL"
+    },
+    {
+      "id": "Lenfosit#",
+      "name": "Lenfosit#",
+      "ref_max": 3.57,
+      "ref_min": 1.32,
+      "unit": "10^3/µL"
+    },
+    {
+      "id": "Bazofil#",
+      "name": "Bazofil#",
+      "ref_max": 0.08,
+      "ref_min": 0.01,
+      "unit": "10^3/µL"
+    },
+    {
+      "id": "Nötrofil#",
+      "name": "Nötrofil#",
+      "ref_max": 5.38,
+      "ref_min": 1.78,
+      "unit": "10^3/µL"
+    },
+    {
+      "id": "Albümin",
+      "name": "Albümin",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "g/L"
+    },
+    {
+      "id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "name": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "ml/dk/1.73 m2"
+    },
+    {
+      "id": "Total Bilirubin",
+      "name": "Total Bilirubin",
+      "ref_max": 1.2,
+      "ref_min": 0.2,
+      "unit": "mg/dL"
+    },
+    {
+      "id": "Total Protein",
+      "name": "Total Protein",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "g/L"
+    },
+    {
+      "id": "Protrombin zamanı %",
+      "name": "Protrombin zamanı %",
+      "ref_max": 130,
+      "ref_min": 70,
+      "unit": "%"
+    },
+    {
+      "id": "Protrombin zamanı INR",
+      "name": "Protrombin zamanı INR",
+      "ref_max": 1.2,
+      "ref_min": 0.8,
+      "unit": ""
+    },
+    {
+      "id": "Alt (Alanine Aminotransferaz)",
+      "name": "Alt (Alanine Aminotransferaz)",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "U/L"
+    },
+    {
+      "id": "Ast (Aspartat Transaminaz)",
+      "name": "Ast (Aspartat Transaminaz)",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "U/L"
+    },
+    {
+      "id": "Ggt (Gamma Glutamil Transferaz)",
+      "name": "Ggt (Gamma Glutamil Transferaz)",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "U/L"
+    },
+    {
+      "id": "Ldh (Laktik Dehidrogenaz)",
+      "name": "Ldh (Laktik Dehidrogenaz)",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "U/L"
+    },
+    {
+      "id": "POTASYUM (SERUM/PLAZMA)",
+      "name": "POTASYUM (SERUM/PLAZMA)",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "mmol/L"
+    },
+    {
+      "id": "Sodyum (Na)(Serum/Plazma)",
+      "name": "Sodyum (Na)(Serum/Plazma)",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "mmol/L"
+    },
+    {
+      "id": "Ürik Asit (Serum/Plazma)",
+      "name": "Ürik Asit (Serum/Plazma)",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "BUN",
+      "name": "BUN",
+      "ref_max": 20,
+      "ref_min": 6,
+      "unit": "mg/dL"
+    },
+    {
+      "id": "Kalsiyum (Serum/Plazma)",
+      "name": "Kalsiyum (Serum/Plazma)",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "mg/dL"
+    },
+    {
+      "id": "CRP",
+      "name": "CRP",
+      "ref_max": 5,
+      "ref_min": null,
+      "unit": "mg/L"
+    },
+    {
+      "id": "AST",
+      "name": "AST",
+      "ref_max": 34,
+      "ref_min": 5,
+      "unit": "U/L"
+    },
+    {
+      "id": "ALT",
+      "name": "ALT",
+      "ref_max": 55,
+      "ref_min": null,
+      "unit": "U/L"
+    },
+    {
+      "id": "LDH",
+      "name": "LDH",
+      "ref_max": 243,
+      "ref_min": 125,
+      "unit": "U/L"
+    },
+    {
+      "id": "EOS%",
+      "name": "EOS%",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "%"
+    },
+    {
+      "id": "MON%",
+      "name": "MON%",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "%"
+    },
+    {
+      "id": "HGB",
+      "name": "HGB",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "g/dL"
+    },
+    {
+      "id": "EOS#",
+      "name": "EOS#",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "10^9/L"
+    },
+    {
+      "id": "NEU%",
+      "name": "NEU%",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "%"
+    },
+    {
+      "id": "BASO%",
+      "name": "BASO%",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "%"
+    },
+    {
+      "id": "PLT",
+      "name": "PLT",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "10^9/L"
+    },
+    {
+      "id": "LYM%",
+      "name": "LYM%",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "%"
+    },
+    {
+      "id": "HCT",
+      "name": "HCT",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "%"
+    },
+    {
+      "id": "LYM#",
+      "name": "LYM#",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "10^9/L"
+    },
+    {
+      "id": "MON#",
+      "name": "MON#",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "10^9/L"
+    },
+    {
+      "id": "WBC",
+      "name": "WBC",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "10^9/L"
+    },
+    {
+      "id": "RBC",
+      "name": "RBC",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "10^12/L"
+    },
+    {
+      "id": "NEU#",
+      "name": "NEU#",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "10^9/L"
+    },
+    {
+      "id": "BASO#",
+      "name": "BASO#",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "10^9/L"
+    },
+    {
+      "id": "GGT",
+      "name": "GGT",
+      "ref_max": 36,
+      "ref_min": 9,
+      "unit": "U/L"
+    },
+    {
+      "id": "ALP",
+      "name": "ALP",
+      "ref_max": 150,
+      "ref_min": 40,
+      "unit": "U/L"
+    },
+    {
+      "id": "Crp (Turbidimetrik)",
+      "name": "Crp (Turbidimetrik)",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "mg/L"
+    },
+    {
+      "id": "Lökosit",
+      "name": "Lökosit",
+      "ref_max": 9.07,
+      "ref_min": 4.23,
+      "unit": "10^3/µL"
+    },
+    {
+      "id": "Albumin",
+      "name": "Albumin",
+      "ref_max": 50,
+      "ref_min": 35,
+      "unit": "g/L"
+    },
+    {
+      "id": "Ferritin",
+      "name": "Ferritin",
+      "ref_max": 274.66,
+      "ref_min": 21.81,
+      "unit": "ng/mL"
+    },
+    {
+      "id": "Alanin aminotransferaz",
+      "name": "Alanin aminotransferaz",
+      "ref_max": 50,
+      "ref_min": 5,
+      "unit": "U/L"
+    },
+    {
+      "id": "Alkalen Fosfataz",
+      "name": "Alkalen Fosfataz",
+      "ref_max": 150,
+      "ref_min": 40,
+      "unit": "U/L"
+    },
+    {
+      "id": "APTT",
+      "name": "APTT",
+      "ref_max": 38.4,
+      "ref_min": 25.4,
+      "unit": "sn"
+    },
+    {
+      "id": "Aspartat transaminaz",
+      "name": "Aspartat transaminaz",
+      "ref_max": 34,
+      "ref_min": 5,
+      "unit": "U/L"
+    },
+    {
+      "id": "BAC (Mik.)",
+      "name": "BAC (Mik.)",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Bazofil%",
+      "name": "Bazofil%",
+      "ref_max": 1.2,
+      "ref_min": 0.2,
+      "unit": "%"
+    },
+    {
+      "id": "BE-b",
+      "name": "BE-b",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "BE-ecf",
+      "name": "BE-ecf",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Bilirubin (Direkt)",
+      "name": "Bilirubin (Direkt)",
+      "ref_max": 0.2,
+      "ref_min": null,
+      "unit": "mg/dL"
+    },
+    {
+      "id": "Bilirubin (Total)",
+      "name": "Bilirubin (Total)",
+      "ref_max": 1.2,
+      "ref_min": 0.3,
+      "unit": "mg/dL"
+    },
+    {
+      "id": "C-reaktif Protein",
+      "name": "C-reaktif Protein",
+      "ref_max": 18,
+      "ref_min": null,
+      "unit": "mg/L"
+    },
+    {
+      "id": "Ca++",
+      "name": "Ca++",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Cl-",
+      "name": "Cl-",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "D-dimer",
+      "name": "D-dimer",
+      "ref_max": 500,
+      "ref_min": null,
+      "unit": "mg/ml DDU"
+    },
+    {
+      "id": "Demir",
+      "name": "Demir",
+      "ref_max": 144,
+      "ref_min": 31,
+      "unit": "µg/dL"
+    },
+    {
+      "id": "Doymamış Demir Bağlama Kapasitesi",
+      "name": "Doymamış Demir Bağlama Kapasitesi",
+      "ref_max": 370,
+      "ref_min": 110,
+      "unit": "µg/dL"
+    },
+    {
+      "id": "Doymuş Demir Bağlama Kapasitesi",
+      "name": "Doymuş Demir Bağlama Kapasitesi",
+      "ref_max": 370,
+      "ref_min": 110,
+      "unit": "µg/dL"
+    },
+    {
+      "id": "eGFR",
+      "name": "eGFR",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "mL/dk/1.73 m2"
+    },
+    {
+      "id": "Eozinofil%",
+      "name": "Eozinofil%",
+      "ref_max": 7,
+      "ref_min": 0.8,
+      "unit": "%"
+    },
+    {
+      "id": "Fibrinojen",
+      "name": "Fibrinojen",
+      "ref_max": 580,
+      "ref_min": 240,
+      "unit": "mg/dL"
+    },
+    {
+      "id": "Folat",
+      "name": "Folat",
+      "ref_max": 20.5,
+      "ref_min": 3.1,
+      "unit": "ng/mL"
+    },
+    {
+      "id": "Fosfor",
+      "name": "Fosfor",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Gap K",
+      "name": "Gap K",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "GGT - Gamma glutamil transferaz",
+      "name": "GGT - Gamma glutamil transferaz",
+      "ref_max": 36,
+      "ref_min": 9,
+      "unit": "U/L"
+    },
+    {
+      "id": "Globulin",
+      "name": "Globulin",
+      "ref_max": 40,
+      "ref_min": 14,
+      "unit": "g/L"
+    },
+    {
+      "id": "Glu",
+      "name": "Glu",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Glukoz",
+      "name": "Glukoz",
+      "ref_max": 105,
+      "ref_min": 70,
+      "unit": "mg/dL"
+    },
+    {
+      "id": "HCO3",
+      "name": "HCO3",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Hematokrit",
+      "name": "Hematokrit",
+      "ref_max": 51,
+      "ref_min": 40.1,
+      "unit": "%"
+    },
+    {
+      "id": "HFR#",
+      "name": "HFR#",
+      "ref_max": 10.5,
+      "ref_min": 1.6,
+      "unit": "10^3/µL"
+    },
+    {
+      "id": "IGRAN%",
+      "name": "IGRAN%",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "IRF",
+      "name": "IRF",
+      "ref_max": 10.5,
+      "ref_min": 1.6,
+      "unit": "%"
+    },
+    {
+      "id": "K+",
+      "name": "K+",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Kalsiyum",
+      "name": "Kalsiyum",
+      "ref_max": 10.2,
+      "ref_min": 8.4,
+      "unit": "mg/dL"
+    },
+    {
+      "id": "Kan Üre Azotu",
+      "name": "Kan Üre Azotu",
+      "ref_max": 43,
+      "ref_min": 17,
+      "unit": "mg/dL"
+    },
+    {
+      "id": "Lac",
+      "name": "Lac",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "LDH - Laktik Dehidrogenaz",
+      "name": "LDH - Laktik Dehidrogenaz",
+      "ref_max": 243,
+      "ref_min": 125,
+      "unit": "U/L"
+    },
+    {
+      "id": "Lenfosit%",
+      "name": "Lenfosit%",
+      "ref_max": 53.1,
+      "ref_min": 21.8,
+      "unit": "%"
+    },
+    {
+      "id": "LFR",
+      "name": "LFR",
+      "ref_max": 98.4,
+      "ref_min": 89.9,
+      "unit": "L"
+    },
+    {
+      "id": "Magnezyum",
+      "name": "Magnezyum",
+      "ref_max": 2.6,
+      "ref_min": 1.6,
+      "unit": "mg/dL"
+    },
+    {
+      "id": "MCH",
+      "name": "MCH",
+      "ref_max": 32.2,
+      "ref_min": 25.7,
+      "unit": "pg"
+    },
+    {
+      "id": "MCHC",
+      "name": "MCHC",
+      "ref_max": 36.5,
+      "ref_min": 31.5,
+      "unit": "g/dL"
+    },
+    {
+      "id": "MCV",
+      "name": "MCV",
+      "ref_max": 92.2,
+      "ref_min": 79,
+      "unit": "fL"
+    },
+    {
+      "id": "MFR",
+      "name": "MFR",
+      "ref_max": 9.5,
+      "ref_min": 1.6,
+      "unit": "L"
+    },
+    {
+      "id": "Mg",
+      "name": "Mg",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Monosit%",
+      "name": "Monosit%",
+      "ref_max": 12.2,
+      "ref_min": 5.3,
+      "unit": "%"
+    },
+    {
+      "id": "MPV",
+      "name": "MPV",
+      "ref_max": 12.4,
+      "ref_min": 9.4,
+      "unit": "fL"
+    },
+    {
+      "id": "Na+",
+      "name": "Na+",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Nötrofil%",
+      "name": "Nötrofil%",
+      "ref_max": 67.9,
+      "ref_min": 34,
+      "unit": "%"
+    },
+    {
+      "id": "Oksijen Satürasyonu",
+      "name": "Oksijen Satürasyonu",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "P-LCR",
+      "name": "P-LCR",
+      "ref_max": 42.3,
+      "ref_min": 18.5,
+      "unit": "%"
+    },
+    {
+      "id": "PCO2",
+      "name": "PCO2",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "PCT",
+      "name": "PCT",
+      "ref_max": 0.32,
+      "ref_min": 0.17,
+      "unit": "%"
+    },
+    {
+      "id": "PDW",
+      "name": "PDW",
+      "ref_max": 16.1,
+      "ref_min": 10.1,
+      "unit": ""
+    },
+    {
+      "id": "pH",
+      "name": "pH",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "PO2",
+      "name": "PO2",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Potasyum",
+      "name": "Potasyum",
+      "ref_max": 5.1,
+      "ref_min": 3.5,
+      "unit": "mmol/L"
+    },
+    {
+      "id": "Protein",
+      "name": "Protein",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Protein - [Total]",
+      "name": "Protein - [Total]",
+      "ref_max": 83,
+      "ref_min": 64,
+      "unit": "g/L"
+    },
+    {
+      "id": "Prothrombin zamanı INR",
+      "name": "Prothrombin zamanı INR",
+      "ref_max": 1.2,
+      "ref_min": 0.8,
+      "unit": ""
+    },
+    {
+      "id": "Protrombin Zamanı",
+      "name": "Protrombin Zamanı",
+      "ref_max": 130,
+      "ref_min": 70,
+      "unit": "%"
+    },
+    {
+      "id": "Protrombin zamanı sec",
+      "name": "Protrombin zamanı sec",
+      "ref_max": 13.5,
+      "ref_min": 8,
+      "unit": "sn"
+    },
+    {
+      "id": "RDW",
+      "name": "RDW",
+      "ref_max": 14.4,
+      "ref_min": 11.6,
+      "unit": "%"
+    },
+    {
+      "id": "RDW-CV",
+      "name": "RDW-CV",
+      "ref_max": 14.4,
+      "ref_min": 11.6,
+      "unit": "%"
+    },
+    {
+      "id": "RDW-SD",
+      "name": "RDW-SD",
+      "ref_max": 43.9,
+      "ref_min": 35.1,
+      "unit": "fL"
+    },
+    {
+      "id": "RET",
+      "name": "RET",
+      "ref_max": 0.095,
+      "ref_min": 0.026,
+      "unit": "10^6/µL"
+    },
+    {
+      "id": "RET %",
+      "name": "RET %",
+      "ref_max": 1.81,
+      "ref_min": 0.51,
+      "unit": "%"
+    },
+    {
+      "id": "Retikülosit sayımı",
+      "name": "Retikülosit sayımı",
+      "ref_max": 0.095,
+      "ref_min": 0.026,
+      "unit": "10^6/µL"
+    },
+    {
+      "id": "SBC",
+      "name": "SBC",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Serbest T3",
+      "name": "Serbest T3",
+      "ref_max": 3.91,
+      "ref_min": 1.58,
+      "unit": "pg/mL"
+    },
+    {
+      "id": "Serbest T4",
+      "name": "Serbest T4",
+      "ref_max": 1.48,
+      "ref_min": 0.7,
+      "unit": "ng/dL"
+    },
+    {
+      "id": "SG",
+      "name": "SG",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "SO2%",
+      "name": "SO2%",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Sodyum",
+      "name": "Sodyum",
+      "ref_max": 145,
+      "ref_min": 136,
+      "unit": "mmol/L"
+    },
+    {
+      "id": "TCO2",
+      "name": "TCO2",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "tHb",
+      "name": "tHb",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Total Demir Bağlama Kapasitesi",
+      "name": "Total Demir Bağlama Kapasitesi",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Transferrin Doygunluğu %",
+      "name": "Transferrin Doygunluğu %",
+      "ref_max": 42,
+      "ref_min": 14,
+      "unit": "µg/dL"
+    },
+    {
+      "id": "TROPONİN I",
+      "name": "TROPONİN I",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": "ng/L"
+    },
+    {
+      "id": "TSH",
+      "name": "TSH",
+      "ref_max": 4.94,
+      "ref_min": 0.35,
+      "unit": "uIU/mL"
+    },
+    {
+      "id": "Vitamin B12",
+      "name": "Vitamin B12",
+      "ref_max": 883,
+      "ref_min": 189,
+      "unit": "pg/mL"
+    },
+    {
+      "id": "WBC (Mik.)",
+      "name": "WBC (Mik.)",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Gap_K",
+      "name": "Gap_K",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Kalsiyum (Ca)",
+      "name": "Kalsiyum (Ca)",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Ortalama Trombosit Hacmi",
+      "name": "Ortalama Trombosit Hacmi",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Sodyum [Na]",
+      "name": "Sodyum [Na]",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Potasiyum",
+      "name": "Potasiyum",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Bilirubin Direkt",
+      "name": "Bilirubin Direkt",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Alkalin fosfataz",
+      "name": "Alkalin fosfataz",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Bilirubin",
+      "name": "Bilirubin",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Bilirubin - [Direkt]",
+      "name": "Bilirubin - [Direkt]",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Albümin (Serum/Plazma)",
+      "name": "Albümin (Serum/Plazma)",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Demir [Serum]",
+      "name": "Demir [Serum]",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "RET #",
+      "name": "RET #",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Ferritin(Serum/Plazma)",
+      "name": "Ferritin(Serum/Plazma)",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Direkt Bilirubin",
+      "name": "Direkt Bilirubin",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Doymuş Demir bağlama kapasitesi",
+      "name": "Doymuş Demir bağlama kapasitesi",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Alp (Alkalen Fosfataz)",
+      "name": "Alp (Alkalen Fosfataz)",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Alt (Alanin Aminotransferaz)",
+      "name": "Alt (Alanin Aminotransferaz)",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Alanin aminotransferaz - [Alt / Sgpt]",
+      "name": "Alanin aminotransferaz - [Alt / Sgpt]",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Alkalen fosfataz (Serum/Plazma)",
+      "name": "Alkalen fosfataz (Serum/Plazma)",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "Aspartat transaminaz [Ast / Sgot]",
+      "name": "Aspartat transaminaz [Ast / Sgot]",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    },
+    {
+      "id": "RET%",
+      "name": "RET%",
+      "ref_max": null,
+      "ref_min": null,
+      "unit": ""
+    }
+  ],
+  "values": [
+    {
+      "date": "2025-06-23",
+      "metric_id": "Hemoglobin",
+      "value": 9.2
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Eritrosit",
+      "value": 2.87
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "MCV",
+      "value": 103.5
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "MCH",
+      "value": 32.1
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "RDW",
+      "value": 14.5
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "PDW",
+      "value": 12.1
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Kreatinin",
+      "value": 1.69
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 38.73
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "BE-ecf",
+      "value": -1.4
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Gap_K",
+      "value": 7.4
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "HCO3",
+      "value": 23.9
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "pH",
+      "value": 7.379
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "PO2",
+      "value": 33
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Lac",
+      "value": 1.4
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "BE-b",
+      "value": -0.4
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "SBC",
+      "value": 23.9
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Kan Üre Azotu",
+      "value": 39.72
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Magnezyum",
+      "value": 1.98
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "PCO2",
+      "value": 40.1
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Alkalen Fosfataz",
+      "value": 75
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "C-reaktif Protein",
+      "value": 9.1
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Cl-",
+      "value": 107.6
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "TCO2",
+      "value": 25.1
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Lenfosit%",
+      "value": 92.4
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Lenfosit#",
+      "value": 92.4
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Bazofil#",
+      "value": 0.02
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Glukoz",
+      "value": 179
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Nötrofil%",
+      "value": 7.4
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Monosit%",
+      "value": 0.2
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Nötrofil#",
+      "value": 4.45
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 8.2
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Hematokrit",
+      "value": 29.7
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Monosit#",
+      "value": 0.2
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Lökosit",
+      "value": 60.59
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Aspartat transaminaz",
+      "value": 12
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Ortalama Trombosit Hacmi",
+      "value": 10.5
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "GGT - Gamma glutamil transferaz",
+      "value": 10
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Sodyum [Na]",
+      "value": 136
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Total Bilirubin",
+      "value": 0.47
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 157
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Ürik asit",
+      "value": 4.6
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Potasiyum",
+      "value": 5.4
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Trombosit",
+      "value": 72
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Bilirubin Direkt",
+      "value": 0.17
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 12
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Alkalin fosfataz",
+      "value": 75
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Bilirubin",
+      "value": 0.47
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Bilirubin - [Direkt]",
+      "value": 0.17
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Ca++",
+      "value": 1.16
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "eGFR",
+      "value": 38.73
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Glu",
+      "value": 192
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "K+",
+      "value": 5.35
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Mg",
+      "value": 1.4
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "MPV",
+      "value": 10.5
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Na+",
+      "value": 133.6
+    },
+    {
+      "date": "2025-06-23",
+      "metric_id": "Üre",
+      "value": 85
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Hemoglobin",
+      "value": 10
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Eritrosit",
+      "value": 3.19
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "MCV",
+      "value": 95
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "MCH",
+      "value": 31.3
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "MCHC",
+      "value": 33
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "RDW",
+      "value": 14
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "PCT",
+      "value": 0.07
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "PDW",
+      "value": 12.5
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Kreatinin",
+      "value": 2.56
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 23.36
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Fosfor",
+      "value": 6.4
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Kan Üre Azotu",
+      "value": 67.76
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Magnezyum",
+      "value": 2.3
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Lenfosit%",
+      "value": 68.6
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Lenfosit#",
+      "value": 7.27
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Bazofil%",
+      "value": 0.2
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Bazofil#",
+      "value": 0.02
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Eozinofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Nötrofil%",
+      "value": 30.1
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Monosit%",
+      "value": 1.1
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Nötrofil#",
+      "value": 3.18
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 8.2
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Hematokrit",
+      "value": 30.3
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Monosit#",
+      "value": 0.12
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Lökosit",
+      "value": 10.59
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Aspartat transaminaz",
+      "value": 15
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Ortalama Trombosit Hacmi",
+      "value": 10.5
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Sodyum [Na]",
+      "value": 133
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Total Bilirubin",
+      "value": 0.5
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 159
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Ürik asit",
+      "value": 4.7
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Potasiyum",
+      "value": 5.3
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Trombosit",
+      "value": 68
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 41
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Bilirubin Direkt",
+      "value": 0.2
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 16
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Albümin",
+      "value": 41
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Bilirubin",
+      "value": 0.5
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "eGFR",
+      "value": 23.36
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Kalsiyum",
+      "value": 8.2
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "MPV",
+      "value": 10.5
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Potasyum",
+      "value": 5.3
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Sodyum",
+      "value": 133
+    },
+    {
+      "date": "2025-06-26",
+      "metric_id": "Üre",
+      "value": 145
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "Hemoglobin",
+      "value": 11.2
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "Eritrosit",
+      "value": 3.36
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "MCV",
+      "value": 96.1
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "MCH",
+      "value": 33.3
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "MCHC",
+      "value": 34.7
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "RDW",
+      "value": 14
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "PCT",
+      "value": 0.06
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "PDW",
+      "value": 11.5
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "P-LCR",
+      "value": 31.6
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "IGRAN%",
+      "value": 0.2
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "Lenfosit%",
+      "value": 32.9
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "Lenfosit#",
+      "value": 1.8
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "Bazofil%",
+      "value": 0.2
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "Bazofil#",
+      "value": 0.2
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "Eozinofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "Nötrofil%",
+      "value": 64.7
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "Monosit%",
+      "value": 2.2
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "Nötrofil#",
+      "value": 3.54
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "Hematokrit",
+      "value": 32.3
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "Monosit#",
+      "value": 0.12
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "Lökosit",
+      "value": 5.47
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "Ortalama Trombosit Hacmi",
+      "value": 11
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "Trombosit",
+      "value": 58
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "MPV",
+      "value": 11
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "RDW-CV",
+      "value": 14
+    },
+    {
+      "date": "2025-07-02",
+      "metric_id": "RDW-SD",
+      "value": 49.7
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Hemoglobin",
+      "value": 10.2
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Eritrosit",
+      "value": 3.24
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "MCV",
+      "value": 93.8
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "MCH",
+      "value": 31.5
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "MCHC",
+      "value": 33.6
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "RDW",
+      "value": 13.9
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "PCT",
+      "value": 0.05
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "PDW",
+      "value": 11.1
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "APTT",
+      "value": 26.5
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Kreatinin",
+      "value": 2.04
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 30.74
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Demir [Serum]",
+      "value": 125
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Vitamin B12",
+      "value": 236
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Ferritin",
+      "value": 1482.32
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Folat",
+      "value": 16
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Sedimantasyon",
+      "value": 31
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Kan Üre Azotu",
+      "value": 25.23
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Protrombin Zamanı",
+      "value": 0.98
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "C-reaktif Protein",
+      "value": 29.9
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Total Protein",
+      "value": 54
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Doymamış Demir Bağlama Kapasitesi",
+      "value": 64
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Transferrin Doygunluğu %",
+      "value": 64
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Lenfosit%",
+      "value": 80.8
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Lenfosit#",
+      "value": 0.21
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Bazofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Bazofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Glukoz",
+      "value": 154
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Eozinofil%",
+      "value": 3.8
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Nötrofil%",
+      "value": 3.9
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Monosit%",
+      "value": 11.5
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Nötrofil#",
+      "value": 0.01
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 8.7
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Hematokrit",
+      "value": 30.4
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Monosit#",
+      "value": 0.03
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Eozinofil#",
+      "value": 0.01
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Lökosit",
+      "value": 0.26
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Aspartat transaminaz",
+      "value": 20
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Ortalama Trombosit Hacmi",
+      "value": 11.1
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Protrombin zamanı %",
+      "value": 94
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Prothrombin zamanı INR",
+      "value": 0.98
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "RET #",
+      "value": 0
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Sodyum [Na]",
+      "value": 134
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 261
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Ürik asit",
+      "value": 2.7
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Potasiyum",
+      "value": 5
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Trombosit",
+      "value": 45
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 37
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 16
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Albümin",
+      "value": 37
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "eGFR",
+      "value": 30.74
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Ferritin(Serum/Plazma)",
+      "value": 1482.32
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "MPV",
+      "value": 11.1
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Potasyum",
+      "value": 5
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Protein - [Total]",
+      "value": 54
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Protrombin zamanı INR",
+      "value": 0.98
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Protrombin zamanı sec",
+      "value": 11.6
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Retikülosit sayımı",
+      "value": 0
+    },
+    {
+      "date": "2025-07-17",
+      "metric_id": "Üre",
+      "value": 54
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 31.98
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Kan Üre Azotu",
+      "value": 28.5
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "C-reaktif Protein",
+      "value": 40
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Bazofil%",
+      "value": 0.8
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 8.4
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Aspartat transaminaz",
+      "value": 16
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Ortalama Trombosit Hacmi",
+      "value": 10.3
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Sodyum [Na]",
+      "value": 135
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 223
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Potasiyum",
+      "value": 4.8
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "BUN",
+      "value": 28.5
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 38
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 12
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Bazofil#",
+      "value": 0.01
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Trombosit",
+      "value": 100
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "PCT",
+      "value": 0.1
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "MPV",
+      "value": 10.3
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "PDW",
+      "value": 9.4
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Glukoz",
+      "value": 136
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Üre",
+      "value": 61
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Eritrosit",
+      "value": 3.11
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Hemoglobin",
+      "value": 10
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Hematokrit",
+      "value": 29.3
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "MCV",
+      "value": 94.2
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "MCH",
+      "value": 32.2
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "MCHC",
+      "value": 34.1
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "RDW",
+      "value": 13.9
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Lökosit",
+      "value": 1.25
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Nötrofil%",
+      "value": 65.6
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Nötrofil#",
+      "value": 0.82
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Lenfosit%",
+      "value": 14.4
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Lenfosit#",
+      "value": 0.18
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Monosit%",
+      "value": 0.23
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Monosit#",
+      "value": 0.02
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Eozinofil%",
+      "value": 0.8
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Eozinofil#",
+      "value": 0.01
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Kreatinin",
+      "value": 1.98
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Ürik asit",
+      "value": 3.4
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Sodyum",
+      "value": 135
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Potasyum",
+      "value": 4.8
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Kalsiyum",
+      "value": 8.4
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "eGFR",
+      "value": 31.98
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Total Protein",
+      "value": 54
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Albümin",
+      "value": 38
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "Globulin",
+      "value": 16
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "AST",
+      "value": 16
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "ALT",
+      "value": 12
+    },
+    {
+      "date": "2025-07-21",
+      "metric_id": "LDH",
+      "value": 223
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Hemoglobin",
+      "value": 10.2
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Eritrosit",
+      "value": 3.11
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "MCV",
+      "value": 96.5
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "MCH",
+      "value": 32.8
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "MCHC",
+      "value": 34
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "RDW",
+      "value": 13.9
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "PCT",
+      "value": 0.2
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "PDW",
+      "value": 10.3
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Kreatinin",
+      "value": 2.1
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "P-LCR",
+      "value": 25
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "IGRAN%",
+      "value": 4.2
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Kan Üre Azotu",
+      "value": 63
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Total Protein",
+      "value": 55.82
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Lenfosit%",
+      "value": 7.4
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Lenfosit#",
+      "value": 0.99
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Bazofil%",
+      "value": 0.2
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Bazofil#",
+      "value": 0.2
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Glukoz",
+      "value": 105
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Eozinofil%",
+      "value": 0.1
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Nötrofil%",
+      "value": 85.2
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Monosit%",
+      "value": 7.1
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Nötrofil#",
+      "value": 11.45
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 8.82
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Hematokrit",
+      "value": 30
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Monosit#",
+      "value": 0.96
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Eozinofil#",
+      "value": 0.01
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Lökosit",
+      "value": 13.44
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Aspartat transaminaz",
+      "value": 16
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Ortalama Trombosit Hacmi",
+      "value": 10.2
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "GGT - Gamma glutamil transferaz",
+      "value": 15
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Sodyum [Na]",
+      "value": 138
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Total Bilirubin",
+      "value": 0.67
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 260
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Ürik asit",
+      "value": 3.6
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Potasiyum",
+      "value": 4.99
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Trombosit",
+      "value": 201
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 36.55
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Bilirubin Direkt",
+      "value": 0.13
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 12
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Alt (Alanine Aminotransferaz)",
+      "value": 12
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Albümin",
+      "value": 36.55
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Ast (Aspartat Transaminaz)",
+      "value": 16
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Bilirubin (Direkt)",
+      "value": 0.13
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Bilirubin (Total)",
+      "value": 0.67
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Ggt (Gamma Glutamil Transferaz)",
+      "value": 15
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Kalsiyum",
+      "value": 8.82
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Ldh (Laktik Dehidrogenaz)",
+      "value": 260
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "MPV",
+      "value": 10.2
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "POTASYUM (SERUM/PLAZMA)",
+      "value": 4.99
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Protein",
+      "value": 55.82
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "RDW-CV",
+      "value": 13.9
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "RDW-SD",
+      "value": 48.8
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Sodyum (Na)(Serum/Plazma)",
+      "value": 138
+    },
+    {
+      "date": "2025-07-24",
+      "metric_id": "Ürik Asit (Serum/Plazma)",
+      "value": 3.6
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Hemoglobin",
+      "value": 8
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Eritrosit",
+      "value": 2.53
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "MCH",
+      "value": 31.6
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "RDW",
+      "value": 13.8
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "PDW",
+      "value": 8.9
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "C-reaktif Protein",
+      "value": 28.83
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Lenfosit%",
+      "value": 2.6
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Lenfosit#",
+      "value": 0.09
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Bazofil%",
+      "value": 0.6
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Bazofil#",
+      "value": 0.02
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Eozinofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Nötrofil%",
+      "value": 90
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Monosit%",
+      "value": 7
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Nötrofil#",
+      "value": 3.27
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 7.93
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Hematokrit",
+      "value": 23.9
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Monosit#",
+      "value": 0.25
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Lökosit",
+      "value": 3.63
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Aspartat transaminaz",
+      "value": 13
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Ortalama Trombosit Hacmi",
+      "value": 9.6
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "GGT - Gamma glutamil transferaz",
+      "value": 12
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Sodyum [Na]",
+      "value": 135
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Total Bilirubin",
+      "value": 0.54
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 184
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Ürik asit",
+      "value": 3.59
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Potasiyum",
+      "value": 4.29
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Trombosit",
+      "value": 174
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Bilirubin Direkt",
+      "value": 0.11
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 9
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "TROPONİN I",
+      "value": 11.06
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "MCV",
+      "value": 95
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "MPV",
+      "value": 9.7
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "RDW-SD",
+      "value": 46.9
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "EOS%",
+      "value": 0
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "MON%",
+      "value": 7
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "HGB",
+      "value": 8.6
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "RDW-CV",
+      "value": 13.6
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "P-LCR",
+      "value": 21.4
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "EOS#",
+      "value": 0
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "MCHC",
+      "value": 34.8
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "NEU%",
+      "value": 89.7
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "BASO%",
+      "value": 0.7
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "PLT",
+      "value": 188
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "LYM%",
+      "value": 2.6
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "HCT",
+      "value": 24.7
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "LYM#",
+      "value": 0.11
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "MON#",
+      "value": 0.3
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "WBC",
+      "value": 4.29
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "RBC",
+      "value": 2.6
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "NEU#",
+      "value": 3.85
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "BASO#",
+      "value": 0.03
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "PCT",
+      "value": 0.18
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "IGRAN%",
+      "value": 4.9
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Kan Üre Azotu",
+      "value": 56
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Kreatinin",
+      "value": 1.83
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Ldh (Laktik Dehidrogenaz)",
+      "value": 184
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Ast (Aspartat Transaminaz)",
+      "value": 13
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Kalsiyum (Serum/Plazma)",
+      "value": 7.93
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Crp (Turbidimetrik)",
+      "value": 28.83
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Glukoz",
+      "value": 175
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 36
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Bilirubin (Total)",
+      "value": 0.54
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Bilirubin (Direkt)",
+      "value": 0.11
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Sodyum (Na)(Serum/Plazma)",
+      "value": 135
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "POTASYUM (SERUM/PLAZMA)",
+      "value": 4.29
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Alt (Alanine Aminotransferaz)",
+      "value": 9
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Ggt (Gamma Glutamil Transferaz)",
+      "value": 12
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "Ürik Asit (Serum/Plazma)",
+      "value": 3.59
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "SG",
+      "value": 1.01
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "WBC (Mik.)",
+      "value": 1
+    },
+    {
+      "date": "2025-07-29",
+      "metric_id": "BAC (Mik.)",
+      "value": 2
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Hemoglobin",
+      "value": 10.2
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Eritrosit",
+      "value": 3.25
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "MCV",
+      "value": 88.3
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "MCH",
+      "value": 31.4
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "MCHC",
+      "value": 35.5
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "RDW",
+      "value": 16.6
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Kreatinin",
+      "value": 1.89
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 33.71
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Kan Üre Azotu",
+      "value": 22.9
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Magnezyum",
+      "value": 1.9
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Lenfosit%",
+      "value": 41.7
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Lenfosit#",
+      "value": 0.1
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Bazofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Bazofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Eozinofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Nötrofil%",
+      "value": 50
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Monosit%",
+      "value": 8.3
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Nötrofil#",
+      "value": 0.12
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 6.5
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Hematokrit",
+      "value": 28.7
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Monosit#",
+      "value": 0.02
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Lökosit",
+      "value": 0.24
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Sodyum [Na]",
+      "value": 141
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Potasiyum",
+      "value": 3.5
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Trombosit",
+      "value": 35
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 25
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Albümin",
+      "value": 25
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "eGFR",
+      "value": 33.71
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Kalsiyum",
+      "value": 6.5
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Potasyum",
+      "value": 3.5
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Sodyum",
+      "value": 141
+    },
+    {
+      "date": "2025-08-24",
+      "metric_id": "Üre",
+      "value": 49
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Hemoglobin",
+      "value": 9.8
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Eritrosit",
+      "value": 3.17
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "MCV",
+      "value": 90.9
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "MCH",
+      "value": 30.9
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "MCHC",
+      "value": 34
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "RDW",
+      "value": 16.6
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Kreatinin",
+      "value": 1.54
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 43.29
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Kan Üre Azotu",
+      "value": 19.16
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Magnezyum",
+      "value": 1.75
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Alkalen Fosfataz",
+      "value": 55
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Total Protein",
+      "value": 38
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Lenfosit%",
+      "value": 55.6
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Lenfosit#",
+      "value": 0.5
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Bazofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Bazofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Glukoz",
+      "value": 154
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Eozinofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Nötrofil%",
+      "value": 33.3
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Monosit%",
+      "value": 11.1
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Nötrofil#",
+      "value": 0.3
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 7
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Hematokrit",
+      "value": 28.8
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Monosit#",
+      "value": 0.1
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Lökosit",
+      "value": 0.09
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Aspartat transaminaz",
+      "value": 14
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "GGT - Gamma glutamil transferaz",
+      "value": 16
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Sodyum [Na]",
+      "value": 133
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 209
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Ürik asit",
+      "value": 2.9
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Potasiyum",
+      "value": 3.7
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Trombosit",
+      "value": 211
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 25
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 11
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Albumin",
+      "value": 25
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "eGFR",
+      "value": 43.29
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Kalsiyum",
+      "value": 7
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Potasyum",
+      "value": 3.7
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Sodyum",
+      "value": 133
+    },
+    {
+      "date": "2025-08-26",
+      "metric_id": "Üre",
+      "value": 41
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Hemoglobin",
+      "value": 9.5
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Eritrosit",
+      "value": 3.09
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "MCV",
+      "value": 88
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "MCH",
+      "value": 30.7
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "MCHC",
+      "value": 34.9
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "RDW",
+      "value": 16.8
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "PCT",
+      "value": 0.09
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "PDW",
+      "value": 23.1
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Kreatinin",
+      "value": 1.41
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 48.16
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Kan Üre Azotu",
+      "value": 20.56
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Magnezyum",
+      "value": 1.64
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Alkalen Fosfataz",
+      "value": 63
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Total Protein",
+      "value": 38
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Lenfosit%",
+      "value": 21.8
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Lenfosit#",
+      "value": 0.56
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Bazofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Bazofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Glukoz",
+      "value": 170
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Eozinofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Nötrofil%",
+      "value": 33.3
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Monosit%",
+      "value": 5.3
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Nötrofil#",
+      "value": 0.03
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 6.8
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Hematokrit",
+      "value": 27.2
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Monosit#",
+      "value": 0.1
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Lökosit",
+      "value": 0.07
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Aspartat transaminaz",
+      "value": 20
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Ortalama Trombosit Hacmi",
+      "value": 13.7
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "GGT - Gamma glutamil transferaz",
+      "value": 17
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Sodyum [Na]",
+      "value": 131
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 239
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Ürik asit",
+      "value": 2.5
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Potasiyum",
+      "value": 4.2
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Trombosit",
+      "value": 68
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 24
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 10
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Albumin",
+      "value": 24
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "eGFR",
+      "value": 48.16
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Kalsiyum",
+      "value": 6.8
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "MPV",
+      "value": 13.7
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Potasyum",
+      "value": 4.2
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Sodyum",
+      "value": 131
+    },
+    {
+      "date": "2025-08-27",
+      "metric_id": "Üre",
+      "value": 44
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Hemoglobin",
+      "value": 9.9
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Eritrosit",
+      "value": 3.15
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "MCV",
+      "value": 94.3
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "MCH",
+      "value": 31.4
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "MCHC",
+      "value": 33.3
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "RDW",
+      "value": 16.8
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Kreatinin",
+      "value": 1.49
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 45
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Kan Üre Azotu",
+      "value": 17.76
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Magnezyum",
+      "value": 1.64
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Alkalen Fosfataz",
+      "value": 62
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Total Protein",
+      "value": 39
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Lenfosit%",
+      "value": 60
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Lenfosit#",
+      "value": 0.9
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Glukoz",
+      "value": 152
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Eozinofil%",
+      "value": 6.7
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Nötrofil%",
+      "value": 33.3
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Monosit%",
+      "value": 13.3
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Nötrofil#",
+      "value": 0.2
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 6.7
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Hematokrit",
+      "value": 29.7
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Monosit#",
+      "value": 0.2
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Eozinofil#",
+      "value": 0.01
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Lökosit",
+      "value": 0.15
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Aspartat transaminaz",
+      "value": 24
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "GGT - Gamma glutamil transferaz",
+      "value": 12
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Sodyum [Na]",
+      "value": 128
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 417
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Ürik asit",
+      "value": 2.2
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Potasiyum",
+      "value": 4.6
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Trombosit",
+      "value": 29
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 23
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 10
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Albumin",
+      "value": 23
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "eGFR",
+      "value": 45
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Kalsiyum",
+      "value": 6.7
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Potasyum",
+      "value": 4.6
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Sodyum",
+      "value": 128
+    },
+    {
+      "date": "2025-08-28",
+      "metric_id": "Üre",
+      "value": 38
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "MCV",
+      "value": 90
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 40.41
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "BE-ecf",
+      "value": -0.1
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Gap_K",
+      "value": 9.8
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "HCO3",
+      "value": 23
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "pH",
+      "value": 7.511
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "PO2",
+      "value": 44.6
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Lac",
+      "value": 1.3
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "tHb",
+      "value": 9.6
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "BE-b",
+      "value": 1.2
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "SBC",
+      "value": 25.3
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Kan Üre Azotu",
+      "value": 19.63
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "PCO2",
+      "value": 28.5
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Alkalen Fosfataz",
+      "value": 62
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Oksijen Satürasyonu",
+      "value": 81
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Cl-",
+      "value": 95.3
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "TCO2",
+      "value": 23.9
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 7.1
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Aspartat transaminaz",
+      "value": 16
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "GGT - Gamma glutamil transferaz",
+      "value": 13
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Sodyum [Na]",
+      "value": 134
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 247
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Potasiyum",
+      "value": 3.9
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 29
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 10
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Ca++",
+      "value": 1.02
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Gap K",
+      "value": 9.8
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Glu",
+      "value": 163
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "K+",
+      "value": 3.59
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Mg",
+      "value": 1.2
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Na+",
+      "value": 124.6
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "SO2%",
+      "value": 81
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Eritrosit",
+      "value": 3.09
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Hemoglobin",
+      "value": 9.4
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Hematokrit",
+      "value": 28.1
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "MCH",
+      "value": 30.4
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "MCHC",
+      "value": 33.5
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "RDW",
+      "value": 16.4
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Lökosit",
+      "value": 0.8
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Nötrofil%",
+      "value": 25
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Nötrofil#",
+      "value": 0.2
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Lenfosit%",
+      "value": 62.5
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Lenfosit#",
+      "value": 0.5
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Monosit%",
+      "value": 12.5
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Monosit#",
+      "value": 0.1
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Eozinofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Bazofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Bazofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Trombosit",
+      "value": 17
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Glukoz",
+      "value": 166
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Üre",
+      "value": 42
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "BUN",
+      "value": 19.63
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Kreatinin",
+      "value": 1.63
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Ürik asit",
+      "value": 2.5
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Sodyum",
+      "value": 134
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Potasyum",
+      "value": 3.9
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Kalsiyum",
+      "value": 7.1
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Magnezyum",
+      "value": 1.68
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "eGFR",
+      "value": 40.41
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Total Protein",
+      "value": 42
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "Albumin",
+      "value": 29
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "AST",
+      "value": 16
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "ALT",
+      "value": 10
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "GGT",
+      "value": 13
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "ALP",
+      "value": 62
+    },
+    {
+      "date": "2025-08-29",
+      "metric_id": "LDH",
+      "value": 247
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Hemoglobin",
+      "value": 9
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Eritrosit",
+      "value": 2.96
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "MCV",
+      "value": 86.5
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "MCH",
+      "value": 30.4
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "MCHC",
+      "value": 35.2
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "RDW",
+      "value": 16.3
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "PCT",
+      "value": 0.17
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "PDW",
+      "value": 10.1
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Kreatinin",
+      "value": 1.75
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 37.9
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Kan Üre Azotu",
+      "value": 21.03
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Magnezyum",
+      "value": 1.64
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Alkalen Fosfataz",
+      "value": 54
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Total Protein",
+      "value": 38
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Lenfosit#",
+      "value": 6.25
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Glukoz",
+      "value": 175
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Nötrofil#",
+      "value": 2.5
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 6.9
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Hematokrit",
+      "value": 25.6
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Monosit#",
+      "value": 1.25
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Lökosit",
+      "value": 0.09
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Aspartat transaminaz",
+      "value": 12
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "GGT - Gamma glutamil transferaz",
+      "value": 7
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Sodyum [Na]",
+      "value": 131
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 63
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Ürik asit",
+      "value": 3
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Potasiyum",
+      "value": 3.5
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Trombosit",
+      "value": 22.1
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 26
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 9
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Albumin",
+      "value": 26
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "eGFR",
+      "value": 37.9
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Kalsiyum",
+      "value": 6.9
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Potasyum",
+      "value": 3.5
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Sodyum",
+      "value": 131
+    },
+    {
+      "date": "2025-08-30",
+      "metric_id": "Üre",
+      "value": 45
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Hemoglobin",
+      "value": 8.8
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Eritrosit",
+      "value": 2.84
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "MCV",
+      "value": 88.7
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "MCH",
+      "value": 31
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "MCHC",
+      "value": 34.9
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "RDW",
+      "value": 16.3
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Kreatinin",
+      "value": 1.65
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 39.82
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Kan Üre Azotu",
+      "value": 21.03
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Magnezyum",
+      "value": 1.69
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Alkalen Fosfataz",
+      "value": 52
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Total Protein",
+      "value": 39
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Lenfosit%",
+      "value": 60
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Lenfosit#",
+      "value": 0.6
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Bazofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Bazofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Glukoz",
+      "value": 160
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Eozinofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Nötrofil%",
+      "value": 30
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Monosit%",
+      "value": 10
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Nötrofil#",
+      "value": 0.03
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 6.8
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Hematokrit",
+      "value": 25.2
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Monosit#",
+      "value": 0.01
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Lökosit",
+      "value": 0.1
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Aspartat transaminaz",
+      "value": 19
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "GGT - Gamma glutamil transferaz",
+      "value": 11
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Sodyum [Na]",
+      "value": 131
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 293
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Ürik asit",
+      "value": 3.1
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Potasiyum",
+      "value": 3.9
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Trombosit",
+      "value": 29
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 25
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 11
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Albumin",
+      "value": 25
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "eGFR",
+      "value": 39.82
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Kalsiyum",
+      "value": 6.8
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Potasyum",
+      "value": 3.9
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Sodyum",
+      "value": 131
+    },
+    {
+      "date": "2025-08-31",
+      "metric_id": "Üre",
+      "value": 45
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Hemoglobin",
+      "value": 9.7
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Eritrosit",
+      "value": 3.23
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "MCV",
+      "value": 84.5
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "MCH",
+      "value": 30
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "MCHC",
+      "value": 35.5
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "RDW",
+      "value": 15.9
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "APTT",
+      "value": 26.3
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Fibrinojen",
+      "value": 340
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Kreatinin",
+      "value": 1.47
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 45.79
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Kan Üre Azotu",
+      "value": 21.03
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Magnezyum",
+      "value": 1.48
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Protrombin Zamanı",
+      "value": 1.09
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Alkalen Fosfataz",
+      "value": 50
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Total Protein",
+      "value": 36
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Lenfosit%",
+      "value": 53.8
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Lenfosit#",
+      "value": 0.7
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Bazofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Bazofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Glukoz",
+      "value": 152
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Eozinofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Nötrofil%",
+      "value": 23.1
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Monosit%",
+      "value": 23.1
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Nötrofil#",
+      "value": 0.03
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 6.9
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Hematokrit",
+      "value": 27.3
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Monosit#",
+      "value": 0.3
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Lökosit",
+      "value": 0.13
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Aspartat transaminaz",
+      "value": 10
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Prothrombin zamanı INR",
+      "value": 1.09
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "GGT - Gamma glutamil transferaz",
+      "value": 11
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Sodyum [Na]",
+      "value": 126
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Total Bilirubin",
+      "value": 1
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 158
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Ürik asit",
+      "value": 3
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Potasiyum",
+      "value": 3.4
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Trombosit",
+      "value": 36
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 25
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 9
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Albumin",
+      "value": 25
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "eGFR",
+      "value": 45.79
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Kalsiyum",
+      "value": 6.9
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Potasyum",
+      "value": 3.4
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Sodyum",
+      "value": 126
+    },
+    {
+      "date": "2025-09-01",
+      "metric_id": "Üre",
+      "value": 45
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Hemoglobin",
+      "value": 7.6
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Eritrosit",
+      "value": 2.56
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "MCV",
+      "value": 85.2
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "MCH",
+      "value": 29.7
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "MCHC",
+      "value": 34.9
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "RDW",
+      "value": 15.9
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Kreatinin",
+      "value": 1.49
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 45
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Kan Üre Azotu",
+      "value": 27.57
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Magnezyum",
+      "value": 2.28
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Total Protein",
+      "value": 36
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Lenfosit%",
+      "value": 44
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Lenfosit#",
+      "value": 0.11
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Bazofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Bazofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Glukoz",
+      "value": 181
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Eozinofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Nötrofil%",
+      "value": 28
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Monosit%",
+      "value": 28
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Nötrofil#",
+      "value": 0.07
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 6.5
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Hematokrit",
+      "value": 21.8
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Monosit#",
+      "value": 0.07
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Lökosit",
+      "value": 0.25
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Sodyum [Na]",
+      "value": 123.1
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 166
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Ürik asit",
+      "value": 3.2
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Potasiyum",
+      "value": 4
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Trombosit",
+      "value": 36
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 22
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Bilirubin Direkt",
+      "value": 0.6
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 8
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Albumin",
+      "value": 22
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Direkt Bilirubin",
+      "value": 0.6
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "eGFR",
+      "value": 45
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Kalsiyum",
+      "value": 6.5
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Potasyum",
+      "value": 4
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Sodyum",
+      "value": 123.1
+    },
+    {
+      "date": "2025-09-02",
+      "metric_id": "Üre",
+      "value": 59
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Hemoglobin",
+      "value": 9.1
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Eritrosit",
+      "value": 2.96
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "MCV",
+      "value": 87.5
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "MCH",
+      "value": 30.7
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "MCHC",
+      "value": 35.1
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "RDW",
+      "value": 15.4
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "PCT",
+      "value": 0.04
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "PDW",
+      "value": 15
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Kreatinin",
+      "value": 1.25
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 55.57
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Kan Üre Azotu",
+      "value": 23.83
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Magnezyum",
+      "value": 1.93
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Total Protein",
+      "value": 39
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Lenfosit%",
+      "value": 51.4
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Lenfosit#",
+      "value": 0.18
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Bazofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Bazofil#",
+      "value": 0.01
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Glukoz",
+      "value": 176
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Eozinofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Nötrofil%",
+      "value": 28.6
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Monosit%",
+      "value": 17.1
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Nötrofil#",
+      "value": 0.1
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 7.1
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Hematokrit",
+      "value": 25.9
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Monosit#",
+      "value": 0.06
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Lökosit",
+      "value": 0.35
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Aspartat transaminaz",
+      "value": 8
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Ortalama Trombosit Hacmi",
+      "value": 10.8
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Sodyum [Na]",
+      "value": 127
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Total Bilirubin",
+      "value": 0.8
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 123
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Ürik asit",
+      "value": 4
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Potasiyum",
+      "value": 4.1
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Trombosit",
+      "value": 36
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 26
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Bilirubin Direkt",
+      "value": 0.6
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 6
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Albumin",
+      "value": 26
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Direkt Bilirubin",
+      "value": 0.6
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "eGFR",
+      "value": 55.57
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Kalsiyum",
+      "value": 7.1
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "MPV",
+      "value": 10.8
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Potasyum",
+      "value": 4.1
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Sodyum",
+      "value": 127
+    },
+    {
+      "date": "2025-09-03",
+      "metric_id": "Üre",
+      "value": 51
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Hemoglobin",
+      "value": 9.1
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Eritrosit",
+      "value": 2.93
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "MCV",
+      "value": 91.8
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "MCH",
+      "value": 31.1
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "MCHC",
+      "value": 33.8
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "RDW",
+      "value": 11.6
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "PCT",
+      "value": 0.09
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "PDW",
+      "value": 13.1
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Kreatinin",
+      "value": 1.33
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 51.68
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Kan Üre Azotu",
+      "value": 25.7
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Magnezyum",
+      "value": 1.94
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Total Protein",
+      "value": 44
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Lenfosit%",
+      "value": 26.9
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Lenfosit#",
+      "value": 0.32
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Bazofil%",
+      "value": 0.01
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Bazofil#",
+      "value": 0.01
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Glukoz",
+      "value": 164
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Eozinofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Nötrofil%",
+      "value": 62.2
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Monosit%",
+      "value": 10.1
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Nötrofil#",
+      "value": 0.74
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 7.8
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Hematokrit",
+      "value": 26.9
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Monosit#",
+      "value": 0.12
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Lökosit",
+      "value": 1.19
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Aspartat transaminaz",
+      "value": 15
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Ortalama Trombosit Hacmi",
+      "value": 13.5
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Sodyum [Na]",
+      "value": 131
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Total Bilirubin",
+      "value": 0.7
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 183
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Ürik asit",
+      "value": 7
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Potasiyum",
+      "value": 3.9
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Trombosit",
+      "value": 65
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 29
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Bilirubin Direkt",
+      "value": 0.7
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 9
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Albumin",
+      "value": 29
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Direkt Bilirubin",
+      "value": 0.7
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "eGFR",
+      "value": 51.68
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Kalsiyum",
+      "value": 7.8
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "MPV",
+      "value": 13.5
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Potasyum",
+      "value": 3.9
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Sodyum",
+      "value": 131
+    },
+    {
+      "date": "2025-09-06",
+      "metric_id": "Üre",
+      "value": 55
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Hemoglobin",
+      "value": 9.5
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Eritrosit",
+      "value": 3.03
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "MCV",
+      "value": 92.1
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "MCH",
+      "value": 31.4
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "MCHC",
+      "value": 34.1
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "RDW",
+      "value": 16.3
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "PCT",
+      "value": 0.07
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "PDW",
+      "value": 13.3
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Kreatinin",
+      "value": 1.2
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 58.52
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Kan Üre Azotu",
+      "value": 22.9
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Lenfosit%",
+      "value": 18.6
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Lenfosit#",
+      "value": 0.36
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Bazofil%",
+      "value": 0.5
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Bazofil#",
+      "value": 0.01
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Eozinofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Nötrofil%",
+      "value": 71.1
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Monosit%",
+      "value": 0.98
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Nötrofil#",
+      "value": 1.38
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 7.8
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Hematokrit",
+      "value": 27.9
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Monosit#",
+      "value": 0.19
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Lökosit",
+      "value": 1.94
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Ortalama Trombosit Hacmi",
+      "value": 12
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Sodyum [Na]",
+      "value": 138
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Potasiyum",
+      "value": 3.8
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Trombosit",
+      "value": 61
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 29
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Albümin",
+      "value": 29
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "eGFR",
+      "value": 58.52
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Kalsiyum",
+      "value": 7.8
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "MPV",
+      "value": 12
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Potasyum",
+      "value": 3.8
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Sodyum",
+      "value": 138
+    },
+    {
+      "date": "2025-09-07",
+      "metric_id": "Üre",
+      "value": 49
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Hemoglobin",
+      "value": 10.7
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "HFR#",
+      "value": 24
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "LFR",
+      "value": 76
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "MFR",
+      "value": 14.3
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Eritrosit",
+      "value": 3.55
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "MCV",
+      "value": 89.3
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "MCH",
+      "value": 30.1
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "MCHC",
+      "value": 33.8
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "RDW",
+      "value": 17.9
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "PCT",
+      "value": 0.17
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "PDW",
+      "value": 11.3
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "APTT",
+      "value": 28
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Fibrinojen",
+      "value": 316
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "D-dimer",
+      "value": 161
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Kreatinin",
+      "value": 1.95
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 32.46
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Globulin",
+      "value": 14
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Demir [Serum]",
+      "value": 56
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Vitamin B12",
+      "value": 1992
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Ferritin",
+      "value": 21.81
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Folat",
+      "value": 9.3
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Kan Üre Azotu",
+      "value": 17.29
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Protrombin Zamanı",
+      "value": 89
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Total Protein",
+      "value": 50
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Doymamış Demir Bağlama Kapasitesi",
+      "value": 147
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Doymuş Demir bağlama kapasitesi",
+      "value": 91
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Transferrin Doygunluğu %",
+      "value": 38.1
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Lenfosit%",
+      "value": 39.7
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Lenfosit#",
+      "value": 1.58
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Bazofil%",
+      "value": 0.8
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Bazofil#",
+      "value": 0.01
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Glukoz",
+      "value": 37
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Eozinofil%",
+      "value": 0.5
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Nötrofil%",
+      "value": 51.2
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Monosit%",
+      "value": 0.31
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Nötrofil#",
+      "value": 2.04
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 8.6
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Hematokrit",
+      "value": 31.7
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Monosit#",
+      "value": 0.31
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Eozinofil#",
+      "value": 0.02
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Total Demir Bağlama Kapasitesi",
+      "value": 147
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Lökosit",
+      "value": 3.99
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Ortalama Trombosit Hacmi",
+      "value": 11.1
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Protrombin zamanı %",
+      "value": 89
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "RET #",
+      "value": 0.0927
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "RET %",
+      "value": 2.61
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Sodyum [Na]",
+      "value": 137
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Total Bilirubin",
+      "value": 0.8
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 248
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Ürik asit",
+      "value": 7.4
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Potasiyum",
+      "value": 5.1
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Trombosit",
+      "value": 152
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 36
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 10
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Albümin",
+      "value": 36
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Demir",
+      "value": 56
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "eGFR",
+      "value": 32.46
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Kalsiyum",
+      "value": 8.6
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "MPV",
+      "value": 11.1
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Potasyum",
+      "value": 5.1
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Protrombin zamanı sec",
+      "value": 12
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Sodyum",
+      "value": 137
+    },
+    {
+      "date": "2025-09-15",
+      "metric_id": "Üre",
+      "value": 37
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 48.406
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Kan Üre Azotu",
+      "value": 15.89
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "C-reaktif Protein",
+      "value": 4.8
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 7.9
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Aspartat transaminaz",
+      "value": 16
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Ortalama Trombosit Hacmi",
+      "value": 11.2
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Sodyum [Na]",
+      "value": 141
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 246
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Ürik asit",
+      "value": 91
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Potasiyum",
+      "value": 4.4
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 7
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Eritrosit",
+      "value": 3.34
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Hemoglobin",
+      "value": 10.4
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Hematokrit",
+      "value": 33.2
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "MCV",
+      "value": 99.4
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "MCH",
+      "value": 31.1
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "MCHC",
+      "value": 31.3
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "RDW",
+      "value": 19.8
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Lökosit",
+      "value": 4.74
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Nötrofil%",
+      "value": 27.6
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Nötrofil#",
+      "value": 1.31
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Lenfosit%",
+      "value": 60.8
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Lenfosit#",
+      "value": 2.88
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Monosit#",
+      "value": 0.51
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Eozinofil#",
+      "value": 0.01
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Bazofil#",
+      "value": 0.03
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Trombosit",
+      "value": 90
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "PCT",
+      "value": 0.1
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "MPV",
+      "value": 11.2
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "PDW",
+      "value": 12.3
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Glukoz",
+      "value": 129
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Üre",
+      "value": 34
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "BUN",
+      "value": 15.89
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Kreatinin",
+      "value": 1.4
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Sodyum",
+      "value": 141
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Potasyum",
+      "value": 4.4
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "Kalsiyum",
+      "value": 7.9
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "eGFR",
+      "value": 48.406
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "AST",
+      "value": 16
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "ALT",
+      "value": 7
+    },
+    {
+      "date": "2025-09-29",
+      "metric_id": "LDH",
+      "value": 246
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Bilirubin (Direkt)",
+      "value": 0.12
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Hemoglobin",
+      "value": 10.1
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Eritrosit",
+      "value": 3.12
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "MCV",
+      "value": 99.4
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "MCH",
+      "value": 32.4
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "MCHC",
+      "value": 32.6
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "RDW",
+      "value": 19.7
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "PCT",
+      "value": 0.06
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "PDW",
+      "value": 13.2
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Kreatinin",
+      "value": 1.59
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "P-LCR",
+      "value": 31
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "IGRAN%",
+      "value": 0.2
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Kan Üre Azotu",
+      "value": 33
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Alkalen Fosfataz",
+      "value": 68
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "C-reaktif Protein",
+      "value": 4.11
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Lenfosit%",
+      "value": 43.7
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Lenfosit#",
+      "value": 2.37
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Bazofil%",
+      "value": 0.2
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Bazofil#",
+      "value": 0.2
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Glukoz",
+      "value": 133
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Eozinofil%",
+      "value": 0.4
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Nötrofil%",
+      "value": 50.3
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Monosit%",
+      "value": 5.4
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Nötrofil#",
+      "value": 2.73
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 8.6
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Hematokrit",
+      "value": 31
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Monosit#",
+      "value": 5.4
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Eozinofil#",
+      "value": 0.4
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Lökosit",
+      "value": 5.42
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Aspartat transaminaz",
+      "value": 15
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Ortalama Trombosit Hacmi",
+      "value": 10.6
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "GGT - Gamma glutamil transferaz",
+      "value": 12
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Sodyum [Na]",
+      "value": 142
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Total Bilirubin",
+      "value": 0.7
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Ürik asit",
+      "value": 10.12
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Potasiyum",
+      "value": 4.07
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Trombosit",
+      "value": 60
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 34.91
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Bilirubin Direkt",
+      "value": 0.12
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 7
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Alp (Alkalen Fosfataz)",
+      "value": 68
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Alt (Alanin Aminotransferaz)",
+      "value": 7
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Ast (Aspartat Transaminaz)",
+      "value": 15
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Bilirubin (Total)",
+      "value": 0.7
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Ggt (Gamma Glutamil Transferaz)",
+      "value": 12
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Kalsiyum (Serum/Plazma)",
+      "value": 8.6
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "MPV",
+      "value": 10.6
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "POTASYUM (SERUM/PLAZMA)",
+      "value": 4.07
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "RDW-CV",
+      "value": 19.7
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "RDW-SD",
+      "value": 72.1
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Sodyum (Na)(Serum/Plazma)",
+      "value": 142
+    },
+    {
+      "date": "2025-10-08",
+      "metric_id": "Ürik Asit (Serum/Plazma)",
+      "value": 10.12
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Hemoglobin",
+      "value": 10.4
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "HFR#",
+      "value": 7.5
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "LFR",
+      "value": 78.8
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "MFR",
+      "value": 13.7
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Eritrosit",
+      "value": 3.28
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "MCV",
+      "value": 98.2
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "MCH",
+      "value": 31.7
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "MCHC",
+      "value": 32.3
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "RDW",
+      "value": 18
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "PCT",
+      "value": 0.03
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "PDW",
+      "value": 12.6
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Kreatinin",
+      "value": 1.35
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 50.73
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Demir [Serum]",
+      "value": 128
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Vitamin B12",
+      "value": 340
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Ferritin",
+      "value": 2977.37
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Folat",
+      "value": 7.2
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Sedimantasyon",
+      "value": 14
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Kan Üre Azotu",
+      "value": 18.69
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Alkalen Fosfataz",
+      "value": 86
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "C-reaktif Protein",
+      "value": 6.1
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "IRF",
+      "value": 21.2
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Total Protein",
+      "value": 54
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Doymamış Demir Bağlama Kapasitesi",
+      "value": 74
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Doymuş Demir bağlama kapasitesi",
+      "value": 74
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Lenfosit%",
+      "value": 44.2
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Lenfosit#",
+      "value": 2.21
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Bazofil#",
+      "value": 0.02
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Glukoz",
+      "value": 133
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Monosit%",
+      "value": 8.8
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Nötrofil#",
+      "value": 2.32
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 8.6
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Hematokrit",
+      "value": 32.2
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Monosit#",
+      "value": 0.44
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Eozinofil#",
+      "value": 0.2
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Lökosit",
+      "value": 4.99
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Aspartat transaminaz",
+      "value": 15
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Ortalama Trombosit Hacmi",
+      "value": 9.9
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "RET #",
+      "value": 0.06
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "GGT - Gamma glutamil transferaz",
+      "value": 16
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Sodyum [Na]",
+      "value": 147
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 209
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Ürik asit",
+      "value": 9.4
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Potasiyum",
+      "value": 4.8
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Trombosit",
+      "value": 27
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 41
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 7
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Alanin aminotransferaz - [Alt / Sgpt]",
+      "value": 7
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Albümin",
+      "value": 41
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Alkalen fosfataz (Serum/Plazma)",
+      "value": 86
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Aspartat transaminaz [Ast / Sgot]",
+      "value": 15
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Doymuş Demir Bağlama Kapasitesi",
+      "value": 74
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "eGFR",
+      "value": 50.73
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Ferritin(Serum/Plazma)",
+      "value": 2977.37
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "MPV",
+      "value": 9.9
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Potasyum",
+      "value": 4.8
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Protein - [Total]",
+      "value": 54
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Retikülosit sayımı",
+      "value": 0.06
+    },
+    {
+      "date": "2025-10-21",
+      "metric_id": "Üre",
+      "value": 40
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Hemoglobin",
+      "value": 9.5
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "HFR#",
+      "value": 7.3
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "LFR",
+      "value": 80.8
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "MFR",
+      "value": 11.9
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Eritrosit",
+      "value": 2.94
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "MCV",
+      "value": 96.3
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "MCH",
+      "value": 32.3
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "MCHC",
+      "value": 33.6
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "RDW",
+      "value": 17.1
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "PCT",
+      "value": 0.05
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "PDW",
+      "value": 12.9
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Kreatinin",
+      "value": 1.21
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 57.87
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Demir [Serum]",
+      "value": 151
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Vitamin B12",
+      "value": 528
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Ferritin",
+      "value": 6129.39
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Folat",
+      "value": 6.8
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Sedimantasyon",
+      "value": 27
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Kan Üre Azotu",
+      "value": 20.09
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Alkalen Fosfataz",
+      "value": 104
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Serbest T3",
+      "value": 2.72
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Serbest T4",
+      "value": 0.82
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "TSH",
+      "value": 0.85
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "IRF",
+      "value": 19.2
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Total Protein",
+      "value": 59
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Doymamış Demir Bağlama Kapasitesi",
+      "value": 48
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Transferrin Doygunluğu %",
+      "value": 48
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Lenfosit%",
+      "value": 62.9
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Lenfosit#",
+      "value": 1.71
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Bazofil%",
+      "value": 0.4
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Bazofil#",
+      "value": 0.01
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Glukoz",
+      "value": 120
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "RET%",
+      "value": 1.87
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Eozinofil%",
+      "value": 0.7
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Nötrofil%",
+      "value": 15
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Monosit%",
+      "value": 21
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Nötrofil#",
+      "value": 0.41
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 8.5
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Hematokrit",
+      "value": 28.3
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Monosit#",
+      "value": 0.57
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Eozinofil#",
+      "value": 0.02
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Lökosit",
+      "value": 2.72
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Aspartat transaminaz",
+      "value": 17
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Ortalama Trombosit Hacmi",
+      "value": 11.4
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "RET #",
+      "value": 0.06
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "GGT - Gamma glutamil transferaz",
+      "value": 18
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Sodyum [Na]",
+      "value": 140
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 220
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Ürik asit",
+      "value": 9
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Potasiyum",
+      "value": 4.5
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Trombosit",
+      "value": 44
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 43
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 7
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "RET",
+      "value": 0.06
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Albümin",
+      "value": 43
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Demir",
+      "value": 151
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "eGFR",
+      "value": 57.87
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Kalsiyum",
+      "value": 8.5
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "MPV",
+      "value": 11.4
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Potasyum",
+      "value": 4.5
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Sodyum",
+      "value": 140
+    },
+    {
+      "date": "2025-11-03",
+      "metric_id": "Üre",
+      "value": 43
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Hemoglobin",
+      "value": 10
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Eritrosit",
+      "value": 2.96
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "MCV",
+      "value": 103
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "MCH",
+      "value": 33.8
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "MCHC",
+      "value": 32.8
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "RDW",
+      "value": 17.5
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "PCT",
+      "value": 0.07
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "PDW",
+      "value": 14.4
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Kreatinin",
+      "value": 1.13
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 62.86
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Globulin",
+      "value": 16
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Sedimantasyon",
+      "value": 25
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Kan Üre Azotu",
+      "value": 13.08
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "C-reaktif Protein",
+      "value": 8.1
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Total Protein",
+      "value": 56
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Lenfosit%",
+      "value": 20.5
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Lenfosit#",
+      "value": 1.39
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Bazofil%",
+      "value": 0.6
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Bazofil#",
+      "value": 0.04
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Glukoz",
+      "value": 137
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Eozinofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Nötrofil%",
+      "value": 60.2
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Monosit%",
+      "value": 18.7
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Nötrofil#",
+      "value": 4.09
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 8.8
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Hematokrit",
+      "value": 30.5
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Monosit#",
+      "value": 1.27
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Lökosit",
+      "value": 6.79
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Aspartat transaminaz",
+      "value": 7
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Ortalama Trombosit Hacmi",
+      "value": 12.1
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Sodyum [Na]",
+      "value": 141
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 242
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Ürik asit",
+      "value": 10
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Potasiyum",
+      "value": 4.5
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Trombosit",
+      "value": 57
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 40
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 17
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Albumin",
+      "value": 40
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "eGFR",
+      "value": 62.86
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Kalsiyum",
+      "value": 8.8
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "MPV",
+      "value": 12.1
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Potasyum",
+      "value": 4.5
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Sodyum",
+      "value": 141
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "Üre",
+      "value": 28
+    },
+    {
+      "date": "2025-11-11",
+      "metric_id": "CRP",
+      "value": 8.1
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Hemoglobin",
+      "value": 10.1
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "HFR#",
+      "value": 8.5
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "LFR",
+      "value": 76.6
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "MFR",
+      "value": 14.9
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Eritrosit",
+      "value": 3.13
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "MCV",
+      "value": 99.7
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "MCH",
+      "value": 32.5
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "MCHC",
+      "value": 32.6
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "RDW",
+      "value": 17.7
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "PCT",
+      "value": 0.11
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "PDW",
+      "value": 11
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Kreatinin",
+      "value": 1.15
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 61.51
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Demir [Serum]",
+      "value": 55
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Vitamin B12",
+      "value": 1261
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Folat",
+      "value": 7.7
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Kan Üre Azotu",
+      "value": 15.89
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Alkalen Fosfataz",
+      "value": 94
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "C-reaktif Protein",
+      "value": 29.3
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "IRF",
+      "value": 23.4
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Total Protein",
+      "value": 56
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Doymamış Demir Bağlama Kapasitesi",
+      "value": 128
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Lenfosit%",
+      "value": 35.3
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Lenfosit#",
+      "value": 1.92
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Bazofil%",
+      "value": 0.2
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Bazofil#",
+      "value": 0.01
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Glukoz",
+      "value": 125
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Nötrofil%",
+      "value": 20.4
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Monosit%",
+      "value": 30.3
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Nötrofil#",
+      "value": 1.11
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 8.7
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Hematokrit",
+      "value": 31.3
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Monosit#",
+      "value": 1.65
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Eozinofil#",
+      "value": 13.8
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Lökosit",
+      "value": 5.17
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Aspartat transaminaz",
+      "value": 17
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Ortalama Trombosit Hacmi",
+      "value": 10.8
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "RET #",
+      "value": 0.11
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "RET %",
+      "value": 3.4
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "GGT - Gamma glutamil transferaz",
+      "value": 20
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Sodyum [Na]",
+      "value": 141
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 232
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Ürik asit",
+      "value": 8.7
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Potasiyum",
+      "value": 4.4
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Trombosit",
+      "value": 98
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Albümin (Serum/Plazma)",
+      "value": 39
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 6
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "RET",
+      "value": 0.11
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Albümin",
+      "value": 39
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Demir",
+      "value": 55
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "eGFR",
+      "value": 61.51
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Kalsiyum",
+      "value": 8.7
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "MPV",
+      "value": 10.8
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Potasyum",
+      "value": 4.4
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Sodyum",
+      "value": 141
+    },
+    {
+      "date": "2025-11-25",
+      "metric_id": "Üre",
+      "value": 34
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Hemoglobin",
+      "value": 10.7
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Eritrosit",
+      "value": 3.26
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "MCV",
+      "value": 99.7
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "MCH",
+      "value": 32.8
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "MCHC",
+      "value": 32.9
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "RDW",
+      "value": 16
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "PDW",
+      "value": 12.8
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "APTT",
+      "value": 29.2
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Kreatinin",
+      "value": 1.18
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 59.6
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Sedimantasyon",
+      "value": 24
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Kan Üre Azotu",
+      "value": 21.03
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Protrombin Zamanı",
+      "value": 1.02
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "C-reaktif Protein",
+      "value": 9.5
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Lenfosit%",
+      "value": 56.5
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Lenfosit#",
+      "value": 2.08
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Bazofil%",
+      "value": 0.3
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Bazofil#",
+      "value": 0.01
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Glukoz",
+      "value": 45
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Eozinofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Nötrofil%",
+      "value": 24.2
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Monosit%",
+      "value": 19
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Nötrofil#",
+      "value": 0.89
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 8.5
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Hematokrit",
+      "value": 32.5
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Monosit#",
+      "value": 0.7
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Lökosit",
+      "value": 3.68
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Aspartat transaminaz",
+      "value": 23
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Protrombin zamanı %",
+      "value": 90
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Prothrombin zamanı INR",
+      "value": 1.02
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Sodyum [Na]",
+      "value": 145
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Total Bilirubin",
+      "value": 0.6
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 210
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Ürik asit",
+      "value": 8.5
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Potasiyum",
+      "value": 4.4
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Trombosit",
+      "value": 47
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 5
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "eGFR",
+      "value": 59.6
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Kalsiyum",
+      "value": 8.5
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Potasyum",
+      "value": 4.4
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Protrombin zamanı INR",
+      "value": 1.02
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Protrombin zamanı sec",
+      "value": 12.1
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Sodyum",
+      "value": 145
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "Üre",
+      "value": 21.03
+    },
+    {
+      "date": "2025-12-15",
+      "metric_id": "CRP",
+      "value": 9.5
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Monosit%",
+      "value": 10.3
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Monosit#",
+      "value": 0.26
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Eozinofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Sodyum",
+      "value": 139
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Potasyum",
+      "value": 4.6
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Kalsiyum",
+      "value": 8.6
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "eGFR",
+      "value": 53
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Total Bilirubin",
+      "value": 0.6
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "AST",
+      "value": 25
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "ALT",
+      "value": 8
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "LDH",
+      "value": 235
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 53
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Sedimantasyon",
+      "value": 29
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Kan Üre Azotu",
+      "value": 24.77
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Protrombin Zamanı",
+      "value": 89
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "C-reaktif Protein",
+      "value": 16.4
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 8.6
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Aspartat transaminaz",
+      "value": 25
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Prothrombin zamanı INR",
+      "value": 1.03
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Sodyum [Na]",
+      "value": 139
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 235
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Potasiyum",
+      "value": 4.6
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 8
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Protrombin zamanı %",
+      "value": 89
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Sedimentasyon",
+      "value": 29
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Protrombin zamanı INR",
+      "value": 1.03
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Protrombin zamanı sec",
+      "value": 12.2
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "APTT",
+      "value": 28
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Eritrosit",
+      "value": 2.85
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Hemoglobin",
+      "value": 9.8
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Hematokrit",
+      "value": 29.5
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "MCV",
+      "value": 103.5
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "MCH",
+      "value": 34.4
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "MCHC",
+      "value": 33.2
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "RDW",
+      "value": 15.3
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Lökosit",
+      "value": 2.52
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Nötrofil%",
+      "value": 80
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Nötrofil#",
+      "value": 0.31
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Lenfosit%",
+      "value": 57.9
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Lenfosit#",
+      "value": 1.46
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Bazofil%",
+      "value": 0
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Bazofil#",
+      "value": 0
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Trombosit",
+      "value": 16
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Glukoz",
+      "value": 122
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Üre",
+      "value": 53
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "BUN",
+      "value": 24.77
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Kreatinin",
+      "value": 1.3
+    },
+    {
+      "date": "2025-12-30",
+      "metric_id": "Ürik asit",
+      "value": 8.2
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Hemoglobin",
+      "value": 8.7
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Eritrosit",
+      "value": 2.68
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "MCV",
+      "value": 99.3
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "MCH",
+      "value": 32.5
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "MCHC",
+      "value": 32.7
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "RDW",
+      "value": 15.6
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Kreatinin",
+      "value": 1.27
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Gfr - Tahmini Glomerüler Filtrasyon Hızı",
+      "value": 54.52
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Sedimantasyon",
+      "value": 38
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Kan Üre Azotu",
+      "value": 24.3
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Lenfosit%",
+      "value": 68.1
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Lenfosit#",
+      "value": 1.3
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Bazofil%",
+      "value": 0
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Bazofil#",
+      "value": 0
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Glukoz",
+      "value": 52
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Eozinofil%",
+      "value": 0
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Nötrofil%",
+      "value": 24.6
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Monosit%",
+      "value": 7.3
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Nötrofil#",
+      "value": 0.47
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Kalsiyum (Ca)",
+      "value": 8.6
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Hematokrit",
+      "value": 26.6
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Monosit#",
+      "value": 0.14
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Lökosit",
+      "value": 1.91
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Aspartat transaminaz",
+      "value": 21
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Sodyum [Na]",
+      "value": 139
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Total Bilirubin",
+      "value": 0.5
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "LDH - Laktik Dehidrogenaz",
+      "value": 174
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Ürik asit",
+      "value": 8.9
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Potasiyum",
+      "value": 4.6
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Trombosit",
+      "value": 7
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Alanin aminotransferaz",
+      "value": 27
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "eGFR",
+      "value": 54.52
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Kalsiyum",
+      "value": 8.6
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Potasyum",
+      "value": 4.6
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Sodyum",
+      "value": 139
+    },
+    {
+      "date": "2026-01-05",
+      "metric_id": "Üre",
+      "value": 34.3
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Üre",
+      "value": 44
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "BUN",
+      "value": 20.56
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Kreatinin",
+      "value": 1.41
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Sodyum",
+      "value": 133
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Potasyum",
+      "value": 4.2
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Kalsiyum",
+      "value": 7.5
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Magnezyum",
+      "value": 1.32
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "eGFR",
+      "value": 48.04
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Albümin",
+      "value": 31
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Eritrosit",
+      "value": 2.74
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Hemoglobin",
+      "value": 9.2
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Hematokrit",
+      "value": 27.1
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "MCV",
+      "value": 98.8
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "MCH",
+      "value": 33.6
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "MCHC",
+      "value": 33.9
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "RDW",
+      "value": 16.8
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Lökosit",
+      "value": 0.81
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Nötrofil%",
+      "value": 60.5
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Nötrofil#",
+      "value": 0.49
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Lenfosit%",
+      "value": 32.1
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Lenfosit#",
+      "value": 0.26
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Monosit%",
+      "value": 7.4
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Monosit#",
+      "value": 0.06
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Eozinofil%",
+      "value": 0
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Bazofil%",
+      "value": 0
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Bazofil#",
+      "value": 0
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "Trombosit",
+      "value": 20
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "PCT",
+      "value": 0.02
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "MPV",
+      "value": 11.4
+    },
+    {
+      "date": "2026-01-07",
+      "metric_id": "PDW",
+      "value": 17.3
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "Eritrosit",
+      "value": 2.87
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "Hemoglobin",
+      "value": 9.1
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "Hematokrit",
+      "value": 27.1
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "MCV",
+      "value": 94.4
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "MCH",
+      "value": 31.7
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "MCHC",
+      "value": 33.6
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "RDW",
+      "value": 17
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "Lökosit",
+      "value": 1.31
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "Nötrofil%",
+      "value": 9.1
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "Nötrofil#",
+      "value": 0.12
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "Lenfosit%",
+      "value": 73.3
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "Lenfosit#",
+      "value": 0.96
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "Monosit%",
+      "value": 17.6
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "Monosit#",
+      "value": 0.23
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "Eozinofil%",
+      "value": 0
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "Eozinofil#",
+      "value": 0
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "Bazofil%",
+      "value": 0
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "Bazofil#",
+      "value": 0
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "Trombosit",
+      "value": 11
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "Potasyum",
+      "value": 4.2
+    },
+    {
+      "date": "2026-01-10",
+      "metric_id": "AST",
+      "value": 21
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "CRP",
+      "value": 28
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Eritrosit",
+      "value": 2.76
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Hemoglobin",
+      "value": 9
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Hematokrit",
+      "value": 26.8
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "MCV",
+      "value": 97.1
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "MCH",
+      "value": 32.6
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "MCHC",
+      "value": 33.6
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "RDW",
+      "value": 16.9
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Lökosit",
+      "value": 2.01
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Nötrofil%",
+      "value": 13.9
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Nötrofil#",
+      "value": 0.28
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Lenfosit%",
+      "value": 79.6
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Lenfosit#",
+      "value": 1.6
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Monosit%",
+      "value": 6
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Monosit#",
+      "value": 0.12
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Eozinofil%",
+      "value": 0.5
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Eozinofil#",
+      "value": 0.01
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Bazofil%",
+      "value": 0
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Bazofil#",
+      "value": 0
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Trombosit",
+      "value": 24
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "PCT",
+      "value": 0.03
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "MPV",
+      "value": 11.9
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "PDW",
+      "value": 14
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Üre",
+      "value": 58
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "BUN",
+      "value": 27.1
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Kreatinin",
+      "value": 1.23
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Sodyum",
+      "value": 137
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Potasyum",
+      "value": 4.4
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Kalsiyum",
+      "value": 8
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "Magnezyum",
+      "value": 1.8
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "eGFR",
+      "value": 56.67
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "AST",
+      "value": 25
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "ALT",
+      "value": 26
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "GGT",
+      "value": 36
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "ALP",
+      "value": 113
+    },
+    {
+      "date": "2026-01-11",
+      "metric_id": "LDH",
+      "value": 192
+    }
+  ]
+}

@@ -4,84 +4,57 @@ import { Suspense, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createBrowserClient } from "@/lib/supabase-browser";
+import { signIn, useSession } from "next-auth/react";
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session, status } = useSession();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // Check for error in URL params (from OAuth callback)
   useEffect(() => {
     const errorParam = searchParams.get("error");
-    const errorDescription = searchParams.get("error_description");
     if (errorParam) {
-      setError(errorDescription || errorParam);
+      if (errorParam === "AccessDenied") {
+        setError("Bu e-posta adresiyle giriş izniniz bulunmamaktadır.");
+      } else {
+        setError(errorParam);
+      }
     }
   }, [searchParams]);
 
   // Get the redirect destination (from middleware or default to dashboard)
   const redirectTo = searchParams.get("redirect") || "/dashboard";
 
-  // Check if user is already logged in
+  // Redirect if already authenticated
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const supabase = createBrowserClient();
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        if (session) {
-          // User is already logged in, redirect to intended destination
-          router.push(redirectTo);
-        }
-      } catch (err) {
-        // If createBrowserClient throws (missing env vars), show error
-        console.error("Supabase client error:", err);
-        setError(
-          "Supabase yapılandırması eksik. Lütfen ortam değişkenlerini kontrol edin.",
-        );
-      }
-    };
-    checkSession();
-  }, [router, redirectTo]);
+    if (status === "authenticated" && session) {
+      router.push(redirectTo);
+    }
+  }, [status, session, router, redirectTo]);
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const supabase = createBrowserClient();
-      // Include the redirect destination in the callback URL
-      const callbackUrl = new URL("/auth/callback", window.location.origin);
-      if (redirectTo !== "/dashboard") {
-        callbackUrl.searchParams.set("redirect", redirectTo);
-      }
-
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: callbackUrl.toString(),
-          queryParams: {
-            access_type: "offline",
-            prompt: "consent",
-          },
-        },
+      await signIn("google", {
+        callbackUrl: redirectTo,
       });
-
-      if (error) {
-        console.error("OAuth error:", error);
-        setError(error.message || "Google ile giriş başarısız oldu");
-        setIsLoading(false);
-      }
-      // If successful, the browser will redirect to Google OAuth
+      // Browser will redirect to Google OAuth
     } catch (err) {
       console.error("Sign in error:", err);
       setError("Giriş yapılırken bir hata oluştu");
       setIsLoading(false);
     }
   };
+
+  // Show loading state while checking session
+  if (status === "loading") {
+    return <LoginFallback />;
+  }
 
   return (
     <Card className="w-full max-w-md">

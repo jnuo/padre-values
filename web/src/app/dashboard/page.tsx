@@ -235,7 +235,7 @@ export default function Dashboard() {
   const [, setHoveredDate] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>("all");
   const [showAverage, setShowAverage] = useState(false);
-  // Check Supabase auth and claim profile if needed
+  // Check auth and claim profile if needed
   const { profileName, claimResult, error: profileError } = useProfileClaim();
 
   // User config - uses authenticated user name or demo fallback
@@ -273,7 +273,7 @@ export default function Dashboard() {
     }
   }, [profileError, addToast]);
 
-  // Load metric order from Supabase API on mount
+  // Load metric order from API on mount
   useEffect(() => {
     if (!currentUser) return;
 
@@ -321,17 +321,17 @@ export default function Dashboard() {
     }),
   );
 
-  // Fetch data from Supabase API (or fallback to Google Sheets)
+  // Fetch data from API (or fallback to Google Sheets)
   useEffect(() => {
     if (!currentUser) return;
 
     let ignore = false;
     async function load() {
       try {
-        // Try Supabase API first, fall back to Google Sheets if it fails
+        // Try primary API first, fall back to Google Sheets if it fails
         let res = await fetch(`/api/metrics`, { cache: "no-store" });
 
-        // If Supabase returns empty or fails, try the Google Sheets endpoint
+        // If API returns empty or fails, try the Google Sheets endpoint
         if (!res.ok) {
           res = await fetch(`/api/data?userId=${currentUser!.id}`, {
             cache: "no-store",
@@ -341,7 +341,7 @@ export default function Dashboard() {
         if (!res.ok) throw new Error("Failed to load data");
         const json = (await res.json()) as ApiData;
 
-        // If Supabase returned empty data and we have Google Sheets config, try that
+        // If API returned empty data and we have Google Sheets config, try that
         if (json.metrics.length === 0 && json.values.length === 0) {
           const sheetsRes = await fetch(`/api/data?userId=${currentUser!.id}`, {
             cache: "no-store",
@@ -550,7 +550,7 @@ export default function Dashboard() {
     const newOrder = arrayMove(metricOrder, oldIndex, newIndex);
     setMetricOrder(newOrder);
 
-    // Save to Supabase API
+    // Save to API
     try {
       const response = await fetch("/api/metric-order", {
         method: "PUT",
@@ -586,7 +586,7 @@ export default function Dashboard() {
       duration: 3000,
     });
 
-    // Save to Supabase API
+    // Save to API
     try {
       const response = await fetch("/api/metric-order", {
         method: "PUT",
@@ -632,7 +632,7 @@ export default function Dashboard() {
       }
     });
 
-    // Save to Supabase API
+    // Save to API
     try {
       const response = await fetch("/api/metric-order", {
         method: "PUT",
@@ -698,12 +698,9 @@ export default function Dashboard() {
                   variant="outline"
                   size="sm"
                   onClick={async () => {
-                    // Sign out from Supabase
-                    const supabase = (
-                      await import("@/lib/supabase-browser")
-                    ).createBrowserClient();
-                    await supabase.auth.signOut();
-                    router.push("/login");
+                    // Sign out using NextAuth
+                    const { signOut } = await import("next-auth/react");
+                    await signOut({ callbackUrl: "/login" });
                   }}
                 >
                   Çıkış

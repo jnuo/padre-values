@@ -37,3 +37,4 @@ secrets/
 token_*.json
 *client_secret*.json
 *service_account*.json
+.env.neon
