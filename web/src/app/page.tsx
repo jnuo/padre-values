@@ -1,28 +1,14 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Header } from "@/components/header";
 
 export default function Home() {
-  const router = useRouter();
-
-  const handleLogin = () => {
-    router.push("/login");
-  };
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-card">
-        <div className="flex items-center justify-between px-4 py-4 sm:px-6 md:px-8">
-          <h1 className="text-2xl font-bold">ViziAI</h1>
-          <Button onClick={handleLogin} variant="default">
-            Giriş Yap
-          </Button>
-        </div>
-      </header>
+      <Header />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 max-w-4xl">

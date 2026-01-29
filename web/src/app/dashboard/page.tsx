@@ -55,9 +55,9 @@ type UserConfig = {
 import { compareDateAsc, parseToISO, formatTR } from "@/lib/date";
 import { MetricChart } from "@/components/metric-chart";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/toast";
 import { useProfileClaim } from "@/hooks/use-profile-claim";
+import { Header } from "@/components/header";
 
 type ApiData = { metrics: Metric[]; values: MetricValue[] };
 
@@ -226,7 +226,6 @@ function SortableMetricItem({
 }
 
 export default function Dashboard() {
-  const router = useRouter();
   const { addToast } = useToast();
   const [data, setData] = useState<ApiData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -681,34 +680,7 @@ export default function Dashboard() {
     <TooltipProvider>
       <div className="min-h-screen bg-background">
         {/* Header - Product + User Info */}
-        <header className="border-b bg-card">
-          <div className="px-4 py-2 sm:px-6 md:px-8">
-            <div className="flex items-center justify-between">
-              <div
-                className="text-xl sm:text-2xl font-bold text-primary cursor-pointer hover:text-primary/80"
-                onClick={() => router.push("/")}
-              >
-                ViziAI
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-medium hidden sm:inline">
-                  {profileName || "Kullanıcı"}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={async () => {
-                    // Sign out using NextAuth
-                    const { signOut } = await import("next-auth/react");
-                    await signOut({ callbackUrl: "/login" });
-                  }}
-                >
-                  Çıkış
-                </Button>
-              </div>
-            </div>
-          </div>
-        </header>
+        <Header profileName={profileName} />
 
         <main className="p-2 sm:p-3 md:p-4 space-y-3">
           {/* Metric Grid Widget */}

@@ -36,3 +36,14 @@
   - Updated BRAND.md with final color documentation
 - Learnings: Using OKLCH color space for better perceptual uniformity. Theme toggle already works via next-themes with class attribute. Inter font was already configured in layout.tsx.
 
+## 2026-01-29 - UI-002: Redesign header component with brand colors and logo
+- Files changed: web/src/components/header.tsx (new), web/src/app/page.tsx, web/src/app/dashboard/page.tsx
+- Summary: Created a shared Header component with:
+  - Two-color ViziAI wordmark: "Vizi" in brand primary (teal), "AI" in brand secondary (coral)
+  - Dark/light mode toggle button using next-themes (Moon/Sun icons from lucide-react)
+  - User menu: shows profile name + logout button when logged in, login button when not
+  - Consistent styling across landing page and dashboard
+  - Both pages now use the shared Header component
+  - Removed unused router import from dashboard after refactoring
+- Learnings: Using useTheme() from next-themes with mounted state to avoid hydration mismatch. Brand colors automatically adapt in dark mode via CSS variables.
+

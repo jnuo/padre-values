@@ -37,7 +37,7 @@
       "id": "UI-002",
       "title": "Redesign header component with brand colors and logo",
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "acceptance": "Header shows ViziAI logo (if available) + two-color wordmark (Vizi in teal, AI in coral), dark mode toggle button, user menu",
       "suggestedTools": ["frontend-design", "claude-in-chrome", "Edit"],
       "tasks": [
