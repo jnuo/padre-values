@@ -115,8 +115,11 @@ export async function GET(request: Request) {
       if (!date) continue;
 
       // Add to values array - convert date to string if it's a Date object
+      // Use UTC methods to avoid timezone shifting (Neon returns dates at midnight UTC)
       const dateStr =
-        date instanceof Date ? date.toISOString().split("T")[0] : String(date);
+        date instanceof Date
+          ? `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`
+          : String(date);
       values.push({
         metric_id: m.name,
         date: dateStr,

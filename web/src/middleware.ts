@@ -32,8 +32,8 @@ export async function middleware(request: NextRequest) {
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
 
-  // Protected API routes - DISABLED FOR TESTING
-  const protectedApiRoutes: string[] = []; // ["/api/metrics", "/api/metric-order"];
+  // Protected API routes
+  const protectedApiRoutes: string[] = ["/api/metrics", "/api/metric-order"];
   const isProtectedApiRoute = protectedApiRoutes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );

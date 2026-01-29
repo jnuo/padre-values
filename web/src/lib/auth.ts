@@ -62,8 +62,8 @@ export const authOptions: NextAuthOptions = {
         return true;
       } catch (error) {
         console.error("[Auth] Error checking allowlist:", error);
-        // Allow sign-in but log the error (fail open for now)
-        return true;
+        // Fail closed - deny sign-in if we can't verify the allowlist
+        return false;
       }
     },
     async session({ session, token }) {
