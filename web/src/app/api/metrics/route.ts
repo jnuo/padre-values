@@ -45,8 +45,9 @@ export async function GET(request: Request) {
     const profileId = profiles[0].id;
 
     // Get all reports for this profile
+    // Cast sample_date to TEXT to avoid timezone conversion issues with JS Date
     const reports = await sql`
-      SELECT id, sample_date
+      SELECT id, sample_date::TEXT as sample_date
       FROM reports
       WHERE profile_id = ${profileId}
       ORDER BY sample_date ASC
@@ -92,8 +93,8 @@ export async function GET(request: Request) {
       WHERE report_id = ANY(${reportIds})
     `;
 
-    // Build report_id -> date map (sample_date can be Date or string from DB)
-    const reportDateMap = new Map<string, string | Date>();
+    // Build report_id -> date map (sample_date is cast to TEXT in SQL)
+    const reportDateMap = new Map<string, string>();
     for (const report of reports) {
       reportDateMap.set(report.id, report.sample_date);
     }
@@ -114,12 +115,8 @@ export async function GET(request: Request) {
       const date = reportDateMap.get(m.report_id);
       if (!date) continue;
 
-      // Add to values array - convert date to string if it's a Date object
-      // Use UTC methods to avoid timezone shifting (Neon returns dates at midnight UTC)
-      const dateStr =
-        date instanceof Date
-          ? `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`
-          : String(date);
+      // sample_date is already a string (cast in SQL to avoid timezone issues)
+      const dateStr = date;
       values.push({
         metric_id: m.name,
         date: dateStr,
