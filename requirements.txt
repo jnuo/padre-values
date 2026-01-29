@@ -81,3 +81,10 @@ pycparser==2.23
 
 # Parsing
 pyparsing==3.2.4
+
+# Supabase
+supabase==2.15.2
+
+# Testing
+pytest==8.3.5
+pytest-env==1.1.5

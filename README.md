@@ -31,6 +31,7 @@ This project provides a complete solution for processing blood test PDFs and vis
 ## 📋 Requirements
 
 ### System Requirements
+
 - **Python 3.8+** (for backend)
 - **Node.js 18+** (for frontend)
 - **npm or yarn** (package manager)
@@ -38,6 +39,7 @@ This project provides a complete solution for processing blood test PDFs and vis
 - **OpenAI API account** (for AI extraction)
 
 ### Python Backend Dependencies (53 packages)
+
 - **Google API packages**: Drive, Sheets, Authentication
 - **PDF processing**: PyMuPDF, pdfminer, pdfplumber, PyPDF2, pypdfium2
 - **AI/ML**: OpenAI API, Pandas, NumPy
@@ -46,6 +48,7 @@ This project provides a complete solution for processing blood test PDFs and vis
 - **Security**: cryptography, oauthlib, rsa
 
 ### Web Frontend Dependencies (25+ packages)
+
 - **Core Framework**: Next.js 15.5.3, React 19.1.0, TypeScript 5
 - **Styling**: Tailwind CSS 4, Radix UI components
 - **Charts**: Recharts 3.2.1
@@ -70,12 +73,14 @@ npm test
 ### Environment Variables Required
 
 **Python Backend** (`src/config.py`):
+
 - `OPENAI_API_KEY`: OpenAI API key for AI extraction
 - `GOOGLE_CREDENTIALS_FILE`: Path to Google credentials JSON
 - `DRIVE_FOLDER_ID`: Google Drive folder to monitor
 - `SHEET_ID`: Google Sheets document ID
 
 **Web Frontend** (`.env.local`):
+
 - `GOOGLE_SHEETS_SPREADSHEET_ID`: Google Sheet ID
 - `GOOGLE_SERVICE_ACCOUNT_EMAIL`: Service account email
 - `GOOGLE_SERVICE_ACCOUNT_KEY`: Service account private key
@@ -92,7 +97,7 @@ pip install -r requirements.txt
 
 # Configure credentials in src/config.py
 # - Google Drive API credentials
-# - Google Sheets API credentials  
+# - Google Sheets API credentials
 # - OpenAI API key
 ```
 
@@ -116,15 +121,138 @@ cp .env.example .env.local
 ### 3. Run Tests
 
 ```bash
-# Python backend tests (if available)
-python -m pytest
+# Python backend tests
+source .venv/bin/activate    # if using venv
+pytest tests/ -v             # run all Python tests
 
 # Web frontend tests
 cd web
-npm test
+npm test                     # run all Jest tests
+npm run test:watch           # watch mode for development
+npm run test:coverage        # run with coverage report
 ```
 
-### 4. Google Cloud Setup
+**Python Tests** (`tests/`):
+
+- `test_supabase_client.py` - Tests for Supabase client wrapper
+- `test_migration.py` - Tests for data structures and migration verification
+
+**Web Tests** (`web/src/`):
+
+- `app/api/metrics/route.test.ts` - API endpoint tests
+- `__tests__/basic.test.ts` - Basic functionality tests
+- `__tests__/lib/date.test.ts` - Date utility tests
+- `__tests__/integration/` - Integration tests
+
+### 4. Supabase Setup
+
+1. Go to [Supabase Dashboard](https://supabase.com/dashboard)
+2. Create a new project (or use existing)
+3. Go to **Project Settings → API** to get your credentials:
+   - **Project URL** → `SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_URL`
+   - **anon/public key** → `SUPABASE_PUBLISHABLE_KEY` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - **service_role key** → `SUPABASE_SECRET_KEY`
+4. Add these to your `.env` file (copy from `.env.example`)
+5. For database migrations, install Supabase CLI:
+
+   ```bash
+   # macOS
+   brew install supabase/tap/supabase
+
+   # Link to your project
+   supabase link --project-ref your-project-id
+   ```
+
+### 4b. Supabase Authentication with Google OAuth
+
+To enable Google OAuth for user authentication:
+
+#### Step 1: Create Google OAuth Credentials
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Select your project (or create a new one)
+3. Navigate to **APIs & Services → Credentials**
+4. Click **Create Credentials → OAuth client ID**
+5. Select **Web application**
+6. Add the following authorized redirect URIs:
+   - `https://your-project-ref.supabase.co/auth/v1/callback` (replace `your-project-ref` with your Supabase project reference)
+   - `http://localhost:3000/auth/callback` (for local development)
+7. Click **Create** and note your **Client ID** and **Client Secret**
+
+#### Step 2: Configure Google OAuth in Supabase
+
+1. Go to your [Supabase Dashboard](https://supabase.com/dashboard)
+2. Select your project
+3. Navigate to **Authentication → Providers**
+4. Find **Google** in the list and click to expand
+5. Toggle **Enable Sign in with Google**
+6. Enter your **Client ID** and **Client Secret** from Step 1
+7. Click **Save**
+
+#### Step 3: Configure Site URL (Important for Production)
+
+1. In Supabase Dashboard, go to **Authentication → URL Configuration**
+2. Set **Site URL** to your production domain (e.g., `https://your-app.vercel.app`)
+3. Add any additional redirect URLs under **Redirect URLs**:
+   - `http://localhost:3000/**` (for local development)
+   - `https://your-app.vercel.app/**` (for production)
+
+#### Verification
+
+After completing these steps:
+
+- The login page will show "Sign in with Google" button
+- Users can authenticate using their Google accounts
+- Sessions are managed automatically by Supabase
+
+### 4c. Profile Data Association
+
+When a user first logs in with Google OAuth, the system automatically associates existing profile data with their account:
+
+#### How Profile Claiming Works
+
+1. **Pre-configured Email**: When setting up a profile in the database, set the `owner_email` field to the expected user's email address
+2. **First Login**: When a user logs in for the first time, the system checks if their email matches any unclaimed profile
+3. **Automatic Association**: If a match is found:
+   - The profile's `owner_user_id` is set to the user's Supabase auth ID
+   - A `user_access` entry is created with 'owner' access level
+   - A toast notification shows "X profili hesabınıza bağlandı" (Profile X connected to your account)
+
+#### Setting Up Profile Ownership
+
+To prepare a profile for claiming by a specific user:
+
+```sql
+-- In Supabase SQL Editor
+UPDATE profiles
+SET owner_email = 'user@example.com'
+WHERE display_name = 'Patient Name';
+```
+
+Or using the Python backend:
+
+```python
+from src.supabase_client import get_supabase_client
+
+supabase = get_supabase_client()
+supabase.table('profiles').update({
+    'owner_email': 'user@example.com'
+}).eq('display_name', 'Patient Name').execute()
+```
+
+#### Manual Profile Claiming (API)
+
+If automatic claiming doesn't work, users can manually trigger it:
+
+```bash
+# POST to the claim-profile API (requires authentication)
+curl -X POST http://localhost:3000/api/claim-profile \
+  -H "Cookie: <supabase_auth_cookies>"
+```
+
+The claim happens only once per user (tracked via localStorage).
+
+### 5. Google Cloud Setup
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select existing
@@ -136,15 +264,17 @@ npm test
    - Extract email and private key for env vars
 5. Share your Google Sheet with the service account email
 
-### 4. Google Sheets Structure
+### 6. Google Sheets Structure
 
 Your Google Sheet should have two tabs:
 
 **"Looker" tab:**
+
 - Column A: Date (format: MM/DD/YYYY or YYYY-MM-DD)
 - Columns B+: Metric values (e.g., Hemoglobin, Trombosit, etc.)
 
 **"Reference Values" tab:**
+
 - Column A: Metric name
 - Column B: Unit
 - Column C: Low reference value (ref_min)
@@ -158,8 +288,19 @@ padre-values/
 │   ├── drive_monitor.py          # Google Drive monitoring
 │   ├── pdf_reader.py             # PDF reading and AI extraction
 │   ├── sheets_updater.py         # Google Sheets integration
+│   ├── supabase_client.py        # Supabase client wrapper
+│   ├── supabase_config.py        # Supabase configuration
+│   ├── supabase_updater.py       # Supabase data operations
 │   ├── config.py                 # Configuration and credentials
 │   └── openai_utils.py           # OpenAI API utilities
+├── tests/                        # Python tests
+│   ├── test_supabase_client.py   # Supabase client tests
+│   └── test_migration.py         # Migration verification tests
+├── supabase/                     # Supabase database
+│   ├── migrations/               # SQL migration files
+│   └── schema.md                 # Schema documentation
+├── scripts/                      # Utility scripts
+│   └── migrate_sheets_to_supabase.py  # Data migration script
 ├── web/                          # Next.js web dashboard
 │   ├── src/
 │   │   ├── app/
@@ -196,6 +337,9 @@ padre-values/
 ```bash
 # Start monitoring Google Drive
 python main.py
+
+# Run with Supabase (loads env vars and activates venv)
+source .venv/bin/activate && set -a && source .env && set +a && python main.py --use-supabase
 ```
 
 ### Running the Web Dashboard
@@ -231,6 +375,7 @@ vercel
 ### Python Backend Deployment
 
 The Python backend can be deployed on:
+
 - **VPS/Server**: Run as a service with systemd
 - **Cloud Functions**: Google Cloud Functions or AWS Lambda
 - **Docker**: Containerized deployment
@@ -245,13 +390,18 @@ The Python backend can be deployed on:
 
 ## 📊 Environment Variables
 
-### Python Backend (`src/config.py`)
+### Python Backend (`.env` or `src/config.py`)
+
+- `SUPABASE_URL`: Supabase project URL
+- `SUPABASE_PUBLISHABLE_KEY`: Supabase anon/public key
+- `SUPABASE_SECRET_KEY`: Supabase service_role key (for server-side only)
+- `OPENAI_API_KEY`: OpenAI API key for AI extraction
 - `GOOGLE_CREDENTIALS_FILE`: Path to Google credentials JSON
 - `DRIVE_FOLDER_ID`: Google Drive folder to monitor
 - `SHEET_ID`: Google Sheets document ID
-- `OPENAI_API_KEY`: OpenAI API key
 
 ### Web Dashboard (`.env.local`)
+
 - `GOOGLE_SHEETS_SPREADSHEET_ID`: Google Sheet ID
 - `GOOGLE_SERVICE_ACCOUNT_EMAIL`: Service account email
 - `GOOGLE_SERVICE_ACCOUNT_KEY`: Service account private key
@@ -261,6 +411,7 @@ The Python backend can be deployed on:
 ## 🛠️ Development
 
 ### Python Backend
+
 ```bash
 # Install dependencies
 pip install -r requirements.txt
@@ -270,6 +421,7 @@ python -m src.drive_monitor
 ```
 
 ### Web Dashboard
+
 ```bash
 cd web
 

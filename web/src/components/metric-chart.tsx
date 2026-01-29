@@ -1,6 +1,16 @@
 "use client";
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceArea, ReferenceLine } from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceArea,
+  ReferenceLine,
+} from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
@@ -22,12 +32,18 @@ type MetricChartProps = {
   className?: string;
 };
 
-export function MetricChart({ metric, values, onHover, onRemove, className }: MetricChartProps) {
+export function MetricChart({
+  metric,
+  values,
+  onHover,
+  onRemove,
+  className,
+}: MetricChartProps) {
   // Sort values by date and create chart data
   const chartData: ChartData[] = values
-    .filter(v => v.metric_id === metric.id)
+    .filter((v) => v.metric_id === metric.id)
     .sort((a, b) => compareDateAsc(a.date, b.date))
-    .map(v => ({ date: parseToISO(v.date) ?? v.date, value: v.value }));
+    .map((v) => ({ date: parseToISO(v.date) ?? v.date, value: v.value }));
 
   if (chartData.length === 0) {
     return (
@@ -35,7 +51,12 @@ export function MetricChart({ metric, values, onHover, onRemove, className }: Me
         <CardHeader className="!px-3 pt-3 pb-1">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-medium">{metric.name}</CardTitle>
-            <Button variant="ghost" size="sm" onClick={onRemove} className="h-6 w-6 p-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onRemove}
+              className="h-6 w-6 p-0"
+            >
               <X className="h-3 w-3" />
             </Button>
           </div>
@@ -48,16 +69,18 @@ export function MetricChart({ metric, values, onHover, onRemove, className }: Me
   }
 
   // Calculate Y-axis range
-  const dataValues = chartData.map(d => d.value).filter(v => v !== null) as number[];
+  const dataValues = chartData
+    .map((d) => d.value)
+    .filter((v) => v !== null) as number[];
   const minValue = Math.min(...dataValues);
   const maxValue = Math.max(...dataValues);
-  
+
   // Include reference range in calculation
   const refMin = metric.ref_min ?? minValue;
   const refMax = metric.ref_max ?? maxValue;
   const rangeMin = Math.min(minValue, refMin);
   const rangeMax = Math.max(maxValue, refMax);
-  
+
   // Add 10% headroom
   const range = rangeMax - rangeMin;
   const padding = range * 0.1;
@@ -66,7 +89,8 @@ export function MetricChart({ metric, values, onHover, onRemove, className }: Me
 
   // Determine if value is in range
   const latestValue = chartData[chartData.length - 1]?.value;
-  const inRange = latestValue !== null && 
+  const inRange =
+    latestValue !== null &&
     (metric.ref_min == null || latestValue >= metric.ref_min) &&
     (metric.ref_max == null || latestValue <= metric.ref_max);
 
@@ -82,13 +106,20 @@ export function MetricChart({ metric, values, onHover, onRemove, className }: Me
                 "text-xs",
                 inRange
                   ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300"
-                  : "bg-rose-100 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300"
+                  : "bg-rose-100 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300",
               )}
             >
-              {latestValue !== null ? `${latestValue} ${metric.unit}` : "No data"}
+              {latestValue !== null
+                ? `${latestValue} ${metric.unit}`
+                : "No data"}
             </Badge>
           </div>
-          <Button variant="ghost" size="sm" onClick={onRemove} className="h-6 w-6 p-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onRemove}
+            className="h-6 w-6 p-0"
+          >
             <X className="h-3 w-3" />
           </Button>
         </div>
@@ -100,11 +131,13 @@ export function MetricChart({ metric, values, onHover, onRemove, className }: Me
               data={chartData}
               syncId="labs-sync"
               syncMethod="value"
-              onMouseMove={(state: { activeLabel?: string }) => onHover(state?.activeLabel ?? null)}
+              onMouseMove={(state: { activeLabel?: string }) =>
+                onHover(state?.activeLabel ?? null)
+              }
               onMouseLeave={() => onHover(null)}
             >
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              
+
               {/* Reference range area */}
               {metric.ref_min !== null && metric.ref_max !== null && (
                 <ReferenceArea
@@ -120,7 +153,7 @@ export function MetricChart({ metric, values, onHover, onRemove, className }: Me
                   className="drop-shadow-sm"
                 />
               )}
-              
+
               {/* Reference lines for min and max */}
               {metric.ref_min !== null && (
                 <ReferenceLine
@@ -140,20 +173,26 @@ export function MetricChart({ metric, values, onHover, onRemove, className }: Me
                   label={{ value: `Max: ${metric.ref_max}`, position: "top" }}
                 />
               )}
-              
-              <XAxis 
+
+              <XAxis
                 dataKey="date"
                 tickFormatter={(value: string) => formatTR(value)}
                 tick={{ fontSize: 10 }}
                 tickLine={false}
                 axisLine={false}
               />
-              <YAxis 
+              <YAxis
                 domain={[yMin, yMax]}
                 tick={{ fontSize: 10 }}
                 tickLine={false}
                 axisLine={false}
                 tickCount={6}
+                tickFormatter={(value: number) => {
+                  // Fix floating-point precision issues (e.g., 6.609999999999999 → 6.61)
+                  if (Number.isInteger(value)) return value.toString();
+                  // Max 2 decimal places, remove trailing zeros
+                  return parseFloat(value.toFixed(2)).toString();
+                }}
               />
               <Tooltip
                 content={({ active, payload, label }) => {
@@ -163,9 +202,13 @@ export function MetricChart({ metric, values, onHover, onRemove, className }: Me
                       <div className="rounded-lg border bg-background p-2 shadow-md">
                         <p className="font-medium">{metric.name}</p>
                         <p className="text-sm text-muted-foreground">
-                          {data.value !== null ? `${data.value} ${metric.unit}` : "No data"}
+                          {data.value !== null
+                            ? `${data.value} ${metric.unit}`
+                            : "No data"}
                         </p>
-                        <p className="text-xs text-muted-foreground">{formatTR(label as string)}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatTR(label as string)}
+                        </p>
                       </div>
                     );
                   }
@@ -177,7 +220,11 @@ export function MetricChart({ metric, values, onHover, onRemove, className }: Me
                 dataKey="value"
                 stroke={inRange ? "rgb(34, 197, 94)" : "rgb(239, 68, 68)"}
                 strokeWidth={2}
-                dot={{ fill: inRange ? "rgb(34, 197, 94)" : "rgb(239, 68, 68)", strokeWidth: 2, r: 4 }}
+                dot={{
+                  fill: inRange ? "rgb(34, 197, 94)" : "rgb(239, 68, 68)",
+                  strokeWidth: 2,
+                  r: 4,
+                }}
                 activeDot={{ r: 6, strokeWidth: 2 }}
                 connectNulls={false}
               />
