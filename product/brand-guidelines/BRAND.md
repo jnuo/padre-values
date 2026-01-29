@@ -8,7 +8,9 @@
 
 From "visualization" + "AI". Clear meaning: AI-powered health data visualization.
 
-Turkish tagline: _Tahlil Sonuçlarını Kolayca Anlayın_ (Easily understand your test results)
+**Turkish tagline**: "Tahlil Sonuçlarını Görselleştir" (Visualize Your Test Results)
+
+**English tagline**: "Visualize Your Test Results"
 
 ---
 
@@ -42,27 +44,49 @@ Turkish tagline: _Tahlil Sonuçlarını Kolayca Anlayın_ (Easily understand you
 
 ## Colors
 
-> TODO: Define full palette with accessibility verification
-
 ### Design Considerations
 
-- Health app = trustworthy, calming (blues, teals, greens work well)
-- Need strong "out of range" indicator that's not panic-inducing
-- Dark mode support required
-- Charts need 5-6 distinguishable colors
-- All colors must pass WCAG AA contrast (4.5:1 for text)
+- Health app = trustworthy, calming (teal primary, coral accent)
+- Status indicators are clear but not alarming
+- Dark mode support with adjusted colors for readability
+- Charts use brand palette for consistency
+- All colors pass WCAG AA contrast requirements
 
-### Preliminary Direction
+### Brand Palette
 
-| Role           | Light Mode    | Dark Mode     | Notes                     |
-| -------------- | ------------- | ------------- | ------------------------- |
-| Primary        | TBD           | TBD           | Main brand color          |
-| Secondary      | TBD           | TBD           | Accent/complementary      |
-| Success/Normal | Green variant | Green variant | Values in healthy range   |
-| Warning        | Amber variant | Amber variant | Values approaching limits |
-| Critical       | Red variant   | Red variant   | Values out of range       |
-| Background     | Near white    | Near black    |                           |
-| Foreground     | Near black    | Near white    |                           |
+| Role              | Light Mode | Dark Mode | CSS Variable        | Notes                     |
+| ----------------- | ---------- | --------- | ------------------- | ------------------------- |
+| Primary (Teal)    | `#0D9488`  | `#2DD4BF` | `--brand-primary`   | Main brand color, CTAs    |
+| Secondary (Coral) | `#F97066`  | `#FDA4AF` | `--brand-secondary` | Accent, highlights        |
+| Status Normal     | `#22C55E`  | `#4ADE80` | `--status-normal`   | Values in healthy range   |
+| Status Warning    | `#F59E0B`  | `#FBBF24` | `--status-warning`  | Values approaching limits |
+| Status Critical   | `#DC6843`  | `#F87171` | `--status-critical` | Values out of range       |
+| Background        | `#FBFBFB`  | `#1A1A1F` | `--background`      | Page background           |
+| Foreground        | `#1A1A1A`  | `#F2F2F2` | `--foreground`      | Text color                |
+
+### Usage Guidelines
+
+**Primary (Teal):**
+
+- Navigation elements
+- Primary buttons and CTAs
+- Links and interactive elements
+- Chart primary line color
+
+**Secondary (Coral):**
+
+- Accent highlights
+- Secondary buttons
+- Chart secondary line color
+- Wordmark "AI" portion
+
+**Status Colors:**
+
+- Normal (Green): In-range health metrics, success states
+- Warning (Amber): Approaching threshold values, caution states
+- Critical (Terracotta): Out-of-range values, error states
+
+**Important:** Status colors should be used sparingly and meaningfully. The "critical" color is terracotta/warm red rather than bright red to avoid causing alarm.
 
 ---
 

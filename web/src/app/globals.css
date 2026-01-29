@@ -6,7 +6,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -41,75 +41,118 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* ViziAI Brand Colors */
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-status-normal: var(--status-normal);
+  --color-status-warning: var(--status-warning);
+  --color-status-critical: var(--status-critical);
 }
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  --background: oklch(0.985 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+
+  /* Brand Primary: Teal #0D9488 */
+  --primary: oklch(0.588 0.107 175.13);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
+
+  /* Brand Secondary: Coral #F97066 */
+  --secondary: oklch(0.673 0.171 23.02);
+  --secondary-foreground: oklch(0.145 0 0);
+
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.45 0 0);
+  --accent: oklch(0.97 0.005 175);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
+  --border: oklch(0.9 0 0);
+  --input: oklch(0.9 0 0);
+  --ring: oklch(0.588 0.107 175.13);
+
+  /* Chart colors using brand palette */
+  --chart-1: oklch(0.588 0.107 175.13);
+  --chart-2: oklch(0.673 0.171 23.02);
+  --chart-3: oklch(0.655 0.155 148.93);
+  --chart-4: oklch(0.795 0.132 84.43);
+  --chart-5: oklch(0.545 0.08 227.39);
+
+  /* Sidebar */
+  --sidebar: oklch(0.98 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary: oklch(0.588 0.107 175.13);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent: oklch(0.96 0.01 175);
   --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-border: oklch(0.9 0 0);
+  --sidebar-ring: oklch(0.588 0.107 175.13);
+
+  /* ViziAI Brand Colors */
+  --brand-primary: oklch(0.588 0.107 175.13);
+  --brand-secondary: oklch(0.673 0.171 23.02);
+
+  /* Health Status Colors - Light Mode */
+  --status-normal: oklch(0.655 0.155 148.93);
+  --status-warning: oklch(0.795 0.16 84.43);
+  --status-critical: oklch(0.628 0.171 32.64);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: oklch(0.145 0.005 260);
+  --foreground: oklch(0.95 0 0);
+  --card: oklch(0.19 0.005 260);
+  --card-foreground: oklch(0.95 0 0);
+  --popover: oklch(0.19 0.005 260);
+  --popover-foreground: oklch(0.95 0 0);
+
+  /* Brand Primary: Teal #2DD4BF (dark mode - lighter) */
+  --primary: oklch(0.778 0.127 175.13);
+  --primary-foreground: oklch(0.145 0.02 175);
+
+  /* Brand Secondary: Coral #FDA4AF (dark mode - lighter) */
+  --secondary: oklch(0.775 0.105 15.02);
+  --secondary-foreground: oklch(0.145 0 0);
+
+  --muted: oklch(0.25 0.005 260);
+  --muted-foreground: oklch(0.65 0 0);
+  --accent: oklch(0.25 0.015 175);
+  --accent-foreground: oklch(0.95 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --border: oklch(0.3 0.01 260);
+  --input: oklch(0.28 0.01 260);
+  --ring: oklch(0.778 0.127 175.13);
+
+  /* Chart colors using brand palette - dark mode */
+  --chart-1: oklch(0.778 0.127 175.13);
+  --chart-2: oklch(0.775 0.105 15.02);
+  --chart-3: oklch(0.745 0.145 148.93);
+  --chart-4: oklch(0.83 0.15 84.43);
+  --chart-5: oklch(0.65 0.09 227.39);
+
+  /* Sidebar */
+  --sidebar: oklch(0.17 0.005 260);
+  --sidebar-foreground: oklch(0.95 0 0);
+  --sidebar-primary: oklch(0.778 0.127 175.13);
+  --sidebar-primary-foreground: oklch(0.145 0.02 175);
+  --sidebar-accent: oklch(0.25 0.015 175);
+  --sidebar-accent-foreground: oklch(0.95 0 0);
+  --sidebar-border: oklch(0.3 0.01 260);
+  --sidebar-ring: oklch(0.778 0.127 175.13);
+
+  /* ViziAI Brand Colors - Dark Mode */
+  --brand-primary: oklch(0.778 0.127 175.13);
+  --brand-secondary: oklch(0.775 0.105 15.02);
+
+  /* Health Status Colors - Dark Mode */
+  --status-normal: oklch(0.745 0.145 148.93);
+  --status-warning: oklch(0.83 0.15 84.43);
+  --status-critical: oklch(0.718 0.15 25.64);
 }
 
 @layer base {

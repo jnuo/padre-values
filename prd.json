@@ -22,7 +22,7 @@
       "id": "UI-001",
       "title": "Set up brand color CSS variables and theme configuration",
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "acceptance": "CSS variables for all brand colors in globals.css, working light/dark mode toggle",
       "suggestedTools": ["frontend-design", "Edit"],
       "tasks": [

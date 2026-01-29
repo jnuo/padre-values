@@ -23,3 +23,16 @@
 - Summary: GitHub repo already renamed to viziai, git remote URL already updated. Updated package.json name from "web" to "viziai". Updated all documentation references from padre-values to viziai. Build verified successfully.
 - Learnings: GitHub repo and git remote were already updated prior to this iteration. Local folder still named padre-values (requires user manual action).
 
+## 2026-01-29 - UI-001: Set up brand color CSS variables and theme configuration
+- Files changed: web/src/app/globals.css, product/brand-guidelines/BRAND.md
+- Summary: Added ViziAI brand color CSS variables to globals.css using OKLCH color space. Configured both light and dark mode palettes with:
+  - Primary (Teal): #0D9488 (light) / #2DD4BF (dark)
+  - Secondary (Coral): #F97066 (light) / #FDA4AF (dark)
+  - Status Normal (Green): #22C55E (light) / #4ADE80 (dark)
+  - Status Warning (Amber): #F59E0B (light) / #FBBF24 (dark)
+  - Status Critical (Terracotta): #DC6843 (light) / #F87171 (dark)
+  - Updated chart colors to use brand palette
+  - Added --brand-primary, --brand-secondary, --status-normal, --status-warning, --status-critical CSS variables
+  - Updated BRAND.md with final color documentation
+- Learnings: Using OKLCH color space for better perceptual uniformity. Theme toggle already works via next-themes with class attribute. Inter font was already configured in layout.tsx.
+
