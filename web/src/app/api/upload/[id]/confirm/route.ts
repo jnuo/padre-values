@@ -237,26 +237,31 @@ export async function POST(
       console.error("[API] processed_files insert error:", e);
     }
 
-    // Update pending upload status and clear file_url
-    await sql`
-      UPDATE pending_uploads
-      SET status = 'confirmed', file_url = NULL, updated_at = NOW()
-      WHERE id = ${uploadId}
-    `;
-
-    // Delete PDF from Vercel Blob storage
+    // Delete PDF from Vercel Blob storage BEFORE clearing file_url
+    // This ensures we don't lose the reference if deletion fails
+    let blobDeleted = false;
     if (upload.file_url && upload.file_url.startsWith("https://")) {
       try {
         await del(upload.file_url);
         console.log(`[API] Deleted blob: ${upload.file_url}`);
+        blobDeleted = true;
       } catch (blobError) {
-        // Log but don't fail if blob deletion fails
+        // Log but don't fail - keep file_url for manual cleanup later
         console.error(
           `[API] Failed to delete blob: ${upload.file_url}`,
           blobError,
         );
       }
     }
+
+    // Update pending upload status, only clear file_url if blob was deleted
+    await sql`
+      UPDATE pending_uploads
+      SET status = 'confirmed',
+          file_url = ${blobDeleted ? null : upload.file_url},
+          updated_at = NOW()
+      WHERE id = ${uploadId}
+    `;
 
     console.log(
       `[API] Upload confirmed: ${uploadId}, ${insertedCount} inserted, ${updatedCount} updated`,

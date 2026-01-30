@@ -44,19 +44,20 @@ export async function GET(request: Request) {
       );
     }
 
-    // Get processed files with metric counts
+    // Get processed files with metric counts and sample date
     // Join with reports and metrics to get the count
     const files = await sql`
       SELECT
         pf.id,
         pf.file_name,
         pf.created_at,
+        r.sample_date,
         COALESCE(COUNT(DISTINCT m.id), 0)::int as metric_count
       FROM processed_files pf
       LEFT JOIN reports r ON r.file_name = pf.file_name AND r.profile_id = pf.profile_id
       LEFT JOIN metrics m ON m.report_id = r.id
       WHERE pf.profile_id = ${profileId}
-      GROUP BY pf.id, pf.file_name, pf.created_at
+      GROUP BY pf.id, pf.file_name, pf.created_at, r.sample_date
       ORDER BY pf.created_at DESC
     `;
 

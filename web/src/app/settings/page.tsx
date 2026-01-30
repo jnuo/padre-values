@@ -1,42 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FileText, Loader2 } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  ChevronRight,
+  FileText,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useActiveProfile } from "@/hooks/use-active-profile";
+import { formatDateTR, formatDateTimeTR } from "@/lib/date";
+
+type SortColumn = "sample_date" | "created_at";
+type SortDirection = "asc" | "desc";
 
 interface ProcessedFile {
   id: string;
   file_name: string;
   created_at: string;
+  sample_date: string | null;
   metric_count: number;
-}
-
-// Format date in Turkish: "29 Oca 2025, 10:30"
-function formatDateTurkish(dateString: string): string {
-  const date = new Date(dateString);
-  const months = [
-    "Oca",
-    "Şub",
-    "Mar",
-    "Nis",
-    "May",
-    "Haz",
-    "Tem",
-    "Ağu",
-    "Eyl",
-    "Eki",
-    "Kas",
-    "Ara",
-  ];
-  const day = date.getDate();
-  const month = months[date.getMonth()];
-  const year = date.getFullYear();
-  const hours = date.getHours().toString().padStart(2, "0");
-  const minutes = date.getMinutes().toString().padStart(2, "0");
-  return `${day} ${month} ${year}, ${hours}:${minutes}`;
 }
 
 export default function SettingsPage() {
@@ -45,6 +32,79 @@ export default function SettingsPage() {
   const [files, setFiles] = useState<ProcessedFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sortColumn, setSortColumn] = useState<SortColumn>("sample_date");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+
+  const sortedFiles = useMemo(() => {
+    return [...files].sort((a, b) => {
+      const aValue = a[sortColumn];
+      const bValue = b[sortColumn];
+
+      // Handle null values - push them to the end
+      if (!aValue && !bValue) return 0;
+      if (!aValue) return 1;
+      if (!bValue) return -1;
+
+      const comparison =
+        new Date(aValue).getTime() - new Date(bValue).getTime();
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+  }, [files, sortColumn, sortDirection]);
+
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("desc");
+    }
+  };
+
+  function SortIcon({ column }: { column: SortColumn }): React.ReactElement {
+    if (sortColumn !== column) {
+      return (
+        <ArrowUpDown className="h-4 w-4 ml-1 opacity-30 group-hover:opacity-60 transition-opacity" />
+      );
+    }
+    if (sortDirection === "asc") {
+      return <ArrowUp className="h-4 w-4 ml-1" />;
+    }
+    return <ArrowDown className="h-4 w-4 ml-1" />;
+  }
+
+  function SortableHeader({
+    column,
+    label,
+  }: {
+    column: SortColumn;
+    label: string;
+  }): React.ReactElement {
+    const isActive = sortColumn === column;
+    const ariaLabel = isActive
+      ? `${label} - ${sortDirection === "asc" ? "artan sıra" : "azalan sıra"}`
+      : `${label} - sıralanmamış`;
+
+    return (
+      <th
+        className="text-left p-3 font-medium cursor-pointer hover:bg-muted-foreground/10 select-none group transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        onClick={() => handleSort(column)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleSort(column);
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label={ariaLabel}
+      >
+        <span className="inline-flex items-center">
+          {label}
+          <SortIcon column={column} />
+        </span>
+      </th>
+    );
+  }
 
   useEffect(() => {
     async function fetchFiles() {
@@ -101,21 +161,37 @@ export default function SettingsPage() {
                 <thead className="bg-muted">
                   <tr>
                     <th className="text-left p-3 font-medium">Dosya Adı</th>
-                    <th className="text-left p-3 font-medium">
-                      Yüklenme Zamanı
-                    </th>
+                    <SortableHeader
+                      column="sample_date"
+                      label="Tahlil Tarihi"
+                    />
+                    <SortableHeader column="created_at" label="Yüklenme" />
                     <th className="text-center p-3 font-medium">Metrik</th>
                     <th className="text-right p-3 font-medium"></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {files.map((file) => (
+                  {sortedFiles.map((file) => (
                     <tr key={file.id} className="border-t hover:bg-muted/50">
+                      <td className="p-3 max-w-[200px]">
+                        <span
+                          className="font-medium truncate block"
+                          title={file.file_name}
+                        >
+                          {file.file_name}
+                        </span>
+                      </td>
                       <td className="p-3">
-                        <span className="font-medium">{file.file_name}</span>
+                        {file.sample_date ? (
+                          <span className="font-medium">
+                            {formatDateTR(file.sample_date)}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
                       </td>
                       <td className="p-3 text-muted-foreground">
-                        {formatDateTurkish(file.created_at)}
+                        {formatDateTimeTR(file.created_at)}
                       </td>
                       <td className="p-3 text-center">
                         <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium">
@@ -124,13 +200,14 @@ export default function SettingsPage() {
                       </td>
                       <td className="p-3 text-right">
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
                           onClick={() =>
                             router.push(`/settings/files/${file.id}`)
                           }
                         >
-                          Detaylar
+                          Değerleri Gör
+                          <ChevronRight className="h-4 w-4 ml-1" />
                         </Button>
                       </td>
                     </tr>

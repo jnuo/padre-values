@@ -1,457 +1,131 @@
-# Blood Test Analysis System
+# ViziAI - Blood Test Analysis & Visualization
 
-A complete blood test analysis system consisting of a Python backend for PDF processing and a modern web dashboard for data visualization.
+AI-powered blood test PDF analyzer with visual health insights. Upload lab reports, extract values with AI, and track health trends over time.
 
-## 🏗️ System Overview
+**Live:** [vizi-ai.onurovali.me](https://vizi-ai.onurovali.me)
 
-This project provides a complete solution for processing blood test PDFs and visualizing the results:
+## Features
 
-1. **Python Backend** (`src/`): Monitors Google Drive for new PDFs, extracts blood test values using AI, and updates Google Sheets
-2. **Web Dashboard** (`web/`): Interactive dashboard for viewing and analyzing blood test results with charts and trends
+- **PDF Upload & AI Extraction**: Upload blood test PDFs, AI extracts all metric values automatically
+- **Smart Review**: Review and edit extracted values before saving
+- **Interactive Charts**: Visualize trends with synchronized, interactive line charts
+- **Reference Ranges**: See normal ranges highlighted on charts
+- **Multi-Profile Support**: Track multiple family members' health data
+- **File Management**: View uploaded files, edit metric values anytime
+- **Dark/Light Mode**: Automatic theme switching
+- **Turkish Localization**: Full Turkish language support with Turkey timezone
 
-## 🐍 Python Backend Features
+## Tech Stack
 
-- 📁 **Google Drive Monitoring**: Automatically detects new PDF files
-- 🤖 **AI-Powered Extraction**: Uses OpenAI API to extract blood test values from PDFs
-- 📊 **Google Sheets Integration**: Updates spreadsheet with extracted data
-- 🔄 **Automated Processing**: Continuous monitoring and processing pipeline
+- **Frontend**: Next.js 15 (App Router), React, TypeScript, Tailwind CSS
+- **UI Components**: shadcn/ui, Radix UI
+- **Charts**: Recharts
+- **Database**: Neon Postgres (serverless)
+- **Auth**: NextAuth.js with Google OAuth
+- **Storage**: Vercel Blob (PDF files)
+- **AI**: OpenAI GPT-4 for PDF text extraction
+- **Async Processing**: Upstash QStash
+- **Deployment**: Vercel
 
-## 🌐 Web Dashboard Features
+## Architecture
 
-- 🔐 **Secure Authentication**: Environment-based login system
-- 📊 **Interactive Dashboard**: Click metric boxes to add charts
-- 📈 **Synchronized Charts**: Hover over any chart to see tooltips across all charts
-- 🎯 **Date Filtering**: View last 15/30/90 days or all data
-- 📱 **Responsive Design**: Works on mobile, tablet, and desktop
-- 🌙 **Dark/Light Mode**: Automatic theme switching
-- 🔄 **Drag & Drop**: Reorder charts by dragging chips
-- 📊 **Value Modes**: Switch between latest values and averages
-- 🎨 **Visual Indicators**: Green for normal values, red for out-of-range
+```
+User uploads PDF
+       ↓
+Vercel Blob Storage (temporary)
+       ↓
+QStash triggers async extraction
+       ↓
+OpenAI extracts metrics from PDF
+       ↓
+User reviews & confirms
+       ↓
+Neon Postgres (permanent storage)
+       ↓
+PDF deleted from Blob
+```
 
-## 📋 Requirements
-
-### System Requirements
-
-- **Python 3.8+** (for backend)
-- **Node.js 18+** (for frontend)
-- **npm or yarn** (package manager)
-- **Google Cloud Console account** (for API credentials)
-- **OpenAI API account** (for AI extraction)
-
-### Python Backend Dependencies (53 packages)
-
-- **Google API packages**: Drive, Sheets, Authentication
-- **PDF processing**: PyMuPDF, pdfminer, pdfplumber, PyPDF2, pypdfium2
-- **AI/ML**: OpenAI API, Pandas, NumPy
-- **Image processing**: Pillow
-- **HTTP/Networking**: requests, httpx, urllib3
-- **Security**: cryptography, oauthlib, rsa
-
-### Web Frontend Dependencies (25+ packages)
-
-- **Core Framework**: Next.js 15.5.3, React 19.1.0, TypeScript 5
-- **Styling**: Tailwind CSS 4, Radix UI components
-- **Charts**: Recharts 3.2.1
-- **Interactions**: @dnd-kit (drag & drop)
-- **Testing**: Jest, React Testing Library
-- **Google APIs**: googleapis 160.0.0
-
-### Installation Commands
+## Local Development
 
 ```bash
-# Python Backend
-pip install -r requirements.txt
-
-# Web Frontend
 cd web
 npm install
-
-# Run Tests
-npm test
-```
-
-### Environment Variables Required
-
-**Python Backend** (`src/config.py`):
-
-- `OPENAI_API_KEY`: OpenAI API key for AI extraction
-- `GOOGLE_CREDENTIALS_FILE`: Path to Google credentials JSON
-- `DRIVE_FOLDER_ID`: Google Drive folder to monitor
-- `SHEET_ID`: Google Sheets document ID
-
-**Web Frontend** (`.env.local`):
-
-- `GOOGLE_SHEETS_SPREADSHEET_ID`: Google Sheet ID
-- `GOOGLE_SERVICE_ACCOUNT_EMAIL`: Service account email
-- `GOOGLE_SERVICE_ACCOUNT_KEY`: Service account private key
-- `NEXT_PUBLIC_LOGIN_USERNAME`: Dashboard username
-- `NEXT_PUBLIC_LOGIN_PASSWORD`: Dashboard password
-
-## 🚀 Quick Start
-
-### 1. Python Backend Setup
-
-```bash
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Configure credentials in src/config.py
-# - Google Drive API credentials
-# - Google Sheets API credentials
-# - OpenAI API key
-```
-
-### 2. Web Dashboard Setup
-
-```bash
-cd web
-
-# Install dependencies
-npm install
-
-# Create environment file
-cp .env.example .env.local
-
-# Edit .env.local with your credentials
-# - Google Sheets ID
-# - Service Account credentials
-# - Login credentials
-```
-
-### 3. Run Tests
-
-```bash
-# Python backend tests
-source .venv/bin/activate    # if using venv
-pytest tests/ -v             # run all Python tests
-
-# Web frontend tests
-cd web
-npm test                     # run all Jest tests
-npm run test:watch           # watch mode for development
-npm run test:coverage        # run with coverage report
-```
-
-**Python Tests** (`tests/`):
-
-- `test_supabase_client.py` - Tests for Supabase client wrapper
-- `test_migration.py` - Tests for data structures and migration verification
-
-**Web Tests** (`web/src/`):
-
-- `app/api/metrics/route.test.ts` - API endpoint tests
-- `__tests__/basic.test.ts` - Basic functionality tests
-- `__tests__/lib/date.test.ts` - Date utility tests
-- `__tests__/integration/` - Integration tests
-
-### 4. Supabase Setup
-
-1. Go to [Supabase Dashboard](https://supabase.com/dashboard)
-2. Create a new project (or use existing)
-3. Go to **Project Settings → API** to get your credentials:
-   - **Project URL** → `SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_URL`
-   - **anon/public key** → `SUPABASE_PUBLISHABLE_KEY` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - **service_role key** → `SUPABASE_SECRET_KEY`
-4. Add these to your `.env` file (copy from `.env.example`)
-5. For database migrations, install Supabase CLI:
-
-   ```bash
-   # macOS
-   brew install supabase/tap/supabase
-
-   # Link to your project
-   supabase link --project-ref your-project-id
-   ```
-
-### 4b. Supabase Authentication with Google OAuth
-
-To enable Google OAuth for user authentication:
-
-#### Step 1: Create Google OAuth Credentials
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Select your project (or create a new one)
-3. Navigate to **APIs & Services → Credentials**
-4. Click **Create Credentials → OAuth client ID**
-5. Select **Web application**
-6. Add the following authorized redirect URIs:
-   - `https://your-project-ref.supabase.co/auth/v1/callback` (replace `your-project-ref` with your Supabase project reference)
-   - `http://localhost:3000/auth/callback` (for local development)
-7. Click **Create** and note your **Client ID** and **Client Secret**
-
-#### Step 2: Configure Google OAuth in Supabase
-
-1. Go to your [Supabase Dashboard](https://supabase.com/dashboard)
-2. Select your project
-3. Navigate to **Authentication → Providers**
-4. Find **Google** in the list and click to expand
-5. Toggle **Enable Sign in with Google**
-6. Enter your **Client ID** and **Client Secret** from Step 1
-7. Click **Save**
-
-#### Step 3: Configure Site URL (Important for Production)
-
-1. In Supabase Dashboard, go to **Authentication → URL Configuration**
-2. Set **Site URL** to your production domain (e.g., `https://your-app.vercel.app`)
-3. Add any additional redirect URLs under **Redirect URLs**:
-   - `http://localhost:3000/**` (for local development)
-   - `https://your-app.vercel.app/**` (for production)
-
-#### Verification
-
-After completing these steps:
-
-- The login page will show "Sign in with Google" button
-- Users can authenticate using their Google accounts
-- Sessions are managed automatically by Supabase
-
-### 4c. Profile Data Association
-
-When a user first logs in with Google OAuth, the system automatically associates existing profile data with their account:
-
-#### How Profile Claiming Works
-
-1. **Pre-configured Email**: When setting up a profile in the database, set the `owner_email` field to the expected user's email address
-2. **First Login**: When a user logs in for the first time, the system checks if their email matches any unclaimed profile
-3. **Automatic Association**: If a match is found:
-   - The profile's `owner_user_id` is set to the user's Supabase auth ID
-   - A `user_access` entry is created with 'owner' access level
-   - A toast notification shows "X profili hesabınıza bağlandı" (Profile X connected to your account)
-
-#### Setting Up Profile Ownership
-
-To prepare a profile for claiming by a specific user:
-
-```sql
--- In Supabase SQL Editor
-UPDATE profiles
-SET owner_email = 'user@example.com'
-WHERE display_name = 'Patient Name';
-```
-
-Or using the Python backend:
-
-```python
-from src.supabase_client import get_supabase_client
-
-supabase = get_supabase_client()
-supabase.table('profiles').update({
-    'owner_email': 'user@example.com'
-}).eq('display_name', 'Patient Name').execute()
-```
-
-#### Manual Profile Claiming (API)
-
-If automatic claiming doesn't work, users can manually trigger it:
-
-```bash
-# POST to the claim-profile API (requires authentication)
-curl -X POST http://localhost:3000/api/claim-profile \
-  -H "Cookie: <supabase_auth_cookies>"
-```
-
-The claim happens only once per user (tracked via localStorage).
-
-### 5. Google Cloud Setup
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select existing
-3. Enable Google Drive API and Google Sheets API
-4. Create a Service Account:
-   - Go to IAM & Admin > Service Accounts
-   - Create Service Account
-   - Download JSON key file
-   - Extract email and private key for env vars
-5. Share your Google Sheet with the service account email
-
-### 6. Google Sheets Structure
-
-Your Google Sheet should have two tabs:
-
-**"Looker" tab:**
-
-- Column A: Date (format: MM/DD/YYYY or YYYY-MM-DD)
-- Columns B+: Metric values (e.g., Hemoglobin, Trombosit, etc.)
-
-**"Reference Values" tab:**
-
-- Column A: Metric name
-- Column B: Unit
-- Column C: Low reference value (ref_min)
-- Column D: High reference value (ref_max)
-
-## 📁 Project Structure
-
-```
-viziai/
-├── src/                          # Python backend
-│   ├── drive_monitor.py          # Google Drive monitoring
-│   ├── pdf_reader.py             # PDF reading and AI extraction
-│   ├── sheets_updater.py         # Google Sheets integration
-│   ├── supabase_client.py        # Supabase client wrapper
-│   ├── supabase_config.py        # Supabase configuration
-│   ├── supabase_updater.py       # Supabase data operations
-│   ├── config.py                 # Configuration and credentials
-│   └── openai_utils.py           # OpenAI API utilities
-├── tests/                        # Python tests
-│   ├── test_supabase_client.py   # Supabase client tests
-│   └── test_migration.py         # Migration verification tests
-├── supabase/                     # Supabase database
-│   ├── migrations/               # SQL migration files
-│   └── schema.md                 # Schema documentation
-├── scripts/                      # Utility scripts
-│   └── migrate_sheets_to_supabase.py  # Data migration script
-├── web/                          # Next.js web dashboard
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── api/data/route.ts # Google Sheets API endpoint
-│   │   │   ├── layout.tsx        # Root layout with theme provider
-│   │   │   └── page.tsx          # Main dashboard page
-│   │   ├── components/
-│   │   │   ├── ui/               # shadcn/ui components
-│   │   │   ├── login-gate.tsx    # Login component
-│   │   │   ├── metric-chart.tsx  # Chart component
-│   │   │   └── metric-chip.tsx   # Draggable chip component
-│   │   ├── lib/
-│   │   │   ├── sheets.ts         # Google Sheets client
-│   │   │   ├── date.ts           # Date utilities
-│   │   │   └── utils.ts          # General utilities
-│   │   └── __tests__/            # Test files
-│   │       ├── basic.test.ts     # Basic functionality tests
-│   │       ├── lib/date.test.ts  # Date utility tests
-│   │       └── integration/      # Integration tests
-│   ├── .env.example              # Environment variables template
-│   ├── package.json              # Node.js dependencies
-│   └── jest.config.js            # Jest test configuration
-├── downloads/                    # Processed PDF files
-├── requirements.txt              # Python dependencies (53 packages)
-├── requirements-complete.txt     # Complete requirements reference
-├── REQUIREMENTS.md               # Detailed requirements documentation
-└── README.md                     # This file
-```
-
-## 🔧 Usage
-
-### Running the Python Backend
-
-```bash
-# Start monitoring Google Drive
-python main.py
-
-# Run with Supabase (loads env vars and activates venv)
-source .venv/bin/activate && set -a && source .env && set +a && python main.py --use-supabase
-```
-
-### Running the Web Dashboard
-
-```bash
-cd web
 npm run dev
 ```
 
-Visit `http://localhost:3000`
+### Environment Variables
 
-## 🌐 Deployment
+Create `.env.local` with:
 
-### Web Dashboard Deployment (Vercel)
+```env
+# Database
+NEON_DATABASE_URL=postgres://...
+
+# Auth
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-secret
+GOOGLE_CLIENT_ID=your-client-id
+GOOGLE_CLIENT_SECRET=your-client-secret
+
+# AI & Storage
+OPENAI_API_KEY=your-openai-key
+BLOB_READ_WRITE_TOKEN=your-vercel-blob-token
+
+# Async Processing
+QSTASH_TOKEN=your-qstash-token
+QSTASH_CURRENT_SIGNING_KEY=your-signing-key
+QSTASH_NEXT_SIGNING_KEY=your-next-signing-key
+```
+
+## Database Schema
+
+- **profiles**: Family member profiles
+- **reports**: Blood test reports with sample dates
+- **metrics**: Individual test values (Hemoglobin, etc.)
+- **metric_definitions**: Reference ranges per profile
+- **processed_files**: Upload tracking (prevents duplicates)
+- **pending_uploads**: In-progress upload state
+
+## Key Pages
+
+| Route                  | Description                                 |
+| ---------------------- | ------------------------------------------- |
+| `/dashboard`           | Main dashboard with metric cards and charts |
+| `/upload`              | PDF upload with AI extraction and review    |
+| `/settings`            | File management - view all uploads          |
+| `/settings/files/[id]` | File detail - view and edit metrics         |
+
+## Features in Detail
+
+### Upload Flow
+
+1. Select profile, drag & drop PDF
+2. AI extracts metrics asynchronously (up to 5 min)
+3. Review extracted values, edit if needed
+4. Confirm to save - PDF is deleted after confirmation
+
+### Dashboard
+
+- Click metric cards to add charts
+- Hover syncs tooltips across all charts
+- Filter by date range (15/30/90 days or all)
+- Green = normal range, red = out of range
+
+### File Management
+
+- View all uploaded files with dates
+- Sort by test date or upload date
+- Click to view all metrics from a file
+- Edit metric values inline
+
+## Deployment
+
+Deployed on Vercel with automatic deployments from `main` branch.
 
 ```bash
-cd web
-
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
 vercel
-
-# Add environment variables in Vercel dashboard
-# - GOOGLE_SHEETS_SPREADSHEET_ID
-# - GOOGLE_SERVICE_ACCOUNT_EMAIL
-# - GOOGLE_SERVICE_ACCOUNT_KEY
-# - NEXT_PUBLIC_LOGIN_USERNAME
-# - NEXT_PUBLIC_LOGIN_PASSWORD
 ```
 
-### Python Backend Deployment
+## License
 
-The Python backend can be deployed on:
-
-- **VPS/Server**: Run as a service with systemd
-- **Cloud Functions**: Google Cloud Functions or AWS Lambda
-- **Docker**: Containerized deployment
-- **Cron Job**: Scheduled execution
-
-## 🔐 Security
-
-- ✅ **No secrets in code**: All sensitive data uses environment variables
-- ✅ **Private repository**: Blood test data is protected
-- ✅ **Secure authentication**: Login credentials are environment variables
-- ✅ **Google Sheets credentials**: Stored securely in deployment platform
-
-## 📊 Environment Variables
-
-### Python Backend (`.env` or `src/config.py`)
-
-- `SUPABASE_URL`: Supabase project URL
-- `SUPABASE_PUBLISHABLE_KEY`: Supabase anon/public key
-- `SUPABASE_SECRET_KEY`: Supabase service_role key (for server-side only)
-- `OPENAI_API_KEY`: OpenAI API key for AI extraction
-- `GOOGLE_CREDENTIALS_FILE`: Path to Google credentials JSON
-- `DRIVE_FOLDER_ID`: Google Drive folder to monitor
-- `SHEET_ID`: Google Sheets document ID
-
-### Web Dashboard (`.env.local`)
-
-- `GOOGLE_SHEETS_SPREADSHEET_ID`: Google Sheet ID
-- `GOOGLE_SERVICE_ACCOUNT_EMAIL`: Service account email
-- `GOOGLE_SERVICE_ACCOUNT_KEY`: Service account private key
-- `NEXT_PUBLIC_LOGIN_USERNAME`: Dashboard username
-- `NEXT_PUBLIC_LOGIN_PASSWORD`: Dashboard password
-
-## 🛠️ Development
-
-### Python Backend
-
-```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Run with debug
-python -m src.drive_monitor
-```
-
-### Web Dashboard
-
-```bash
-cd web
-
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Lint code
-npm run lint
-```
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **"No data" showing**: Check Google Sheets API credentials and sheet sharing
-2. **Date filtering not working**: Ensure dates are in MM/DD/YYYY or YYYY-MM-DD format
-3. **Charts not syncing**: Check that all charts have the same `syncId`
-4. **Build errors**: Ensure all environment variables are set
-5. **PDF processing fails**: Check OpenAI API key and PDF format
-
-### Debug Mode
-
-Add `?debug=true` to URL to see console logs for debugging.
-
-## 📝 License
-
-Private medical practice project.
+Private project for personal health tracking.
