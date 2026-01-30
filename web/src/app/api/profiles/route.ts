@@ -105,11 +105,25 @@ export async function POST(request: Request) {
     let userId = getDbUserId(session);
 
     if (!userId) {
+      // Look up user by email
       const users = await sql`
         SELECT id FROM users WHERE email = ${session.user.email}
       `;
+
       if (users.length > 0) {
         userId = users[0].id;
+      } else {
+        // Create user record if it doesn't exist (same as GET handler)
+        const newUser = await sql`
+          INSERT INTO users (email, name, avatar_url)
+          VALUES (${session.user.email}, ${session.user.name || null}, ${session.user.image || null})
+          ON CONFLICT (email) DO UPDATE SET updated_at = NOW()
+          RETURNING id
+        `;
+        userId = newUser[0]?.id;
+        console.log(
+          `[API] Created user record for ${session.user.email}: ${userId}`,
+        );
       }
     }
 
@@ -144,6 +158,8 @@ export async function POST(request: Request) {
       );
     }
 
+    console.log(`[API] Creating profile "${trimmedName}" for user ${userId}`);
+
     // Create the profile
     const profileResult = await sql`
       INSERT INTO profiles (display_name, owner_user_id)
@@ -153,8 +169,15 @@ export async function POST(request: Request) {
 
     const profile = profileResult[0];
     if (!profile) {
-      throw new Error("Failed to create profile");
+      console.error(
+        `[API] Profile INSERT returned no result for user ${userId}`,
+      );
+      throw new Error("Failed to create profile - no result returned");
     }
+
+    console.log(
+      `[API] Profile created: ${profile.id}, creating user_access...`,
+    );
 
     // Create user_access entry with owner level
     await sql`
@@ -162,7 +185,9 @@ export async function POST(request: Request) {
       VALUES (${userId}, ${profile.id}, 'owner', ${userId})
     `;
 
-    console.log(`[API] Profile created: ${profile.id} for user ${userId}`);
+    console.log(
+      `[API] Profile ${profile.id} created successfully for user ${userId}`,
+    );
 
     return NextResponse.json(
       {
@@ -179,7 +204,12 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("[API] POST /api/profiles error:", error);
     return NextResponse.json(
-      { error: "Failed to create profile", details: String(error) },
+      {
+        error: "Failed to create profile",
+        message:
+          "Profil oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.",
+        details: String(error),
+      },
       { status: 500 },
     );
   }
