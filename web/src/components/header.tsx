@@ -132,7 +132,7 @@ export function Header({
       return;
     }
     const { signOut } = await import("next-auth/react");
-    await signOut({ callbackUrl: "/login" });
+    await signOut({ callbackUrl: "/" });
   }
 
   return (
