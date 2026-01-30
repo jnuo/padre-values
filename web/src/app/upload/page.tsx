@@ -69,6 +69,8 @@ function UploadPageContent() {
   const [sampleDate, setSampleDate] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pollStartTimeRef = useRef<number | null>(null);
+  const POLL_TIMEOUT_MS = 120000; // 2 minutes max polling
 
   // Check for pending uploads and resume state
   useEffect(() => {
@@ -127,17 +129,42 @@ function UploadPageContent() {
       clearInterval(pollIntervalRef.current);
     }
 
+    pollStartTimeRef.current = Date.now();
+
     pollIntervalRef.current = setInterval(async () => {
       try {
+        // Check for timeout
+        if (
+          pollStartTimeRef.current &&
+          Date.now() - pollStartTimeRef.current > POLL_TIMEOUT_MS
+        ) {
+          clearInterval(pollIntervalRef.current!);
+          pollIntervalRef.current = null;
+          pollStartTimeRef.current = null;
+          setError("İşlem zaman aşımına uğradı. Lütfen tekrar deneyin.");
+          setStatus("error");
+          return;
+        }
+
         const response = await fetch("/api/upload");
         if (!response.ok) return;
 
         const data = await response.json();
         const upload = data.uploads?.find((u: { id: string }) => u.id === id);
 
+        // Upload was deleted or not found
+        if (!upload) {
+          clearInterval(pollIntervalRef.current!);
+          pollIntervalRef.current = null;
+          pollStartTimeRef.current = null;
+          setStatus("idle");
+          return;
+        }
+
         if (upload?.status === "review") {
           clearInterval(pollIntervalRef.current!);
           pollIntervalRef.current = null;
+          pollStartTimeRef.current = null;
           await loadExtractedData(id);
         } else if (
           upload?.status === "error" ||
@@ -145,6 +172,7 @@ function UploadPageContent() {
         ) {
           clearInterval(pollIntervalRef.current!);
           pollIntervalRef.current = null;
+          pollStartTimeRef.current = null;
           setError(upload.error_message || "Veri çıkarma başarısız");
           setStatus("error");
         }
