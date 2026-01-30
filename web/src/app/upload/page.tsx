@@ -85,7 +85,7 @@ function UploadPageContent() {
         const uploads = data.uploads || [];
 
         // Find the relevant upload (from URL or most recent)
-        let pendingUpload = urlUploadId
+        const pendingUpload = urlUploadId
           ? uploads.find((u: { id: string }) => u.id === urlUploadId)
           : uploads[0];
 

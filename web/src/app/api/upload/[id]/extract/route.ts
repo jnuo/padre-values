@@ -84,9 +84,8 @@ async function pdfToImages(buffer: Buffer): Promise<string[]> {
 
   for (let i = 0; i < pageCount; i++) {
     const page = doc.loadPage(i);
-    // Get page bounds and render at ~200 DPI (default is 72 DPI, so scale by ~2.8)
-    const bounds = page.getBounds();
-    const scale = 2.5; // ~180 DPI
+    // Render at ~180 DPI (default is 72 DPI, so scale by ~2.5)
+    const scale = 2.5;
     const pixmap = page.toPixmap(
       mupdf.Matrix.scale(scale, scale),
       mupdf.ColorSpace.DeviceRGB,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileText, Sparkles, Brain, CheckCircle2 } from "lucide-react";
+import { FileText, Sparkles, Brain } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const MESSAGES = [
@@ -19,21 +19,12 @@ interface ExtractionLoadingProps {
 
 export function ExtractionLoading({ fileName }: ExtractionLoadingProps) {
   const [messageIndex, setMessageIndex] = useState(0);
-  const [dots, setDots] = useState("");
 
   // Cycle through messages
   useEffect(() => {
     const interval = setInterval(() => {
       setMessageIndex((prev) => (prev + 1) % MESSAGES.length);
     }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Animate dots
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDots((prev) => (prev.length >= 3 ? "" : prev + "."));
-    }, 400);
     return () => clearInterval(interval);
   }, []);
 
