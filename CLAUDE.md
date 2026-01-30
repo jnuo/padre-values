@@ -16,6 +16,40 @@ AI-powered blood test PDF analyzer with visual health insights. Built for tracki
 3. `gh pr list` - Check for open PRs on this repo
 4. If on a feature branch with an open PR, **warn the user** before pushing new commits
 
+## Database Migrations
+
+**ALWAYS use Neon branching for migrations:**
+
+1. **Create a branch in Neon Console:**
+   - Go to https://console.neon.tech → Your project → Branches
+   - Click "Create Branch" → name it `dev` or `migration-test`
+   - Copy the branch connection string
+
+2. **Test migration on branch:**
+
+   ```bash
+   # Set branch URL temporarily
+   export NEON_DATABASE_URL="postgres://...branch-url..."
+
+   # Run migration
+   psql $NEON_DATABASE_URL -f supabase/migrations/YYYYMMDD_migration_name.sql
+   ```
+
+3. **Verify it worked:**
+   - Check tables exist
+   - Test the app locally against the branch
+
+4. **Apply to production:**
+
+   ```bash
+   # Use prod URL
+   psql $NEON_DATABASE_URL -f supabase/migrations/YYYYMMDD_migration_name.sql
+   ```
+
+5. **Delete the test branch** (optional, Neon has free tier limits)
+
+**Why:** Neon branches are instant copies of your database. If migration fails, prod is untouched. Point-in-time recovery is available but branching is easier.
+
 ## Tech Stack
 
 - **Database**: Neon Postgres (serverless, no inactivity pause)
@@ -76,6 +110,21 @@ In Google Cloud Console > APIs & Services > Credentials > OAuth 2.0 Client:
 - [ ] Login flow works with Google OAuth
 - [ ] User data loads correctly from Neon
 - [ ] All allowed emails can access the app
+
+## Frontend & Design Work
+
+Before any UI/design changes, reference:
+
+- `product/brand-guidelines/BRAND.md` - Colors, typography, voice & tone
+- `product/PROJECT-ROADMAP.md` - Feature roadmap and priorities
+
+**Key brand rules:**
+
+- Primary: Teal (#0D9488 light / #2DD4BF dark)
+- Secondary/Accent: Coral (#F97066 light / #FDA4AF dark)
+- Status colors: Green (normal), Amber (warning), Terracotta (critical - NOT bright red)
+- Font: Inter with Turkish support
+- Tone: Clear, calm, reassuring - never alarming
 
 ## Notes
 

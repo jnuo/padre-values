@@ -24,25 +24,33 @@ type MetricsPayload = {
   values: MetricValue[];
 };
 
-// Default profile name for migrated data
+// Default profile name for migrated data (backward compatibility)
 const DEFAULT_PROFILE_NAME = "Yüksel O.";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
+    const profileIdParam = searchParams.get("profileId");
     const profileName = searchParams.get("profileName") || DEFAULT_PROFILE_NAME;
 
-    // Find the profile
-    const profiles = await sql`
-      SELECT id FROM profiles WHERE display_name = ${profileName}
-    `;
+    let profileId: string;
 
-    if (!profiles || profiles.length === 0) {
-      // Return empty data if no profile found
-      return NextResponse.json({ metrics: [], values: [] });
+    if (profileIdParam) {
+      // Use profile ID directly if provided
+      profileId = profileIdParam;
+    } else {
+      // Fall back to profile name lookup for backward compatibility
+      const profiles = await sql`
+        SELECT id FROM profiles WHERE display_name = ${profileName}
+      `;
+
+      if (!profiles || profiles.length === 0) {
+        // Return empty data if no profile found
+        return NextResponse.json({ metrics: [], values: [] });
+      }
+
+      profileId = profiles[0].id;
     }
-
-    const profileId = profiles[0].id;
 
     // Get all reports for this profile
     // Cast sample_date to TEXT to avoid timezone conversion issues with JS Date

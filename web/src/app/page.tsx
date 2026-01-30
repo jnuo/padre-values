@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -72,10 +74,23 @@ const FEATURES: FeatureCardProps[] = [
 
 export default function Home(): React.ReactElement {
   const router = useRouter();
+  const { status } = useSession();
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace("/dashboard");
+    }
+  }, [status, router]);
 
   const navigateToLogin = (): void => {
     router.push("/login");
   };
+
+  // Show nothing while checking auth or redirecting
+  if (status === "loading" || status === "authenticated") {
+    return <div className="min-h-screen bg-background" />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
