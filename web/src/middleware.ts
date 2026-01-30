@@ -43,10 +43,8 @@ export async function middleware(request: NextRequest) {
   ];
 
   // Internal worker routes that bypass auth (called server-to-server)
-  const internalRoutes = ["/api/upload/", "/extract/worker"];
-  const isInternalWorkerRoute =
-    internalRoutes.every((part) => pathname.includes(part.replace("/", ""))) &&
-    pathname.endsWith("/worker");
+  // Matches: /api/upload/[id]/extract/worker
+  const isInternalWorkerRoute = pathname.endsWith("/extract/worker");
   const isProtectedApiRoute = protectedApiRoutes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );

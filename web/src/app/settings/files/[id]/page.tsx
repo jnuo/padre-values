@@ -80,6 +80,14 @@ export default function FileDetailPage() {
 
   const EMPTY_FORM = { value: "", unit: "", ref_low: "", ref_high: "" };
 
+  // Format reference range: "100 - 200", "≥ 100", "≤ 200", or "-"
+  function formatRefRange(low: number | null, high: number | null): string {
+    if (low != null && high != null) return `${low} - ${high}`;
+    if (low != null) return `≥ ${low}`;
+    if (high != null) return `≤ ${high}`;
+    return "-";
+  }
+
   function startEditing(metric: Metric): void {
     setEditingId(metric.id);
     setEditForm({
@@ -96,6 +104,13 @@ export default function FileDetailPage() {
   }
 
   const saveMetric = async (metricId: string) => {
+    // Validate value is not empty
+    const parsedValue = parseFloat(editForm.value);
+    if (!editForm.value.trim() || isNaN(parsedValue)) {
+      addToast({ message: "Değer boş olamaz", type: "error" });
+      return;
+    }
+
     setSaving(true);
     try {
       const response = await fetch(`/api/settings/files/${fileId}/metrics`, {
@@ -300,9 +315,7 @@ export default function FileDetailPage() {
                               {metric.unit || "-"}
                             </td>
                             <td className="p-3 text-right text-muted-foreground">
-                              {metric.ref_low != null || metric.ref_high != null
-                                ? `${metric.ref_low ?? "-"} - ${metric.ref_high ?? "-"}`
-                                : "-"}
+                              {formatRefRange(metric.ref_low, metric.ref_high)}
                             </td>
                             <td className="p-3 text-right">
                               <Button
