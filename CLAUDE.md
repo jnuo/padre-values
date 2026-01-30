@@ -7,14 +7,32 @@ AI-powered blood test PDF analyzer with visual health insights. Built for tracki
 1. Use `/notion` skill to check tasks with topic `viziai`
 2. Show pending tasks and ask: "Work on these or something else?"
 
-## Before Making Changes
+## Git Workflow Rules
 
-**ALWAYS check these first:**
+**CRITICAL - NEVER commit directly to main branch.**
 
 1. `git status` - Check current branch and uncommitted changes
 2. `git log --oneline -5` - See recent commits
 3. `gh pr list` - Check for open PRs on this repo
-4. If on a feature branch with an open PR, **warn the user** before pushing new commits
+
+**Before making ANY changes, ask the user:**
+
+- "Should I continue on `[current-branch]` or create a new branch?"
+- If there's an open PR, ask: "PR #X is still open. Continue on this branch or wait for merge?"
+- If on `main`, **ALWAYS create a new feature branch first**
+
+**Branch naming:** `feature/descriptive-name` or `fix/issue-description`
+
+```bash
+# Example: Always start work on a new branch
+git checkout -b feature/upload-improvements
+```
+
+**Never:**
+
+- Commit directly to `main`
+- Push to `main` without explicit user approval
+- Continue on a branch without checking PR status first
 
 ## Database Migrations
 
