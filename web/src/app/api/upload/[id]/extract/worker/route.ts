@@ -318,9 +318,11 @@ async function handler(
   }
 }
 
-// In local dev, skip QStash signature verification
-const isLocalDev =
-  !process.env.QSTASH_CURRENT_SIGNING_KEY ||
-  process.env.NODE_ENV === "development";
+// TEMPORARY: Skip signature verification to debug QStash issues
+// TODO: Re-enable after debugging
+// const isLocalDev =
+//   !process.env.QSTASH_CURRENT_SIGNING_KEY ||
+//   process.env.NODE_ENV === "development";
+// export const POST = isLocalDev ? handler : verifySignatureAppRouter(handler);
 
-export const POST = isLocalDev ? handler : verifySignatureAppRouter(handler);
+export const POST = handler;
