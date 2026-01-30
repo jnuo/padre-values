@@ -32,7 +32,7 @@ AI-powered blood test PDF analyzer with visual health insights. Built for tracki
    export NEON_DATABASE_URL="postgres://...branch-url..."
 
    # Run migration
-   psql $NEON_DATABASE_URL -f supabase/migrations/YYYYMMDD_migration_name.sql
+   psql $NEON_DATABASE_URL -f db-schema/migrations/YYYYMMDD_migration_name.sql
    ```
 
 3. **Verify it worked:**
@@ -43,7 +43,7 @@ AI-powered blood test PDF analyzer with visual health insights. Built for tracki
 
    ```bash
    # Use prod URL
-   psql $NEON_DATABASE_URL -f supabase/migrations/YYYYMMDD_migration_name.sql
+   psql $NEON_DATABASE_URL -f db-schema/migrations/YYYYMMDD_migration_name.sql
    ```
 
 5. **Delete the test branch** (optional, Neon has free tier limits)
