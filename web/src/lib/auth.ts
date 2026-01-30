@@ -15,13 +15,21 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user }) {
-      // Open registration - anyone with a Google account can sign in
       if (!user.email) {
         console.log("[Auth] Sign-in denied: no email");
         return false;
       }
 
       try {
+        // Check if email is in the allowlist (profile_allowed_emails table)
+        const allowed = await sql`
+          SELECT 1 FROM profile_allowed_emails WHERE email = ${user.email} LIMIT 1
+        `;
+
+        if (allowed.length === 0) {
+          console.log(`[Auth] Sign-in denied: ${user.email} not in allowlist`);
+          return false;
+        }
         // Create or update user record in our users table
         const result = await sql`
           INSERT INTO users (email, name, avatar_url)
@@ -100,9 +108,8 @@ export const authOptions: NextAuthOptions = {
         return true;
       } catch (error) {
         console.error("[Auth] Error during sign-in:", error);
-        // Don't fail closed anymore - allow sign-in but log the error
-        // The user just won't have any profiles until they create one
-        return true;
+        // Fail closed - deny sign-in on error
+        return false;
       }
     },
     async session({ session, token }) {
