@@ -74,8 +74,25 @@ function LoginContent() {
       </CardHeader>
       <CardContent className="space-y-4">
         {error && (
-          <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-950/50 rounded-lg text-center">
-            {error}
+          <div className="p-4 text-sm bg-muted rounded-lg text-center space-y-2">
+            {error === "Bu e-posta adresiyle giriş izniniz bulunmamaktadır." ? (
+              <>
+                <p className="text-foreground font-medium">
+                  Bu uygulama şu anda davetli kullanıcılara özeldir
+                </p>
+                <p className="text-muted-foreground">
+                  Erişim talebinde bulunmak için{" "}
+                  <a
+                    href="mailto:onurovalii@gmail.com?subject=ViziAI%20Erişim%20Talebi"
+                    className="text-primary hover:underline"
+                  >
+                    bana e-posta gönderin
+                  </a>
+                </p>
+              </>
+            ) : (
+              <p className="text-red-600">{error}</p>
+            )}
           </div>
         )}
 
