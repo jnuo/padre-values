@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
+import { formatDateTimeTR } from "@/lib/date";
 
 interface Metric {
   id: string;
@@ -25,31 +26,6 @@ interface FileData {
   file_name: string;
   created_at: string;
   profile_id: string;
-}
-
-// Format date in Turkish: "29 Oca 2025, 10:30"
-function formatDateTurkish(dateString: string): string {
-  const date = new Date(dateString);
-  const months = [
-    "Oca",
-    "Şub",
-    "Mar",
-    "Nis",
-    "May",
-    "Haz",
-    "Tem",
-    "Ağu",
-    "Eyl",
-    "Eki",
-    "Kas",
-    "Ara",
-  ];
-  const day = date.getDate();
-  const month = months[date.getMonth()];
-  const year = date.getFullYear();
-  const hours = date.getHours().toString().padStart(2, "0");
-  const minutes = date.getMinutes().toString().padStart(2, "0");
-  return `${day} ${month} ${year}, ${hours}:${minutes}`;
 }
 
 export default function FileDetailPage() {
@@ -102,20 +78,22 @@ export default function FileDetailPage() {
     }
   }, [fileId]);
 
-  const startEditing = (metric: Metric) => {
+  const EMPTY_FORM = { value: "", unit: "", ref_low: "", ref_high: "" };
+
+  function startEditing(metric: Metric): void {
     setEditingId(metric.id);
     setEditForm({
-      value: metric.value.toString(),
-      unit: metric.unit || "",
-      ref_low: metric.ref_low?.toString() || "",
-      ref_high: metric.ref_high?.toString() || "",
+      value: String(metric.value),
+      unit: metric.unit ?? "",
+      ref_low: metric.ref_low != null ? String(metric.ref_low) : "",
+      ref_high: metric.ref_high != null ? String(metric.ref_high) : "",
     });
-  };
+  }
 
-  const cancelEditing = () => {
+  function cancelEditing(): void {
     setEditingId(null);
-    setEditForm({ value: "", unit: "", ref_low: "", ref_high: "" });
-  };
+    setEditForm(EMPTY_FORM);
+  }
 
   const saveMetric = async (metricId: string) => {
     setSaving(true);
@@ -201,7 +179,7 @@ export default function FileDetailPage() {
             {file.file_name}
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            {formatDateTurkish(file.created_at)}
+            {formatDateTimeTR(file.created_at)}
           </p>
         </CardHeader>
         <CardContent>

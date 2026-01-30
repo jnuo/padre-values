@@ -26,36 +26,11 @@ import {
 } from "@/components/ui/select";
 import { Header } from "@/components/header";
 import { cn } from "@/lib/utils";
+import { formatDateTimeTR } from "@/lib/date";
 
 interface Profile {
   id: string;
   display_name: string;
-}
-
-// Format date in Turkish: "29 Oca 2025, 10:30"
-function formatDateTurkish(dateString: string | null): string {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  const months = [
-    "Oca",
-    "Şub",
-    "Mar",
-    "Nis",
-    "May",
-    "Haz",
-    "Tem",
-    "Ağu",
-    "Eyl",
-    "Eki",
-    "Kas",
-    "Ara",
-  ];
-  const day = date.getDate();
-  const month = months[date.getMonth()];
-  const year = date.getFullYear();
-  const hours = date.getHours().toString().padStart(2, "0");
-  const minutes = date.getMinutes().toString().padStart(2, "0");
-  return `${day} ${month} ${year}, ${hours}:${minutes}`;
 }
 
 interface ExtractedMetric {
@@ -98,6 +73,14 @@ function UploadPageContent() {
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const pollStartTimeRef = useRef<number | null>(null);
   const POLL_TIMEOUT_MS = 300000; // 5 minutes max polling
+
+  function stopPolling(): void {
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+    pollStartTimeRef.current = null;
+  }
 
   // Check for pending uploads and resume state
   useEffect(() => {
@@ -144,19 +127,13 @@ function UploadPageContent() {
 
     checkPendingUploads();
 
-    return () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-      }
-    };
+    return stopPolling;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- startPolling/startExtraction/loadExtractedData use refs and are stable
   }, [searchParams]);
 
   // Poll for extraction completion
-  const startPolling = (id: string) => {
-    if (pollIntervalRef.current) {
-      clearInterval(pollIntervalRef.current);
-    }
-
+  function startPolling(id: string): void {
+    stopPolling();
     pollStartTimeRef.current = Date.now();
 
     pollIntervalRef.current = setInterval(async () => {
@@ -166,9 +143,7 @@ function UploadPageContent() {
           pollStartTimeRef.current &&
           Date.now() - pollStartTimeRef.current > POLL_TIMEOUT_MS
         ) {
-          clearInterval(pollIntervalRef.current!);
-          pollIntervalRef.current = null;
-          pollStartTimeRef.current = null;
+          stopPolling();
           setError("5 dakika içinde tamamlanamadı. Lütfen tekrar deneyin.");
           setStatus("error");
           return;
@@ -182,36 +157,30 @@ function UploadPageContent() {
 
         // Upload was deleted or not found
         if (!upload) {
-          clearInterval(pollIntervalRef.current!);
-          pollIntervalRef.current = null;
-          pollStartTimeRef.current = null;
+          stopPolling();
           setStatus("idle");
           return;
         }
 
-        if (upload?.status === "review") {
-          clearInterval(pollIntervalRef.current!);
-          pollIntervalRef.current = null;
-          pollStartTimeRef.current = null;
+        if (upload.status === "review") {
+          stopPolling();
           await loadExtractedData(id);
         } else if (
-          upload?.status === "error" ||
-          (upload?.status === "pending" && upload?.error_message)
+          upload.status === "error" ||
+          (upload.status === "pending" && upload.error_message)
         ) {
-          clearInterval(pollIntervalRef.current!);
-          pollIntervalRef.current = null;
-          pollStartTimeRef.current = null;
+          stopPolling();
           setError(upload.error_message || "Veri çıkarma başarısız");
           setStatus("error");
         }
-      } catch (error) {
-        console.error("Polling error:", error);
+      } catch (err) {
+        console.error("Polling error:", err);
       }
     }, 2000);
-  };
+  }
 
   // Load extracted data for review
-  const loadExtractedData = async (id: string) => {
+  async function loadExtractedData(id: string): Promise<void> {
     try {
       const response = await fetch(`/api/upload/${id}`);
       if (!response.ok) throw new Error("Failed to load upload data");
@@ -226,15 +195,15 @@ function UploadPageContent() {
         setSampleDate(extracted.sample_date || upload.sample_date || "");
         setStatus("review");
       }
-    } catch (error) {
-      console.error("Failed to load extracted data:", error);
+    } catch (err) {
+      console.error("Failed to load extracted data:", err);
       setError("Veri yüklenemedi");
       setStatus("error");
     }
-  };
+  }
 
   // Start extraction for a pending upload (async via QStash)
-  const startExtraction = async (id: string) => {
+  async function startExtraction(id: string): Promise<void> {
     try {
       setStatus("extracting");
       const response = await fetch(`/api/upload/${id}/extract`, {
@@ -248,12 +217,12 @@ function UploadPageContent() {
 
       // Extraction is async - start polling for completion
       startPolling(id);
-    } catch (error) {
-      console.error("Extraction error:", error);
-      setError(String(error));
+    } catch (err) {
+      console.error("Extraction error:", err);
+      setError(String(err));
       setStatus("error");
     }
-  };
+  }
 
   // Fetch profiles on mount and auto-select active profile
   useEffect(() => {
@@ -366,6 +335,7 @@ function UploadPageContent() {
         setStatus("error");
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- startPolling uses refs and is stable
     [selectedProfileId],
   );
 
@@ -376,21 +346,21 @@ function UploadPageContent() {
     disabled: status !== "idle" && status !== "error",
   });
 
-  const handleMetricChange = (
+  function handleMetricChange(
     index: number,
     field: keyof ExtractedMetric,
     value: string | number | null,
-  ) => {
-    const updated = [...editedMetrics];
-    updated[index] = { ...updated[index], [field]: value };
-    setEditedMetrics(updated);
-  };
+  ): void {
+    setEditedMetrics((prev) =>
+      prev.map((m, i) => (i === index ? { ...m, [field]: value } : m)),
+    );
+  }
 
-  const handleRemoveMetric = (index: number) => {
-    setEditedMetrics(editedMetrics.filter((_, i) => i !== index));
-  };
+  function handleRemoveMetric(index: number): void {
+    setEditedMetrics((prev) => prev.filter((_, i) => i !== index));
+  }
 
-  const handleConfirm = async () => {
+  async function handleConfirm(): Promise<void> {
     if (!uploadId || !sampleDate || editedMetrics.length === 0) return;
 
     setStatus("confirming");
@@ -420,15 +390,10 @@ function UploadPageContent() {
       setError("Bir hata oluştu. Lütfen tekrar deneyin.");
       setStatus("review");
     }
-  };
+  }
 
-  const handleCancel = async () => {
-    // Stop polling if active
-    if (pollIntervalRef.current) {
-      clearInterval(pollIntervalRef.current);
-      pollIntervalRef.current = null;
-      pollStartTimeRef.current = null;
-    }
+  async function handleCancel(): Promise<void> {
+    stopPolling();
 
     if (uploadId) {
       try {
@@ -447,11 +412,11 @@ function UploadPageContent() {
     setEditedMetrics([]);
     setSampleDate("");
     setError(null);
-  };
+  }
 
-  const handleGoToDashboard = () => {
+  function handleGoToDashboard(): void {
     router.push("/dashboard");
-  };
+  }
 
   const selectedProfile = profiles.find((p) => p.id === selectedProfileId);
 
@@ -541,7 +506,7 @@ function UploadPageContent() {
             {status === "extracting" && (
               <ExtractionLoading
                 fileName={fileName || undefined}
-                uploadTime={formatDateTurkish(uploadCreatedAt)}
+                uploadTime={formatDateTimeTR(uploadCreatedAt)}
                 onCancel={handleCancel}
               />
             )}
@@ -554,7 +519,7 @@ function UploadPageContent() {
                   <span className="font-medium">{fileName}</span>
                   {uploadCreatedAt && (
                     <span className="text-muted-foreground text-sm">
-                      - {formatDateTurkish(uploadCreatedAt)}
+                      - {formatDateTimeTR(uploadCreatedAt)}
                     </span>
                   )}
                 </div>
@@ -745,7 +710,7 @@ function UploadPageContent() {
                     <p className="text-sm">{error}</p>
                     {fileName && uploadCreatedAt && (
                       <p className="text-xs mt-1 opacity-70">
-                        {fileName} - {formatDateTurkish(uploadCreatedAt)}
+                        {fileName} - {formatDateTimeTR(uploadCreatedAt)}
                       </p>
                     )}
                   </div>

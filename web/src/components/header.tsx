@@ -4,7 +4,7 @@ import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, Upload, Settings } from "lucide-react";
+import { Moon, Sun, Upload, FolderOpen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ProfileSwitcher } from "@/components/profile-switcher";
 
@@ -122,7 +122,7 @@ export function Header({
     router.push("/upload");
   }
 
-  function handleSettingsClick(): void {
+  function handleFilesClick(): void {
     router.push("/settings");
   }
 
@@ -168,16 +168,16 @@ export function Header({
             </Button>
           )}
 
-          {/* Settings Button */}
+          {/* Files Button */}
           {isLoggedIn && (
             <Button
               variant="ghost"
               size="icon"
               className="h-9 w-9"
-              onClick={handleSettingsClick}
-              aria-label="Ayarlar"
+              onClick={handleFilesClick}
+              aria-label="Dosyalar"
             >
-              <Settings className="h-4 w-4" />
+              <FolderOpen className="h-4 w-4" />
             </Button>
           )}
 
