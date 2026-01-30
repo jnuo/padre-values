@@ -52,29 +52,55 @@ AI-powered blood test PDF analyzer with visual health insights. Built for tracki
 
 ## Tech Stack
 
-- **Database**: Neon Postgres (serverless, no inactivity pause)
+- **Framework**: Next.js 15 (App Router) - handles both frontend AND backend
+- **Database**: Neon Postgres (serverless)
 - **Auth**: NextAuth.js with Google OAuth
-- **Frontend**: Next.js (in `web/`)
-- **Backend**: Python (PDF extraction)
-- **AI**: OpenAI for PDF text extraction
+- **Async Jobs**: Upstash QStash (PDF extraction queue)
+- **AI**: OpenAI GPT-4o Vision (extracts lab values from PDF images)
+- **Storage**: Vercel Blob (temporary PDF storage)
+- **Hosting**: Vercel
+
+## Project Structure
+
+```
+viziai/
+├── web/                 # Next.js app (the entire application)
+│   ├── src/app/         # Pages and API routes
+│   ├── src/components/  # React components
+│   └── src/lib/         # Utilities (auth, db, etc.)
+├── db-schema/           # SQL migrations for Neon
+├── product/             # Brand guidelines, roadmap
+└── _legacy/             # Archived Python code
+```
 
 ## Key Files
 
-- Frontend: `web/src/`
-- API routes: `web/src/app/api/`
-- Auth config: `web/src/lib/auth.ts`
-- DB client: `web/src/lib/db.ts`
-- PDF processing: `scripts/`
+- **Pages**: `web/src/app/` (dashboard, upload, settings, login)
+- **API routes**: `web/src/app/api/` (all backend logic)
+- **Auth**: `web/src/lib/auth.ts`
+- **Database**: `web/src/lib/db.ts`
+- **PDF extraction**: `web/src/app/api/upload/[id]/extract/worker/route.ts`
 
 ## Environment Variables (Vercel)
 
 Required for deployment:
 
 - `NEON_DATABASE_URL` - Neon connection string
-- `NEXTAUTH_URL` - Production URL (e.g., https://viziai.vercel.app)
+- `NEXTAUTH_URL` - Production URL (https://vizi-ai.onurovali.me)
 - `NEXTAUTH_SECRET` - Generate with `openssl rand -base64 32`
 - `GOOGLE_CLIENT_ID` - From Google Cloud Console
 - `GOOGLE_CLIENT_SECRET` - From Google Cloud Console
+- `OPENAI_API_KEY` - For PDF extraction (GPT-4o Vision)
+- `QSTASH_URL` - Upstash QStash endpoint
+- `QSTASH_TOKEN` - Upstash QStash token
+- `QSTASH_CURRENT_SIGNING_KEY` - For request verification
+- `QSTASH_NEXT_SIGNING_KEY` - For key rotation
+
+**IMPORTANT:** When adding env vars via Vercel UI, ensure NO trailing newlines. Use CLI:
+
+```bash
+echo -n "value" | npx vercel env add VAR_NAME production
+```
 
 ## Allowed Emails
 
