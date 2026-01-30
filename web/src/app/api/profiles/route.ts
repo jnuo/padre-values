@@ -180,9 +180,10 @@ export async function POST(request: Request) {
     );
 
     // Create user_access entry with owner level
+    // Note: user_id and user_id_new both need to be set (legacy + new columns)
     await sql`
-      INSERT INTO user_access (user_id_new, profile_id, access_level, granted_by)
-      VALUES (${userId}, ${profile.id}, 'owner', ${userId})
+      INSERT INTO user_access (user_id, user_id_new, profile_id, access_level, granted_by)
+      VALUES (${userId}, ${userId}, ${profile.id}, 'owner', ${userId})
     `;
 
     console.log(
