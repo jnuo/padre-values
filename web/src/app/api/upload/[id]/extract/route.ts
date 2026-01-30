@@ -115,6 +115,7 @@ export async function POST(
         url: workerUrl,
         body: { uploadId },
         retries: 2,
+        timeout: "5m", // Allow up to 5 minutes for PDF extraction
       });
 
       console.log(`[Extract] Job enqueued for upload: ${uploadId}`);
