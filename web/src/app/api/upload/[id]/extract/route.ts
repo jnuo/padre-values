@@ -5,6 +5,7 @@ import { sql } from "@/lib/db";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60; // Allow up to 60 seconds for PDF processing + OpenAI
 
 // Extraction prompt - extracts lab values and normalizes names to Turkish
 const EXTRACTION_PROMPT = `Aşağıdaki laboratuvar sayfasından TÜM güncel 'Sonuç' değerlerini çıkar.
