@@ -187,6 +187,17 @@ export async function GET(request: Request) {
       );
     }
 
+    // Auto-cleanup: Mark stuck extracting uploads as rejected (older than 5 minutes)
+    await sql`
+      UPDATE pending_uploads
+      SET status = 'pending',
+          error_message = 'İşlem zaman aşımına uğradı',
+          updated_at = NOW()
+      WHERE user_id = ${userId}
+      AND status = 'extracting'
+      AND updated_at < NOW() - INTERVAL '5 minutes'
+    `;
+
     const { searchParams } = new URL(request.url);
     const profileId = searchParams.get("profileId");
 

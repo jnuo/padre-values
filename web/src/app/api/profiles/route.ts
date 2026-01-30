@@ -64,7 +64,16 @@ export async function GET() {
       ORDER BY p.display_name ASC
     `;
 
-    return NextResponse.json({ profiles });
+    // Clear onboarding cookie if user has profiles (fixes stale cookie redirect issue)
+    const response = NextResponse.json({ profiles });
+    if (profiles.length > 0) {
+      response.cookies.set("viziai_needs_onboarding", "", {
+        path: "/",
+        maxAge: 0,
+      });
+    }
+
+    return response;
   } catch (error) {
     console.error("[API] GET /api/profiles error:", error);
     return NextResponse.json(

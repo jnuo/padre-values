@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions, getDbUserId } from "@/lib/auth";
 import { sql } from "@/lib/db";
+import { del } from "@vercel/blob";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,6 +18,21 @@ interface ConfirmedMetric {
 interface ConfirmRequest {
   sampleDate: string; // YYYY-MM-DD
   metrics: ConfirmedMetric[];
+}
+
+function isValidMetricValue(value: unknown): value is number {
+  return typeof value === "number" && !isNaN(value);
+}
+
+function determineFlag(
+  value: number,
+  refLow: number | null | undefined,
+  refHigh: number | null | undefined,
+): string | null {
+  if (refLow != null && value < refLow) return "L";
+  if (refHigh != null && value > refHigh) return "H";
+  if (refLow != null || refHigh != null) return "N";
+  return null;
 }
 
 /**
@@ -86,7 +102,7 @@ export async function POST(
 
     // Get the pending upload
     const uploads = await sql`
-      SELECT id, profile_id, file_name, content_hash, status
+      SELECT id, profile_id, file_name, content_hash, file_url, status
       FROM pending_uploads
       WHERE id = ${uploadId}
       AND user_id = ${userId}
@@ -147,17 +163,16 @@ export async function POST(
     // Insert metrics
     let insertedCount = 0;
     let updatedCount = 0;
+    let skippedCount = 0;
 
     for (const metric of body.metrics) {
-      // Determine flag based on reference values
-      let flag: string | null = null;
-      if (metric.ref_low != null && metric.value < metric.ref_low) {
-        flag = "L";
-      } else if (metric.ref_high != null && metric.value > metric.ref_high) {
-        flag = "H";
-      } else if (metric.ref_low != null || metric.ref_high != null) {
-        flag = "N";
+      if (!isValidMetricValue(metric.value)) {
+        console.log(`[API] Skipping metric with invalid value: ${metric.name}`);
+        skippedCount++;
+        continue;
       }
+
+      const flag = determineFlag(metric.value, metric.ref_low, metric.ref_high);
 
       // Insert or update metric
       const result = await sql`
@@ -188,8 +203,10 @@ export async function POST(
       }
     }
 
-    // Update or create metric_definitions for new metrics
+    // Update or create metric_definitions for new metrics (only for valid metrics)
     for (const metric of body.metrics) {
+      if (!isValidMetricValue(metric.value)) continue;
+
       await sql`
         INSERT INTO metric_definitions (profile_id, name, unit, ref_low, ref_high)
         VALUES (
@@ -212,19 +229,34 @@ export async function POST(
       await sql`
         INSERT INTO processed_files (profile_id, file_name, content_hash)
         VALUES (${profileId}, ${upload.file_name}, ${upload.content_hash})
-        ON CONFLICT (content_hash) DO NOTHING
+        ON CONFLICT (profile_id, content_hash) DO UPDATE
+        SET file_name = EXCLUDED.file_name, created_at = NOW()
       `;
+      console.log(`[API] processed_files recorded: ${upload.file_name}`);
     } catch (e) {
-      // Table might not have all columns, try minimal insert
-      console.log("[API] processed_files insert warning:", e);
+      console.error("[API] processed_files insert error:", e);
     }
 
-    // Update pending upload status
+    // Update pending upload status and clear file_url
     await sql`
       UPDATE pending_uploads
-      SET status = 'confirmed', updated_at = NOW()
+      SET status = 'confirmed', file_url = NULL, updated_at = NOW()
       WHERE id = ${uploadId}
     `;
+
+    // Delete PDF from Vercel Blob storage
+    if (upload.file_url && upload.file_url.startsWith("https://")) {
+      try {
+        await del(upload.file_url);
+        console.log(`[API] Deleted blob: ${upload.file_url}`);
+      } catch (blobError) {
+        // Log but don't fail if blob deletion fails
+        console.error(
+          `[API] Failed to delete blob: ${upload.file_url}`,
+          blobError,
+        );
+      }
+    }
 
     console.log(
       `[API] Upload confirmed: ${uploadId}, ${insertedCount} inserted, ${updatedCount} updated`,

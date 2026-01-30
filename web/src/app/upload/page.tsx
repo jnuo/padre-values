@@ -32,6 +32,32 @@ interface Profile {
   display_name: string;
 }
 
+// Format date in Turkish: "29 Oca 2025, 10:30"
+function formatDateTurkish(dateString: string | null): string {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const months = [
+    "Oca",
+    "Şub",
+    "Mar",
+    "Nis",
+    "May",
+    "Haz",
+    "Tem",
+    "Ağu",
+    "Eyl",
+    "Eki",
+    "Kas",
+    "Ara",
+  ];
+  const day = date.getDate();
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  return `${day} ${month} ${year}, ${hours}:${minutes}`;
+}
+
 interface ExtractedMetric {
   name: string;
   value: number;
@@ -68,9 +94,10 @@ function UploadPageContent() {
   const [editedMetrics, setEditedMetrics] = useState<ExtractedMetric[]>([]);
   const [sampleDate, setSampleDate] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [uploadCreatedAt, setUploadCreatedAt] = useState<string | null>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const pollStartTimeRef = useRef<number | null>(null);
-  const POLL_TIMEOUT_MS = 120000; // 2 minutes max polling
+  const POLL_TIMEOUT_MS = 300000; // 5 minutes max polling
 
   // Check for pending uploads and resume state
   useEffect(() => {
@@ -95,6 +122,7 @@ function UploadPageContent() {
           setUploadId(pendingUpload.id);
           setFileName(pendingUpload.file_name);
           setSelectedProfileId(pendingUpload.profile_id);
+          setUploadCreatedAt(pendingUpload.created_at);
 
           if (pendingUpload.status === "extracting") {
             setStatus("extracting");
@@ -141,7 +169,7 @@ function UploadPageContent() {
           clearInterval(pollIntervalRef.current!);
           pollIntervalRef.current = null;
           pollStartTimeRef.current = null;
-          setError("İşlem zaman aşımına uğradı. Lütfen tekrar deneyin.");
+          setError("5 dakika içinde tamamlanamadı. Lütfen tekrar deneyin.");
           setStatus("error");
           return;
         }
@@ -307,6 +335,7 @@ function UploadPageContent() {
         }
 
         setUploadId(uploadData.uploadId);
+        setUploadCreatedAt(new Date().toISOString());
         setStatus("extracting");
 
         // Start extraction (async via QStash)
@@ -394,6 +423,13 @@ function UploadPageContent() {
   };
 
   const handleCancel = async () => {
+    // Stop polling if active
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+      pollStartTimeRef.current = null;
+    }
+
     if (uploadId) {
       try {
         await fetch(`/api/upload/${uploadId}`, { method: "DELETE" });
@@ -406,6 +442,7 @@ function UploadPageContent() {
     setStatus("idle");
     setUploadId(null);
     setFileName("");
+    setUploadCreatedAt(null);
     setExtractedData(null);
     setEditedMetrics([]);
     setSampleDate("");
@@ -502,7 +539,11 @@ function UploadPageContent() {
 
             {/* Extracting State */}
             {status === "extracting" && (
-              <ExtractionLoading fileName={fileName || undefined} />
+              <ExtractionLoading
+                fileName={fileName || undefined}
+                uploadTime={formatDateTurkish(uploadCreatedAt)}
+                onCancel={handleCancel}
+              />
             )}
 
             {/* Review State */}
@@ -511,6 +552,11 @@ function UploadPageContent() {
                 <div className="flex items-center gap-2 text-status-normal">
                   <FileText className="h-5 w-5" />
                   <span className="font-medium">{fileName}</span>
+                  {uploadCreatedAt && (
+                    <span className="text-muted-foreground text-sm">
+                      - {formatDateTurkish(uploadCreatedAt)}
+                    </span>
+                  )}
                 </div>
 
                 {/* Sample Date */}
@@ -556,7 +602,7 @@ function UploadPageContent() {
                             <tr key={index} className="border-t">
                               <td className="p-2">
                                 <Input
-                                  value={metric.name}
+                                  value={metric.name ?? ""}
                                   onChange={(e) =>
                                     handleMetricChange(
                                       index,
@@ -570,7 +616,7 @@ function UploadPageContent() {
                               <td className="p-2">
                                 <Input
                                   type="number"
-                                  value={metric.value}
+                                  value={metric.value ?? ""}
                                   onChange={(e) =>
                                     handleMetricChange(
                                       index,
@@ -583,7 +629,7 @@ function UploadPageContent() {
                               </td>
                               <td className="p-2">
                                 <Input
-                                  value={metric.unit || ""}
+                                  value={metric.unit ?? ""}
                                   onChange={(e) =>
                                     handleMetricChange(
                                       index,
@@ -692,9 +738,23 @@ function UploadPageContent() {
 
             {/* Error Display */}
             {error && (
-              <div className="flex items-center gap-2 p-3 bg-status-critical/10 text-status-critical rounded-lg">
-                <AlertCircle className="h-5 w-5 flex-shrink-0" />
-                <p className="text-sm">{error}</p>
+              <div className="space-y-4">
+                <div className="flex items-start gap-2 p-3 bg-status-critical/10 text-status-critical rounded-lg">
+                  <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm">{error}</p>
+                    {fileName && uploadCreatedAt && (
+                      <p className="text-xs mt-1 opacity-70">
+                        {fileName} - {formatDateTurkish(uploadCreatedAt)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                {uploadId && (
+                  <Button variant="outline" size="sm" onClick={handleCancel}>
+                    Yeni Dosya Yükle
+                  </Button>
+                )}
               </div>
             )}
           </CardContent>
