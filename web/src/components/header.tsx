@@ -144,7 +144,7 @@ export function Header({
           {isLoggedIn && (
             <ProfileSwitcher
               currentProfileId={currentProfileId}
-              currentProfileName={profileName}
+              currentProfileName={profileName ?? undefined}
               className="hidden sm:flex"
             />
           )}
@@ -171,7 +171,7 @@ export function Header({
               {/* Mobile Profile Switcher */}
               <ProfileSwitcher
                 currentProfileId={currentProfileId}
-                currentProfileName={profileName}
+                currentProfileName={profileName ?? undefined}
                 className="sm:hidden"
               />
               <Button
