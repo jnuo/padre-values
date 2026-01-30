@@ -298,7 +298,7 @@ async function handler(
       await sql`
         UPDATE pending_uploads
         SET
-          status = 'error',
+          status = 'pending',
           error_message = ${String(extractionError)},
           updated_at = NOW()
         WHERE id = ${uploadId}
@@ -318,5 +318,9 @@ async function handler(
   }
 }
 
-// Wrap with QStash signature verification
-export const POST = verifySignatureAppRouter(handler);
+// In local dev, skip QStash signature verification
+const isLocalDev =
+  !process.env.QSTASH_CURRENT_SIGNING_KEY ||
+  process.env.NODE_ENV === "development";
+
+export const POST = isLocalDev ? handler : verifySignatureAppRouter(handler);

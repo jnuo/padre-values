@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense, useCallback } from "react";
+import { useState, useEffect, Suspense, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDropzone } from "react-dropzone";
 import { User, Upload, ArrowRight, Check, Loader2 } from "lucide-react";
@@ -23,6 +23,28 @@ function OnboardingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isAddMode = searchParams.get("mode") === "add";
+
+  // Check if user already has profiles (handles stale onboarding cookie)
+  useEffect(() => {
+    if (isAddMode) return; // Don't redirect in add mode
+
+    async function checkProfiles() {
+      try {
+        const response = await fetch("/api/profiles");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.profiles && data.profiles.length > 0) {
+            // User has profiles, redirect to dashboard
+            router.replace("/dashboard");
+          }
+        }
+      } catch (err) {
+        console.error("Failed to check profiles:", err);
+      }
+    }
+
+    checkProfiles();
+  }, [isAddMode, router]);
 
   const [step, setStep] = useState<Step>(
     isAddMode ? "create-profile" : "welcome",

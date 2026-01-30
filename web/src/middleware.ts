@@ -41,6 +41,12 @@ export async function middleware(request: NextRequest) {
     "/api/upload",
     "/api/onboarding",
   ];
+
+  // Internal worker routes that bypass auth (called server-to-server)
+  const internalRoutes = ["/api/upload/", "/extract/worker"];
+  const isInternalWorkerRoute =
+    internalRoutes.every((part) => pathname.includes(part.replace("/", ""))) &&
+    pathname.endsWith("/worker");
   const isProtectedApiRoute = protectedApiRoutes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
@@ -68,7 +74,8 @@ export async function middleware(request: NextRequest) {
   }
 
   // Return 401 for protected API routes if not authenticated
-  if (isProtectedApiRoute && !isAuthenticated) {
+  // Skip auth check for internal worker routes
+  if (isProtectedApiRoute && !isAuthenticated && !isInternalWorkerRoute) {
     return NextResponse.json(
       { error: "Unauthorized", message: "Authentication required" },
       { status: 401 },

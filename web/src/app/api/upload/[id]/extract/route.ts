@@ -75,40 +75,48 @@ export async function POST(
       WHERE id = ${uploadId}
     `;
 
-    // Enqueue the extraction job to QStash
+    // Check if we're in local development (no QStash)
     const qstashToken = process.env.QSTASH_TOKEN;
-    if (!qstashToken) {
-      // Fallback: no QStash configured, return error
-      await sql`
-        UPDATE pending_uploads
-        SET status = 'error', error_message = 'QStash not configured', updated_at = NOW()
-        WHERE id = ${uploadId}
-      `;
-      return NextResponse.json(
-        { error: "QStash not configured" },
-        { status: 500 },
+    const isLocalDev = !qstashToken || process.env.NODE_ENV === "development";
+
+    if (isLocalDev) {
+      // Local dev: call worker endpoint directly (fire and forget)
+      const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+      const workerUrl = `${baseUrl}/api/upload/${uploadId}/extract/worker`;
+
+      console.log(
+        `[Extract] Local dev - calling worker directly: ${workerUrl}`,
       );
+
+      // Fire and forget - don't await
+      fetch(workerUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uploadId }),
+      }).catch((err) => console.error("[Extract] Worker call failed:", err));
+
+      console.log(`[Extract] Worker triggered for upload: ${uploadId}`);
+    } else {
+      // Production: use QStash for reliable async processing
+      const client = new Client({ token: qstashToken });
+
+      const baseUrl =
+        process.env.NEXTAUTH_URL || process.env.VERCEL_URL
+          ? `https://${process.env.VERCEL_URL}`
+          : "http://localhost:3000";
+
+      const workerUrl = `${baseUrl}/api/upload/${uploadId}/extract/worker`;
+
+      console.log(`[Extract] Enqueuing job to QStash: ${workerUrl}`);
+
+      await client.publishJSON({
+        url: workerUrl,
+        body: { uploadId },
+        retries: 2,
+      });
+
+      console.log(`[Extract] Job enqueued for upload: ${uploadId}`);
     }
-
-    const client = new Client({ token: qstashToken });
-
-    // Get the base URL for the worker endpoint
-    const baseUrl =
-      process.env.NEXTAUTH_URL || process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : "http://localhost:3000";
-
-    const workerUrl = `${baseUrl}/api/upload/${uploadId}/extract/worker`;
-
-    console.log(`[Extract] Enqueuing job to QStash: ${workerUrl}`);
-
-    await client.publishJSON({
-      url: workerUrl,
-      body: { uploadId },
-      retries: 2,
-    });
-
-    console.log(`[Extract] Job enqueued for upload: ${uploadId}`);
 
     return NextResponse.json({
       uploadId,

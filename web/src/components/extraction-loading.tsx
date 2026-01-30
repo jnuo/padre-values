@@ -15,9 +15,15 @@ const MESSAGES = [
 
 interface ExtractionLoadingProps {
   fileName?: string;
+  uploadTime?: string;
+  onCancel?: () => void;
 }
 
-export function ExtractionLoading({ fileName }: ExtractionLoadingProps) {
+export function ExtractionLoading({
+  fileName,
+  uploadTime,
+  onCancel,
+}: ExtractionLoadingProps) {
   const [messageIndex, setMessageIndex] = useState(0);
 
   // Cycle through messages
@@ -100,12 +106,28 @@ export function ExtractionLoading({ fileName }: ExtractionLoadingProps) {
         ))}
       </div>
 
-      {/* File name */}
+      {/* File name and upload time */}
       {fileName && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full">
           <FileText className="w-4 h-4" />
           <span className="truncate max-w-[200px]">{fileName}</span>
+          {uploadTime && (
+            <>
+              <span className="text-muted-foreground/50">-</span>
+              <span>{uploadTime}</span>
+            </>
+          )}
         </div>
+      )}
+
+      {/* Cancel button */}
+      {onCancel && (
+        <button
+          onClick={onCancel}
+          className="mt-4 px-4 py-2 text-sm text-muted-foreground hover:text-foreground border border-border hover:border-foreground/30 rounded-lg transition-colors"
+        >
+          İptal
+        </button>
       )}
 
       {/* Scanning animation keyframes */}
