@@ -100,10 +100,12 @@ export async function POST(
       // Production: use QStash for reliable async processing
       const client = new Client({ token: qstashToken });
 
+      // Use NEXTAUTH_URL (custom domain) or fall back to VERCEL_URL
       const baseUrl =
-        process.env.NEXTAUTH_URL || process.env.VERCEL_URL
+        process.env.NEXTAUTH_URL ||
+        (process.env.VERCEL_URL
           ? `https://${process.env.VERCEL_URL}`
-          : "http://localhost:3000";
+          : "http://localhost:3000");
 
       const workerUrl = `${baseUrl}/api/upload/${uploadId}/extract/worker`;
 
