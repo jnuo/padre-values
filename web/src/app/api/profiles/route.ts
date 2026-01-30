@@ -160,10 +160,10 @@ export async function POST(request: Request) {
 
     console.log(`[API] Creating profile "${trimmedName}" for user ${userId}`);
 
-    // Create the profile
+    // Create the profile (owner tracked via user_access table)
     const profileResult = await sql`
-      INSERT INTO profiles (display_name, owner_user_id)
-      VALUES (${trimmedName}, ${userId})
+      INSERT INTO profiles (display_name)
+      VALUES (${trimmedName})
       RETURNING id, display_name, created_at
     `;
 
