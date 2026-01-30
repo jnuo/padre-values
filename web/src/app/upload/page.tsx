@@ -139,10 +139,13 @@ function UploadPageContent() {
           clearInterval(pollIntervalRef.current!);
           pollIntervalRef.current = null;
           await loadExtractedData(id);
-        } else if (upload?.status === "pending" && upload?.error_message) {
+        } else if (
+          upload?.status === "error" ||
+          (upload?.status === "pending" && upload?.error_message)
+        ) {
           clearInterval(pollIntervalRef.current!);
           pollIntervalRef.current = null;
-          setError(upload.error_message);
+          setError(upload.error_message || "Veri çıkarma başarısız");
           setStatus("error");
         }
       } catch (error) {
@@ -174,23 +177,21 @@ function UploadPageContent() {
     }
   };
 
-  // Start extraction for a pending upload
+  // Start extraction for a pending upload (async via QStash)
   const startExtraction = async (id: string) => {
     try {
+      setStatus("extracting");
       const response = await fetch(`/api/upload/${id}/extract`, {
         method: "POST",
       });
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.message || "Extraction failed");
+        throw new Error(data.message || data.details || "Extraction failed");
       }
 
-      const data = await response.json();
-      setExtractedData(data.extractedData);
-      setEditedMetrics(data.extractedData.metrics || []);
-      setSampleDate(data.extractedData.sample_date || "");
-      setStatus("review");
+      // Extraction is async - start polling for completion
+      startPolling(id);
     } catch (error) {
       console.error("Extraction error:", error);
       setError(String(error));
@@ -280,7 +281,7 @@ function UploadPageContent() {
         setUploadId(uploadData.uploadId);
         setStatus("extracting");
 
-        // Start extraction
+        // Start extraction (async via QStash)
         const extractResponse = await fetch(
           `/api/upload/${uploadData.uploadId}/extract`,
           {
@@ -291,16 +292,17 @@ function UploadPageContent() {
         const extractData = await extractResponse.json();
 
         if (!extractResponse.ok) {
-          setError(extractData.message || "Veri çıkarma başarısız");
+          setError(
+            extractData.message ||
+              extractData.details ||
+              "Veri çıkarma başarısız",
+          );
           setStatus("error");
           return;
         }
 
-        // Set extracted data for review
-        setExtractedData(extractData.extractedData);
-        setEditedMetrics(extractData.extractedData.metrics || []);
-        setSampleDate(extractData.extractedData.sample_date || "");
-        setStatus("review");
+        // Extraction is now async - start polling for completion
+        startPolling(uploadData.uploadId);
       } catch (err) {
         console.error("Upload error:", err);
         setError("Bir hata oluştu. Lütfen tekrar deneyin.");
