@@ -17,6 +17,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/empty-state";
 import {
   Select,
   SelectContent,
@@ -695,93 +696,80 @@ export default function Dashboard() {
         />
 
         <main className="p-2 sm:p-3 md:p-4 space-y-3">
-          {/* Metric Grid Widget */}
-          <Card className="rounded-xl">
-            <CardHeader className="pb-1.5 space-y-1.5">
-              {/* Row 1: Title + Average + Date */}
-              <div className="flex items-center gap-2">
-                <CardTitle className="text-xs font-medium text-muted-foreground whitespace-nowrap">
-                  Değerler
-                </CardTitle>
+          {/* Empty State - shown when no metrics/reports */}
+          {data && data.metrics.length === 0 && (
+            <Card className="rounded-xl">
+              <EmptyState
+                profileId={activeProfileId || undefined}
+                profileName={activeProfile?.display_name}
+              />
+            </Card>
+          )}
 
-                <div className="flex items-center gap-2 ml-auto">
-                  {/* Average switch */}
-                  <div className="flex items-center space-x-2">
-                    <Label
-                      htmlFor="average-switch"
-                      className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline"
+          {/* Metric Grid Widget - only shown when there's data */}
+          {data && data.metrics.length > 0 && (
+            <Card className="rounded-xl">
+              <CardHeader className="pb-1.5 space-y-1.5">
+                {/* Row 1: Title + Average + Date */}
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-xs font-medium text-muted-foreground whitespace-nowrap">
+                    Değerler
+                  </CardTitle>
+
+                  <div className="flex items-center gap-2 ml-auto">
+                    {/* Average switch */}
+                    <div className="flex items-center space-x-2">
+                      <Label
+                        htmlFor="average-switch"
+                        className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline"
+                      >
+                        Son Değer
+                      </Label>
+                      <Switch
+                        id="average-switch"
+                        checked={showAverage}
+                        onCheckedChange={setShowAverage}
+                      />
+                      <Label
+                        htmlFor="average-switch"
+                        className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline"
+                      >
+                        Ortalama
+                      </Label>
+                    </div>
+
+                    {/* Date filter */}
+                    <Select
+                      value={dateRange}
+                      onValueChange={(value: DateRange) => setDateRange(value)}
                     >
-                      Son Değer
-                    </Label>
-                    <Switch
-                      id="average-switch"
-                      checked={showAverage}
-                      onCheckedChange={setShowAverage}
-                    />
-                    <Label
-                      htmlFor="average-switch"
-                      className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline"
-                    >
-                      Ortalama
-                    </Label>
+                      <SelectTrigger className="w-36 sm:w-40 h-7 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tümü</SelectItem>
+                        <SelectItem value="90">Son 90 gün</SelectItem>
+                        <SelectItem value="30">Son 30 gün</SelectItem>
+                        <SelectItem value="15">Son 15 gün</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-
-                  {/* Date filter */}
-                  <Select
-                    value={dateRange}
-                    onValueChange={(value: DateRange) => setDateRange(value)}
-                  >
-                    <SelectTrigger className="w-36 sm:w-40 h-7 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tümü</SelectItem>
-                      <SelectItem value="90">Son 90 gün</SelectItem>
-                      <SelectItem value="30">Son 30 gün</SelectItem>
-                      <SelectItem value="15">Son 15 gün</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Row 2: Search + Sort + Date Range Display */}
-              <div className="flex items-center gap-2">
-                {/* Desktop: Search input + Sort button */}
-                <div className="hidden md:flex items-center gap-2">
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                    <Input
-                      type="text"
-                      placeholder="Ara..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="h-7 pl-8 w-48 text-xs"
-                    />
-                  </div>
-                  <div className="w-px h-5 bg-border" />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSortSheetOpen(true)}
-                    className="h-7 gap-1 px-2"
-                  >
-                    <ArrowUpDown className="h-3.5 w-3.5" />
-                    <span className="text-xs">Sırala</span>
-                  </Button>
                 </div>
 
-                {/* Mobile: Search button + Sort button */}
-                {!showSearchInput ? (
-                  <div className="flex md:hidden items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowSearchInput(true)}
-                      className="h-7 gap-1 px-2"
-                    >
-                      <Search className="h-3.5 w-3.5" />
-                      <span className="text-xs">Ara</span>
-                    </Button>
+                {/* Row 2: Search + Sort + Date Range Display */}
+                <div className="flex items-center gap-2">
+                  {/* Desktop: Search input + Sort button */}
+                  <div className="hidden md:flex items-center gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                      <Input
+                        type="text"
+                        placeholder="Ara..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="h-7 pl-8 w-48 text-xs"
+                      />
+                    </div>
                     <div className="w-px h-5 bg-border" />
                     <Button
                       variant="ghost"
@@ -793,141 +781,172 @@ export default function Dashboard() {
                       <span className="text-xs">Sırala</span>
                     </Button>
                   </div>
-                ) : (
-                  <div className="flex-1 md:hidden relative">
-                    <Input
-                      type="text"
-                      placeholder="Ara..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="h-7 pr-8 text-xs"
-                      autoFocus
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={closeSearch}
-                      className="absolute right-0.5 top-0.5 h-6 w-6"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                )}
 
-                {/* Date range display */}
-                <div className="text-xs text-muted-foreground ml-auto">
-                  {dateRangeDisplay}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0 px-0">
-              <div className="max-h-48 overflow-y-auto p-2">
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                  {displayedMetrics.map((m) => {
-                    const latest = valuesByMetric.get(m.id);
-                    const value = latest?.value;
-                    const inRange = isValueInRange(value, m.ref_min, m.ref_max);
-                    const isSelected = selectedMetrics.includes(m.id);
-
-                    // Determine flag status for tooltip
-                    let flagStatus = "";
-                    if (
-                      value !== undefined &&
-                      m.ref_min != null &&
-                      value < m.ref_min
-                    ) {
-                      flagStatus = "Düşük";
-                    } else if (
-                      value !== undefined &&
-                      m.ref_max != null &&
-                      value > m.ref_max
-                    ) {
-                      flagStatus = "Yüksek";
-                    }
-
-                    return (
-                      <Card
-                        key={m.id}
-                        className={cn(
-                          "rounded-lg transition-all duration-200 cursor-pointer",
-                          "hover:shadow-md hover:border-primary/50",
-                          "border-l-4",
-                          inRange
-                            ? "border-l-status-normal"
-                            : "border-l-status-critical",
-                          isSelected &&
-                            "ring-2 ring-primary ring-offset-2 ring-offset-background",
-                        )}
-                        onClick={() => toggleMetric(m.id)}
+                  {/* Mobile: Search button + Sort button */}
+                  {!showSearchInput ? (
+                    <div className="flex md:hidden items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowSearchInput(true)}
+                        className="h-7 gap-1 px-2"
                       >
-                        <CardContent className="px-1.5 py-1 space-y-0">
-                          <div className="flex items-start justify-between mb-1">
-                            <div className="text-xs text-muted-foreground line-clamp-1 flex-1">
-                              {m.name}
-                            </div>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Info className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 ml-1" />
-                              </TooltipTrigger>
-                              <TooltipContent side="top" className="max-w-xs">
-                                <div className="space-y-1">
-                                  <div className="font-medium">{m.name}</div>
-                                  {m.ref_min != null && m.ref_max != null ? (
-                                    <div className="text-sm">
-                                      Referans aralığı: {m.ref_min} -{" "}
-                                      {m.ref_max} {m.unit || ""}
-                                    </div>
-                                  ) : m.ref_min != null ? (
-                                    <div className="text-sm">
-                                      Minimum: {m.ref_min} {m.unit || ""}
-                                    </div>
-                                  ) : m.ref_max != null ? (
-                                    <div className="text-sm">
-                                      Maksimum: {m.ref_max} {m.unit || ""}
-                                    </div>
-                                  ) : null}
-                                  {flagStatus && (
-                                    <div className="text-sm font-medium text-status-critical">
-                                      Durum: {flagStatus}
-                                    </div>
-                                  )}
-                                </div>
-                              </TooltipContent>
-                            </Tooltip>
-                          </div>
-                          <div
-                            className={cn(
-                              "text-lg font-semibold leading-none",
-                              inRange
-                                ? "text-status-normal"
-                                : "text-status-critical",
-                            )}
-                          >
-                            {typeof value === "number" ? value.toFixed(1) : "—"}
-                            {m.unit ? (
-                              <span className="text-xs ml-1 font-normal text-muted-foreground">
-                                {m.unit}
-                              </span>
-                            ) : null}
-                          </div>
-                          {latest && (
-                            <div className="text-xs text-muted-foreground leading-none">
-                              {showAverage && latest.count > 1
-                                ? `${latest.count} değer`
-                                : formatTR(latest.date)}
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
+                        <Search className="h-3.5 w-3.5" />
+                        <span className="text-xs">Ara</span>
+                      </Button>
+                      <div className="w-px h-5 bg-border" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSortSheetOpen(true)}
+                        className="h-7 gap-1 px-2"
+                      >
+                        <ArrowUpDown className="h-3.5 w-3.5" />
+                        <span className="text-xs">Sırala</span>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex-1 md:hidden relative">
+                      <Input
+                        type="text"
+                        placeholder="Ara..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="h-7 pr-8 text-xs"
+                        autoFocus
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={closeSearch}
+                        className="absolute right-0.5 top-0.5 h-6 w-6"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Date range display */}
+                  <div className="text-xs text-muted-foreground ml-auto">
+                    {dateRangeDisplay}
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent className="pt-0 px-0">
+                <div className="max-h-48 overflow-y-auto p-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                    {displayedMetrics.map((m) => {
+                      const latest = valuesByMetric.get(m.id);
+                      const value = latest?.value;
+                      const inRange = isValueInRange(
+                        value,
+                        m.ref_min,
+                        m.ref_max,
+                      );
+                      const isSelected = selectedMetrics.includes(m.id);
+
+                      // Determine flag status for tooltip
+                      let flagStatus = "";
+                      if (
+                        value !== undefined &&
+                        m.ref_min != null &&
+                        value < m.ref_min
+                      ) {
+                        flagStatus = "Düşük";
+                      } else if (
+                        value !== undefined &&
+                        m.ref_max != null &&
+                        value > m.ref_max
+                      ) {
+                        flagStatus = "Yüksek";
+                      }
+
+                      return (
+                        <Card
+                          key={m.id}
+                          className={cn(
+                            "rounded-lg transition-all duration-200 cursor-pointer",
+                            "hover:shadow-md hover:border-primary/50",
+                            "border-l-4",
+                            inRange
+                              ? "border-l-status-normal"
+                              : "border-l-status-critical",
+                            isSelected &&
+                              "ring-2 ring-primary ring-offset-2 ring-offset-background",
+                          )}
+                          onClick={() => toggleMetric(m.id)}
+                        >
+                          <CardContent className="px-1.5 py-1 space-y-0">
+                            <div className="flex items-start justify-between mb-1">
+                              <div className="text-xs text-muted-foreground line-clamp-1 flex-1">
+                                {m.name}
+                              </div>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 ml-1" />
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-xs">
+                                  <div className="space-y-1">
+                                    <div className="font-medium">{m.name}</div>
+                                    {m.ref_min != null && m.ref_max != null ? (
+                                      <div className="text-sm">
+                                        Referans aralığı: {m.ref_min} -{" "}
+                                        {m.ref_max} {m.unit || ""}
+                                      </div>
+                                    ) : m.ref_min != null ? (
+                                      <div className="text-sm">
+                                        Minimum: {m.ref_min} {m.unit || ""}
+                                      </div>
+                                    ) : m.ref_max != null ? (
+                                      <div className="text-sm">
+                                        Maksimum: {m.ref_max} {m.unit || ""}
+                                      </div>
+                                    ) : null}
+                                    {flagStatus && (
+                                      <div className="text-sm font-medium text-status-critical">
+                                        Durum: {flagStatus}
+                                      </div>
+                                    )}
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                            <div
+                              className={cn(
+                                "text-lg font-semibold leading-none",
+                                inRange
+                                  ? "text-status-normal"
+                                  : "text-status-critical",
+                              )}
+                            >
+                              {typeof value === "number"
+                                ? value.toFixed(1)
+                                : "—"}
+                              {m.unit ? (
+                                <span className="text-xs ml-1 font-normal text-muted-foreground">
+                                  {m.unit}
+                                </span>
+                              ) : null}
+                            </div>
+                            {latest && (
+                              <div className="text-xs text-muted-foreground leading-none">
+                                {showAverage && latest.count > 1
+                                  ? `${latest.count} değer`
+                                  : formatTR(latest.date)}
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Charts */}
-          {selectedMetrics.length > 0 && (
+          {data && data.metrics.length > 0 && selectedMetrics.length > 0 && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {selectedMetricsData.map((metric) => (
                 <MetricChart

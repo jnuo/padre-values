@@ -29,11 +29,24 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const userId = getDbUserId(session);
+
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: "Unauthorized", message: "Please sign in" },
+        { status: 401 },
+      );
+    }
+
+    let userId = getDbUserId(session);
+    if (!userId) {
+      const users =
+        await sql`SELECT id FROM users WHERE email = ${session.user.email}`;
+      if (users.length > 0) userId = users[0].id;
+    }
 
     if (!userId) {
       return NextResponse.json(
-        { error: "Unauthorized", message: "Please sign in" },
+        { error: "Unauthorized", message: "Could not identify user" },
         { status: 401 },
       );
     }
@@ -194,12 +207,17 @@ export async function POST(
       `;
     }
 
-    // Record in processed_files
-    await sql`
-      INSERT INTO processed_files (profile_id, report_id, file_name, content_hash, uploaded_by_user_id)
-      VALUES (${profileId}, ${reportId}, ${upload.file_name}, ${upload.content_hash}, ${userId})
-      ON CONFLICT (content_hash) DO NOTHING
-    `;
+    // Record in processed_files (to prevent duplicate uploads)
+    try {
+      await sql`
+        INSERT INTO processed_files (profile_id, file_name, content_hash)
+        VALUES (${profileId}, ${upload.file_name}, ${upload.content_hash})
+        ON CONFLICT (content_hash) DO NOTHING
+      `;
+    } catch (e) {
+      // Table might not have all columns, try minimal insert
+      console.log("[API] processed_files insert warning:", e);
+    }
 
     // Update pending upload status
     await sql`

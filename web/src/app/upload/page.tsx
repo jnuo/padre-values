@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useCallback, useEffect, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useDropzone } from "react-dropzone";
 import {
   Upload,
@@ -12,6 +12,7 @@ import {
   AlertCircle,
   ChevronLeft,
 } from "lucide-react";
+import { ExtractionLoading } from "@/components/extraction-loading";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -53,8 +54,9 @@ type UploadStatus =
   | "success"
   | "error";
 
-export default function UploadPage() {
+function UploadPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState<string>("");
   const [status, setStatus] = useState<UploadStatus>("idle");
@@ -66,18 +68,161 @@ export default function UploadPage() {
   const [editedMetrics, setEditedMetrics] = useState<ExtractedMetric[]>([]);
   const [sampleDate, setSampleDate] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch profiles on mount
+  // Check for pending uploads and resume state
+  useEffect(() => {
+    async function checkPendingUploads() {
+      try {
+        // Check URL for specific uploadId
+        const urlUploadId = searchParams.get("uploadId");
+
+        // Fetch pending uploads
+        const response = await fetch("/api/upload");
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const uploads = data.uploads || [];
+
+        // Find the relevant upload (from URL or most recent)
+        let pendingUpload = urlUploadId
+          ? uploads.find((u: { id: string }) => u.id === urlUploadId)
+          : uploads[0];
+
+        if (pendingUpload) {
+          setUploadId(pendingUpload.id);
+          setFileName(pendingUpload.file_name);
+          setSelectedProfileId(pendingUpload.profile_id);
+
+          if (pendingUpload.status === "extracting") {
+            setStatus("extracting");
+            // Poll for completion
+            startPolling(pendingUpload.id);
+          } else if (pendingUpload.status === "review") {
+            // Fetch extracted data
+            await loadExtractedData(pendingUpload.id);
+          } else if (pendingUpload.status === "pending") {
+            // Extraction not started yet, start it
+            setStatus("extracting");
+            startExtraction(pendingUpload.id);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to check pending uploads:", error);
+      }
+    }
+
+    checkPendingUploads();
+
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+      }
+    };
+  }, [searchParams]);
+
+  // Poll for extraction completion
+  const startPolling = (id: string) => {
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+    }
+
+    pollIntervalRef.current = setInterval(async () => {
+      try {
+        const response = await fetch("/api/upload");
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const upload = data.uploads?.find((u: { id: string }) => u.id === id);
+
+        if (upload?.status === "review") {
+          clearInterval(pollIntervalRef.current!);
+          pollIntervalRef.current = null;
+          await loadExtractedData(id);
+        } else if (upload?.status === "pending" && upload?.error_message) {
+          clearInterval(pollIntervalRef.current!);
+          pollIntervalRef.current = null;
+          setError(upload.error_message);
+          setStatus("error");
+        }
+      } catch (error) {
+        console.error("Polling error:", error);
+      }
+    }, 2000);
+  };
+
+  // Load extracted data for review
+  const loadExtractedData = async (id: string) => {
+    try {
+      const response = await fetch(`/api/upload/${id}`);
+      if (!response.ok) throw new Error("Failed to load upload data");
+
+      const data = await response.json();
+      const upload = data.upload;
+
+      if (upload?.extracted_data) {
+        const extracted = upload.extracted_data;
+        setExtractedData(extracted);
+        setEditedMetrics(extracted.metrics || []);
+        setSampleDate(extracted.sample_date || upload.sample_date || "");
+        setStatus("review");
+      }
+    } catch (error) {
+      console.error("Failed to load extracted data:", error);
+      setError("Veri yüklenemedi");
+      setStatus("error");
+    }
+  };
+
+  // Start extraction for a pending upload
+  const startExtraction = async (id: string) => {
+    try {
+      const response = await fetch(`/api/upload/${id}/extract`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || "Extraction failed");
+      }
+
+      const data = await response.json();
+      setExtractedData(data.extractedData);
+      setEditedMetrics(data.extractedData.metrics || []);
+      setSampleDate(data.extractedData.sample_date || "");
+      setStatus("review");
+    } catch (error) {
+      console.error("Extraction error:", error);
+      setError(String(error));
+      setStatus("error");
+    }
+  };
+
+  // Fetch profiles on mount and auto-select active profile
   useEffect(() => {
     async function fetchProfiles() {
       try {
         const response = await fetch("/api/profiles");
         if (response.ok) {
           const data = await response.json();
-          setProfiles(data.profiles || []);
-          // Auto-select first profile if only one
-          if (data.profiles?.length === 1) {
-            setSelectedProfileId(data.profiles[0].id);
+          const fetchedProfiles = data.profiles || [];
+          setProfiles(fetchedProfiles);
+
+          // Read active profile from cookie
+          const cookies = document.cookie.split(";");
+          const activeProfileCookie = cookies.find((c) =>
+            c.trim().startsWith("viziai_active_profile="),
+          );
+          const cookieProfileId = activeProfileCookie?.split("=")[1]?.trim();
+
+          // Use cookie profile if valid, otherwise first profile
+          if (
+            cookieProfileId &&
+            fetchedProfiles.some((p: Profile) => p.id === cookieProfileId)
+          ) {
+            setSelectedProfileId(cookieProfileId);
+          } else if (fetchedProfiles.length > 0) {
+            setSelectedProfileId(fetchedProfiles[0].id);
           }
         }
       } catch (error) {
@@ -241,9 +386,14 @@ export default function UploadPage() {
     router.push("/dashboard");
   };
 
+  const selectedProfile = profiles.find((p) => p.id === selectedProfileId);
+
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header
+        profileName={selectedProfile?.display_name}
+        currentProfileId={selectedProfileId || undefined}
+      />
 
       <main className="container max-w-3xl mx-auto p-4 space-y-6">
         <div className="flex items-center gap-2">
@@ -322,13 +472,7 @@ export default function UploadPage() {
 
             {/* Extracting State */}
             {status === "extracting" && (
-              <div className="flex flex-col items-center py-8">
-                <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-                <p className="text-lg font-medium">Veriler çıkarılıyor...</p>
-                <p className="text-sm text-muted-foreground">
-                  AI tahlil raporunu analiz ediyor
-                </p>
-              </div>
+              <ExtractionLoading fileName={fileName || undefined} />
             )}
 
             {/* Review State */}
@@ -527,5 +671,19 @@ export default function UploadPage() {
         </Card>
       </main>
     </div>
+  );
+}
+
+export default function UploadPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      }
+    >
+      <UploadPageContent />
+    </Suspense>
   );
 }

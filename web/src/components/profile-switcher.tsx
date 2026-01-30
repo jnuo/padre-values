@@ -83,10 +83,7 @@ export function ProfileSwitcher({
     router.push("/onboarding?mode=add");
   };
 
-  // If only one profile or no profiles, don't show the switcher
-  if (profiles.length <= 1 && !loading) {
-    return null;
-  }
+  // Always show the switcher so users can add new profiles
 
   const displayName = currentProfileName || "Profil Seç";
 

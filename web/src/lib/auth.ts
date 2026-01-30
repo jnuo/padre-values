@@ -66,9 +66,9 @@ export const authOptions: NextAuthOptions = {
 
           // Create user_access entry
           await sql`
-            INSERT INTO user_access (user_id, profile_id, access_level, granted_by)
+            INSERT INTO user_access (user_id_new, profile_id, access_level, granted_by)
             VALUES (${dbUserId}, ${profileId}, 'owner', ${dbUserId})
-            ON CONFLICT (user_id, profile_id) DO NOTHING
+            ON CONFLICT (user_id_new, profile_id) DO NOTHING
           `;
 
           console.log(`[Auth] Claimed profile ${profileId} for ${user.email}`);
@@ -81,15 +81,15 @@ export const authOptions: NextAuthOptions = {
           FROM profile_allowed_emails pae
           WHERE pae.email = ${user.email}
           AND pae.profile_id NOT IN (
-            SELECT profile_id FROM user_access WHERE user_id = ${dbUserId}
+            SELECT profile_id FROM user_access WHERE user_id_new = ${dbUserId}
           )
         `;
 
         for (const row of existingAccess) {
           await sql`
-            INSERT INTO user_access (user_id, profile_id, access_level, granted_by)
+            INSERT INTO user_access (user_id_new, profile_id, access_level, granted_by)
             VALUES (${dbUserId}, ${row.profile_id}, 'viewer', ${dbUserId})
-            ON CONFLICT (user_id, profile_id) DO NOTHING
+            ON CONFLICT (user_id_new, profile_id) DO NOTHING
           `;
           console.log(
             `[Auth] Granted access to profile ${row.profile_id} for ${user.email}`,
@@ -161,7 +161,7 @@ export async function hasProfileAccess(
   try {
     const result = await sql`
       SELECT id FROM user_access
-      WHERE user_id = ${userId} AND profile_id = ${profileId}
+      WHERE user_id_new = ${userId} AND profile_id = ${profileId}
     `;
     return result.length > 0;
   } catch (error) {
@@ -185,7 +185,7 @@ export async function getUserProfiles(userId: string): Promise<
       SELECT p.id, p.display_name, ua.access_level
       FROM profiles p
       JOIN user_access ua ON ua.profile_id = p.id
-      WHERE ua.user_id = ${userId}
+      WHERE ua.user_id_new = ${userId}
       ORDER BY p.display_name ASC
     `;
     return result as Array<{

@@ -2,36 +2,59 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions, getDbUserId } from "@/lib/auth";
 import { sql } from "@/lib/db";
-import { PDFParse, type LoadParameters } from "pdf-parse";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Extraction prompt for OpenAI
-const EXTRACTION_PROMPT = `You are a medical document parser. Extract blood test results from this Turkish lab report PDF.
+// Extraction prompt - extracts lab values and normalizes names to Turkish
+const EXTRACTION_PROMPT = `Aşağıdaki laboratuvar sayfasından TÜM güncel 'Sonuç' değerlerini çıkar.
 
-Return a JSON object with this exact structure:
-{
-  "sample_date": "YYYY-MM-DD", // The date when the blood sample was taken
-  "metrics": [
-    {
-      "name": "Metric Name", // Keep the Turkish name exactly as shown
-      "value": 12.5, // Numeric value
-      "unit": "g/dL", // Unit of measurement
-      "ref_low": 11.5, // Lower reference bound (null if not shown)
-      "ref_high": 16.0 // Upper reference bound (null if not shown)
-    }
-  ]
+Kurallar:
+- Parantezli eski sonuçları alma.
+- 10,7 → 10.7 nokta yap.
+- H/L bayrağını 'flag' alanına yaz.
+- % ve # ayrı anahtar (örn: Nötrofil% / Nötrofil#).
+- 'Numune Alım Tarihi'ni tespit et ve sadece tarihi ISO 'YYYY-MM-DD' formatında ver (saatleri atla).
+- Her test için mümkünse referans aralığını çıkar: alt sınır ve üst sınır.
+- Referans aralığı mevcutsa 'ref_low' ve 'ref_high' alanlarını doldur. Yoksa boş bırak.
+
+ÖNEMLİ - Test İsimlerini Türkçeye Çevir:
+- Rapor hangi dilde olursa olsun (İspanyolca, İngilizce, Almanca vb.), test isimlerini Türkçe tıbbi terminolojiye çevir.
+- Örnek çeviriler:
+  - Hemoglobin → Hemoglobin
+  - Hematocrit/Hematocrito → Hematokrit
+  - Red Blood Cells/Eritrocitos → Eritrosit
+  - White Blood Cells/Leucocitos → Lökosit
+  - Platelets/Plaquetas → Trombosit
+  - Glucose/Glucosa → Glukoz
+  - Cholesterol/Colesterol → Kolesterol
+  - Triglycerides/Triglicéridos → Trigliserit
+  - Urea → Üre
+  - Creatinine/Creatinina → Kreatinin
+  - ALT/GPT → ALT
+  - AST/GOT → AST
+  - TSH → TSH
+  - T3/T4 → T3/T4
+  - Iron/Hierro → Demir
+  - Ferritin/Ferritina → Ferritin
+  - Vitamin D → D Vitamini
+  - Vitamin B12 → B12 Vitamini
+- Bilinmeyen testler için orijinal ismi koru.
+
+ÇIKTI: sadece JSON -> {"sample_date": "<YYYY-MM-DD|null>", "tests": { "<Türkçe Ad>": { "value": <number>, "unit": "<unit|null>", "flag": "<H|L|N|null>", "ref_low": <number|null>, "ref_high": <number|null> } } }}`;
+
+interface ExtractedTest {
+  value: number;
+  unit?: string | null;
+  flag?: string | null;
+  ref_low?: number | null;
+  ref_high?: number | null;
 }
 
-Important:
-- Extract ALL metrics from the report
-- Keep metric names in Turkish as they appear
-- Convert comma decimals to dots (12,5 → 12.5)
-- Parse date formats like "15.01.2024" to "2024-01-15"
-- If you can't find the sample date, use null
-- If reference ranges are shown as "11.5-16.0", split into ref_low and ref_high
-- Return ONLY the JSON, no markdown or explanations`;
+interface PageExtractionResult {
+  sample_date: string | null;
+  tests: Record<string, ExtractedTest>;
+}
 
 interface ExtractedMetric {
   name: string;
@@ -47,8 +70,42 @@ interface ExtractionResult {
 }
 
 /**
+ * Convert PDF buffer to array of base64-encoded PNG images (one per page)
+ * Uses MuPDF (same library as Python version) via WebAssembly
+ */
+async function pdfToImages(buffer: Buffer): Promise<string[]> {
+  const mupdf = await import("mupdf");
+
+  const images: string[] = [];
+
+  // Open the PDF document
+  const doc = mupdf.Document.openDocument(buffer, "application/pdf");
+  const pageCount = doc.countPages();
+
+  for (let i = 0; i < pageCount; i++) {
+    const page = doc.loadPage(i);
+    // Get page bounds and render at ~200 DPI (default is 72 DPI, so scale by ~2.8)
+    const bounds = page.getBounds();
+    const scale = 2.5; // ~180 DPI
+    const pixmap = page.toPixmap(
+      mupdf.Matrix.scale(scale, scale),
+      mupdf.ColorSpace.DeviceRGB,
+      false, // no alpha
+      true, // annots
+    );
+
+    // Convert to PNG
+    const pngData = pixmap.asPNG();
+    const base64 = Buffer.from(pngData).toString("base64");
+    images.push(`data:image/png;base64,${base64}`);
+  }
+
+  return images;
+}
+
+/**
  * POST /api/upload/[id]/extract
- * Extract data from an uploaded PDF using AI
+ * Extract data from an uploaded PDF using AI vision
  */
 export async function POST(
   request: Request,
@@ -56,11 +113,24 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const userId = getDbUserId(session);
+
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: "Unauthorized", message: "Please sign in" },
+        { status: 401 },
+      );
+    }
+
+    let userId = getDbUserId(session);
+    if (!userId) {
+      const users =
+        await sql`SELECT id FROM users WHERE email = ${session.user.email}`;
+      if (users.length > 0) userId = users[0].id;
+    }
 
     if (!userId) {
       return NextResponse.json(
-        { error: "Unauthorized", message: "Please sign in" },
+        { error: "Unauthorized", message: "Could not identify user" },
         { status: 401 },
       );
     }
@@ -102,77 +172,132 @@ export async function POST(
     `;
 
     try {
-      // Fetch PDF from Vercel Blob
-      const pdfResponse = await fetch(upload.file_url);
-      if (!pdfResponse.ok) {
-        throw new Error("Failed to fetch PDF from storage");
+      let pdfBuffer: Buffer;
+
+      // Handle data URLs (local dev) vs Vercel Blob URLs
+      if (upload.file_url.startsWith("data:")) {
+        // Parse base64 data URL
+        const base64Data = upload.file_url.split(",")[1];
+        pdfBuffer = Buffer.from(base64Data, "base64");
+      } else {
+        // Fetch PDF from Vercel Blob
+        const pdfResponse = await fetch(upload.file_url);
+        if (!pdfResponse.ok) {
+          throw new Error("Failed to fetch PDF from storage");
+        }
+        pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
       }
 
-      const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
+      // Convert PDF pages to images
+      console.log(`[Extract] Converting PDF to images...`);
+      const pageImages = await pdfToImages(pdfBuffer);
+      console.log(`[Extract] Got ${pageImages.length} page(s)`);
 
-      // Extract text from PDF using pdf-parse
-      const loadOptions: LoadParameters = { data: new Uint8Array(pdfBuffer) };
-      const pdf = new PDFParse(loadOptions);
-      const textResult = await pdf.getText();
-      const pdfText = textResult.text;
-
-      if (!pdfText || pdfText.trim().length === 0) {
-        throw new Error(
-          "Could not extract text from PDF. The file may be image-based.",
-        );
+      if (pageImages.length === 0) {
+        throw new Error("PDF has no pages");
       }
 
-      // Call OpenAI for extraction
+      // Call OpenAI for extraction using vision
       const openaiApiKey = process.env.OPENAI_API_KEY;
       if (!openaiApiKey) {
         throw new Error("OpenAI API key not configured");
       }
 
-      const openaiResponse = await fetch(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${openaiApiKey}`,
+      // Process each page and merge results
+      const mergedResult: PageExtractionResult = {
+        sample_date: null,
+        tests: {},
+      };
+
+      for (let i = 0; i < pageImages.length; i++) {
+        console.log(
+          `[Extract] Processing page ${i + 1}/${pageImages.length}...`,
+        );
+
+        const openaiResponse = await fetch(
+          "https://api.openai.com/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${openaiApiKey}`,
+            },
+            body: JSON.stringify({
+              model: "gpt-4o",
+              messages: [
+                {
+                  role: "user",
+                  content: [
+                    { type: "text", text: EXTRACTION_PROMPT },
+                    {
+                      type: "image_url",
+                      image_url: { url: pageImages[i] },
+                    },
+                  ],
+                },
+              ],
+              max_tokens: 4000,
+              response_format: { type: "json_object" },
+            }),
           },
-          body: JSON.stringify({
-            model: "gpt-4o",
-            messages: [
-              { role: "system", content: EXTRACTION_PROMPT },
-              { role: "user", content: pdfText },
-            ],
-            temperature: 0.1,
-            response_format: { type: "json_object" },
-          }),
-        },
+        );
+
+        if (!openaiResponse.ok) {
+          const errorData = await openaiResponse.json();
+          throw new Error(
+            `OpenAI API error: ${errorData.error?.message || "Unknown error"}`,
+          );
+        }
+
+        const openaiData = await openaiResponse.json();
+        const content = openaiData.choices?.[0]?.message?.content;
+
+        if (!content) {
+          console.log(`[Extract] Page ${i + 1}: No content returned`);
+          continue;
+        }
+
+        // Parse the JSON response
+        let pageData: PageExtractionResult;
+        try {
+          pageData = JSON.parse(content);
+        } catch {
+          console.log(`[Extract] Page ${i + 1}: Failed to parse JSON`);
+          continue;
+        }
+
+        // Merge tests from this page
+        if (pageData.tests) {
+          const testCount = Object.keys(pageData.tests).length;
+          console.log(`[Extract] Page ${i + 1}: Found ${testCount} tests`);
+          Object.assign(mergedResult.tests, pageData.tests);
+        }
+
+        // Keep the first non-null sample_date
+        if (!mergedResult.sample_date && pageData.sample_date) {
+          mergedResult.sample_date = pageData.sample_date;
+        }
+      }
+
+      // Convert from Python format to our expected format
+      const metrics: ExtractedMetric[] = Object.entries(mergedResult.tests).map(
+        ([name, test]) => ({
+          name,
+          value: test.value,
+          unit: test.unit || undefined,
+          ref_low: test.ref_low,
+          ref_high: test.ref_high,
+        }),
       );
 
-      if (!openaiResponse.ok) {
-        const errorData = await openaiResponse.json();
-        throw new Error(
-          `OpenAI API error: ${errorData.error?.message || "Unknown error"}`,
-        );
-      }
+      const extractedData: ExtractionResult = {
+        sample_date: mergedResult.sample_date,
+        metrics,
+      };
 
-      const openaiData = await openaiResponse.json();
-      const extractedContent = openaiData.choices?.[0]?.message?.content;
-
-      if (!extractedContent) {
-        throw new Error("No content returned from OpenAI");
-      }
-
-      // Parse the JSON response
-      let extractedData: ExtractionResult;
-      try {
-        extractedData = JSON.parse(extractedContent);
-      } catch {
-        throw new Error("Failed to parse OpenAI response as JSON");
-      }
-
-      // Validate the structure
-      if (!extractedData.metrics || !Array.isArray(extractedData.metrics)) {
-        throw new Error("Invalid extraction result: missing metrics array");
+      // Validate the result
+      if (metrics.length === 0) {
+        throw new Error("No test results could be extracted from the PDF");
       }
 
       // Resolve metric aliases if available

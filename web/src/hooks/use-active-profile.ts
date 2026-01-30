@@ -33,9 +33,15 @@ export function useActiveProfile() {
   const [error, setError] = useState<string | null>(null);
 
   const isAuthenticated = status === "authenticated";
+  const isLoading = status === "loading";
 
   // Fetch profiles and determine active one
   useEffect(() => {
+    // Wait for session to finish loading
+    if (isLoading) {
+      return;
+    }
+
     if (!isAuthenticated) {
       setLoading(false);
       return;
@@ -47,8 +53,20 @@ export function useActiveProfile() {
       try {
         const response = await fetch("/api/profiles");
 
+        // Handle auth errors gracefully - user might need to re-login
+        if (response.status === 401) {
+          console.log(
+            "[useActiveProfile] Not authenticated, skipping profile fetch",
+          );
+          if (mounted) {
+            setLoading(false);
+          }
+          return;
+        }
+
         if (!response.ok) {
-          throw new Error("Failed to fetch profiles");
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || "Failed to fetch profiles");
         }
 
         const data = await response.json();
@@ -104,7 +122,7 @@ export function useActiveProfile() {
     return () => {
       mounted = false;
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isLoading]);
 
   // Select a profile via API
   const selectProfile = async (profileId: string) => {

@@ -13,11 +13,40 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    const userId = getDbUserId(session);
+
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: "Unauthorized", message: "Please sign in to view profiles" },
+        { status: 401 },
+      );
+    }
+
+    // Get dbId from session, or look up by email if not present (for old sessions)
+    let userId = getDbUserId(session);
+
+    if (!userId) {
+      // Look up user by email
+      const users = await sql`
+        SELECT id FROM users WHERE email = ${session.user.email}
+      `;
+
+      if (users.length > 0) {
+        userId = users[0].id;
+      } else {
+        // Create user record if it doesn't exist
+        const newUser = await sql`
+          INSERT INTO users (email, name, avatar_url)
+          VALUES (${session.user.email}, ${session.user.name || null}, ${session.user.image || null})
+          ON CONFLICT (email) DO UPDATE SET updated_at = NOW()
+          RETURNING id
+        `;
+        userId = newUser[0]?.id;
+      }
+    }
 
     if (!userId) {
       return NextResponse.json(
-        { error: "Unauthorized", message: "Please sign in to view profiles" },
+        { error: "Unauthorized", message: "Could not identify user" },
         { status: 401 },
       );
     }
@@ -31,7 +60,7 @@ export async function GET() {
         (SELECT COUNT(*) FROM reports r WHERE r.profile_id = p.id) as report_count
       FROM profiles p
       JOIN user_access ua ON ua.profile_id = p.id
-      WHERE ua.user_id = ${userId}
+      WHERE ua.user_id_new = ${userId}
       ORDER BY p.display_name ASC
     `;
 
@@ -52,13 +81,34 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    const userId = getDbUserId(session);
+
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        {
+          error: "Unauthorized",
+          message: "Please sign in to create a profile",
+        },
+        { status: 401 },
+      );
+    }
+
+    // Get dbId from session, or look up by email if not present (for old sessions)
+    let userId = getDbUserId(session);
+
+    if (!userId) {
+      const users = await sql`
+        SELECT id FROM users WHERE email = ${session.user.email}
+      `;
+      if (users.length > 0) {
+        userId = users[0].id;
+      }
+    }
 
     if (!userId) {
       return NextResponse.json(
         {
           error: "Unauthorized",
-          message: "Please sign in to create a profile",
+          message: "Could not identify user",
         },
         { status: 401 },
       );
@@ -99,7 +149,7 @@ export async function POST(request: Request) {
 
     // Create user_access entry with owner level
     await sql`
-      INSERT INTO user_access (user_id, profile_id, access_level, granted_by)
+      INSERT INTO user_access (user_id_new, profile_id, access_level, granted_by)
       VALUES (${userId}, ${profile.id}, 'owner', ${userId})
     `;
 

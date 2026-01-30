@@ -2,6 +2,7 @@
 
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun, Upload } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -102,7 +103,8 @@ export function Header({
   onLogin,
 }: HeaderProps): React.ReactElement {
   const router = useRouter();
-  const isLoggedIn = profileName != null;
+  const { status } = useSession();
+  const isLoggedIn = status === "authenticated";
 
   function handleLogoClick(): void {
     router.push("/");

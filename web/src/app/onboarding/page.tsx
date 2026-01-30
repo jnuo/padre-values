@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { User, Upload, ArrowRight, Check } from "lucide-react";
+import { useDropzone } from "react-dropzone";
+import { User, Upload, ArrowRight, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Header } from "@/components/header";
+import { cn } from "@/lib/utils";
 
 type Step = "welcome" | "create-profile" | "upload-prompt" | "complete";
 
@@ -28,6 +30,66 @@ function OnboardingContent() {
   const [profileName, setProfileName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [createdProfileId, setCreatedProfileId] = useState<string | null>(null);
+  const [createdProfileName, setCreatedProfileName] = useState<string | null>(
+    null,
+  );
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Handle file drop for upload
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      const file = acceptedFiles[0];
+      if (!file || !createdProfileId) return;
+
+      if (file.type !== "application/pdf") {
+        setError("Sadece PDF dosyaları kabul edilir");
+        return;
+      }
+
+      setError(null);
+      setIsUploading(true);
+
+      try {
+        // Upload the file
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("profileId", createdProfileId);
+
+        const uploadResponse = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const uploadData = await uploadResponse.json();
+
+        if (!uploadResponse.ok) {
+          if (uploadResponse.status === 409) {
+            setError(`Bu dosya zaten yüklenmiş`);
+          } else {
+            setError(uploadData.message || "Yükleme başarısız");
+          }
+          setIsUploading(false);
+          return;
+        }
+
+        // Redirect to upload page to continue extraction/review
+        router.push(`/upload?uploadId=${uploadData.uploadId}`);
+      } catch (err) {
+        console.error("Upload error:", err);
+        setError("Bir hata oluştu. Lütfen tekrar deneyin.");
+        setIsUploading(false);
+      }
+    },
+    [createdProfileId, router],
+  );
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { "application/pdf": [".pdf"] },
+    maxFiles: 1,
+    disabled: isUploading,
+  });
 
   const handleCreateProfile = async () => {
     if (!profileName.trim()) {
@@ -57,6 +119,8 @@ function OnboardingContent() {
         method: "POST",
       });
 
+      setCreatedProfileId(data.profile.id);
+      setCreatedProfileName(data.profile.display_name);
       setStep("upload-prompt");
     } catch (err) {
       console.error("Create profile error:", err);
@@ -66,17 +130,16 @@ function OnboardingContent() {
     }
   };
 
-  const handleGoToUpload = () => {
-    router.push("/upload");
-  };
-
   const handleSkipToDashboard = () => {
     router.push("/dashboard");
   };
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header
+        profileName={createdProfileName}
+        currentProfileId={createdProfileId || undefined}
+      />
 
       <main className="container max-w-lg mx-auto p-4 pt-12">
         {/* Welcome Step */}
@@ -213,27 +276,49 @@ function OnboardingContent() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="border-2 border-dashed rounded-lg p-6 bg-muted/30">
-                <Upload className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
-                <p className="font-medium">PDF Yükle</p>
-                <p className="text-sm text-muted-foreground">
-                  Tahlil raporlarınızı otomatik olarak analiz edeceğiz
-                </p>
+              {/* Dropzone */}
+              <div
+                {...getRootProps()}
+                className={cn(
+                  "border-2 border-dashed rounded-lg p-6 cursor-pointer transition-colors",
+                  isDragActive
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/50 bg-muted/30",
+                  isUploading && "opacity-50 cursor-wait",
+                )}
+              >
+                <input {...getInputProps()} />
+                {isUploading ? (
+                  <>
+                    <Loader2 className="h-10 w-10 mx-auto mb-3 text-primary animate-spin" />
+                    <p className="font-medium">Yükleniyor...</p>
+                  </>
+                ) : isDragActive ? (
+                  <>
+                    <Upload className="h-10 w-10 mx-auto mb-3 text-primary" />
+                    <p className="font-medium">PDF dosyasını buraya bırakın</p>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
+                    <p className="font-medium">PDF Yükle</p>
+                    <p className="text-sm text-muted-foreground">
+                      Sürükleyip bırakın veya tıklayın
+                    </p>
+                  </>
+                )}
               </div>
 
-              <div className="flex flex-col gap-2">
-                <Button onClick={handleGoToUpload} className="w-full gap-2">
-                  <Upload className="h-4 w-4" />
-                  Rapor Yükle
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={handleSkipToDashboard}
-                  className="w-full text-muted-foreground"
-                >
-                  Şimdilik Atla
-                </Button>
-              </div>
+              {error && <p className="text-sm text-status-critical">{error}</p>}
+
+              <Button
+                variant="ghost"
+                onClick={handleSkipToDashboard}
+                className="w-full text-muted-foreground"
+                disabled={isUploading}
+              >
+                Şimdilik Atla
+              </Button>
             </CardContent>
           </Card>
         )}

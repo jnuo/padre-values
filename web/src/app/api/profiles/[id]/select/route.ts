@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions, getDbUserId, hasProfileAccess } from "@/lib/auth";
 import { cookies } from "next/headers";
+import { sql } from "@/lib/db";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -19,13 +20,34 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const userId = getDbUserId(session);
+
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        {
+          error: "Unauthorized",
+          message: "Please sign in to select a profile",
+        },
+        { status: 401 },
+      );
+    }
+
+    // Get dbId from session, or look up by email if not present (for old sessions)
+    let userId = getDbUserId(session);
+
+    if (!userId) {
+      const users = await sql`
+        SELECT id FROM users WHERE email = ${session.user.email}
+      `;
+      if (users.length > 0) {
+        userId = users[0].id;
+      }
+    }
 
     if (!userId) {
       return NextResponse.json(
         {
           error: "Unauthorized",
-          message: "Please sign in to select a profile",
+          message: "Could not identify user",
         },
         { status: 401 },
       );
@@ -52,10 +74,10 @@ export async function POST(
       );
     }
 
-    // Set the active profile cookie
+    // Set the active profile cookie (NOT httpOnly so client JS can read it)
     const cookieStore = await cookies();
     cookieStore.set(ACTIVE_PROFILE_COOKIE, profileId, {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: COOKIE_MAX_AGE,

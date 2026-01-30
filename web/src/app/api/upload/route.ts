@@ -21,11 +21,25 @@ export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    const userId = getDbUserId(session);
+
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: "Unauthorized", message: "Please sign in to upload files" },
+        { status: 401 },
+      );
+    }
+
+    // Get dbId from session, or look up by email if not present
+    let userId = getDbUserId(session);
+    if (!userId) {
+      const users =
+        await sql`SELECT id FROM users WHERE email = ${session.user.email}`;
+      if (users.length > 0) userId = users[0].id;
+    }
 
     if (!userId) {
       return NextResponse.json(
-        { error: "Unauthorized", message: "Please sign in to upload files" },
+        { error: "Unauthorized", message: "Could not identify user" },
         { status: 401 },
       );
     }
@@ -76,13 +90,12 @@ export async function POST(request: Request) {
       .update(buffer)
       .digest("hex");
 
-    // Check for duplicate uploads
+    // Check for duplicate uploads in processed_files
     const duplicateCheck = await sql`
-      SELECT pf.report_id, r.sample_date::TEXT as sample_date
-      FROM processed_files pf
-      JOIN reports r ON r.id = pf.report_id
-      WHERE pf.profile_id = ${profileId}
-      AND pf.content_hash = ${contentHash}
+      SELECT id, file_name, created_at::TEXT as uploaded_at
+      FROM processed_files
+      WHERE profile_id = ${profileId}
+      AND content_hash = ${contentHash}
       LIMIT 1
     `;
 
@@ -90,45 +103,45 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error: "Duplicate",
-          message: "This file has already been uploaded",
-          existingReportId: duplicateCheck[0].report_id,
-          existingSampleDate: duplicateCheck[0].sample_date,
+          message: "Bu dosya zaten yüklenmiş",
+          existingFileName: duplicateCheck[0].file_name,
+          existingSampleDate: duplicateCheck[0].uploaded_at,
         },
         { status: 409 },
       );
     }
 
-    // Also check pending uploads for duplicates
-    const pendingDuplicateCheck = await sql`
-      SELECT id FROM pending_uploads
+    // Clean up any stuck pending uploads for same file
+    await sql`
+      DELETE FROM pending_uploads
       WHERE profile_id = ${profileId}
       AND content_hash = ${contentHash}
-      AND status IN ('pending', 'extracting', 'review')
-      LIMIT 1
     `;
 
-    if (pendingDuplicateCheck.length > 0) {
-      return NextResponse.json(
-        {
-          error: "Duplicate",
-          message: "This file is already being processed",
-          pendingUploadId: pendingDuplicateCheck[0].id,
-        },
-        { status: 409 },
-      );
-    }
-
-    // Upload to Vercel Blob
     const fileName = file.name || `upload-${Date.now()}.pdf`;
-    const blob = await put(`uploads/${profileId}/${contentHash}.pdf`, buffer, {
-      access: "public",
-      contentType: "application/pdf",
-    });
+    let fileUrl: string;
+
+    // Try Vercel Blob if token is configured, otherwise use data URL for local dev
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      const blob = await put(
+        `uploads/${profileId}/${contentHash}.pdf`,
+        buffer,
+        {
+          access: "public",
+          contentType: "application/pdf",
+        },
+      );
+      fileUrl = blob.url;
+    } else {
+      // For local development: store as base64 data URL
+      const base64 = buffer.toString("base64");
+      fileUrl = `data:application/pdf;base64,${base64}`;
+    }
 
     // Create pending_uploads record
     const result = await sql`
       INSERT INTO pending_uploads (user_id, profile_id, file_name, content_hash, file_url, status)
-      VALUES (${userId}, ${profileId}, ${fileName}, ${contentHash}, ${blob.url}, 'pending')
+      VALUES (${userId}, ${profileId}, ${fileName}, ${contentHash}, ${fileUrl}, 'pending')
       RETURNING id
     `;
 
