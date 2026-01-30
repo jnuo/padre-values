@@ -48,9 +48,10 @@ import { compareDateAsc, parseToISO, formatTR } from "@/lib/date";
 import { MetricChart } from "@/components/metric-chart";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
-import { useProfileClaim } from "@/hooks/use-profile-claim";
+import { useActiveProfile } from "@/hooks/use-active-profile";
 import { Header } from "@/components/header";
 import { LoadingState, ErrorState } from "@/components/ui/spinner";
+import { useRouter } from "next/navigation";
 
 type UserConfig = {
   id: string;
@@ -241,6 +242,7 @@ function SortableMetricItem({
 }
 
 export default function Dashboard() {
+  const router = useRouter();
   const { addToast } = useToast();
   const [data, setData] = useState<ApiData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -249,13 +251,27 @@ export default function Dashboard() {
   const [, setHoveredDate] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>("all");
   const [showAverage, setShowAverage] = useState(false);
-  // Check auth and claim profile if needed
-  const { profileName, claimResult, error: profileError } = useProfileClaim();
 
-  // User config - uses authenticated user name or demo fallback
+  // Multi-profile support
+  const {
+    activeProfile,
+    activeProfileId,
+    loading: profileLoading,
+    needsOnboarding,
+    error: profileError,
+  } = useActiveProfile();
+
+  // Redirect to onboarding if no profiles
+  useEffect(() => {
+    if (needsOnboarding) {
+      router.push("/onboarding");
+    }
+  }, [needsOnboarding, router]);
+
+  // User config - uses active profile
   const [currentUser] = useState<UserConfig>({
     id: "user",
-    name: "", // Will be updated via userName
+    name: "",
     username: "user",
     dataSheetName: "",
     referenceSheetName: "",
@@ -266,22 +282,12 @@ export default function Dashboard() {
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [metricOrder, setMetricOrder] = useState<string[]>([]);
 
-  // Show toast when a profile is claimed
-  useEffect(() => {
-    if (claimResult?.claimed && claimResult.profile_name) {
-      addToast({
-        message: `${claimResult.profile_name} profili hesabınıza bağlandı.`,
-        type: "success",
-      });
-    }
-  }, [claimResult, addToast]);
-
   // Show toast when there's a profile error
   useEffect(() => {
     if (profileError) {
       addToast({
         type: "error",
-        message: profileError.message,
+        message: profileError,
         duration: 5000,
       });
     }
@@ -335,49 +341,28 @@ export default function Dashboard() {
     }),
   );
 
-  // Fetch data from API (or fallback to Google Sheets)
+  // Fetch data from API using active profile
   useEffect(() => {
-    if (!currentUser) return;
+    // Wait for profile to be loaded
+    if (profileLoading || !activeProfileId) {
+      return;
+    }
 
     let ignore = false;
     async function load() {
       try {
-        // Try primary API first, fall back to Google Sheets if it fails
-        let res = await fetch(`/api/metrics`, { cache: "no-store" });
-
-        // If API returns empty or fails, try the Google Sheets endpoint
-        if (!res.ok) {
-          res = await fetch(`/api/data?userId=${currentUser!.id}`, {
-            cache: "no-store",
-          });
-        }
+        // Fetch metrics for the active profile
+        const res = await fetch(`/api/metrics?profileId=${activeProfileId}`, {
+          cache: "no-store",
+        });
 
         if (!res.ok) throw new Error("Failed to load data");
         const json = (await res.json()) as ApiData;
 
-        // If API returned empty data and we have Google Sheets config, try that
-        if (json.metrics.length === 0 && json.values.length === 0) {
-          const sheetsRes = await fetch(`/api/data?userId=${currentUser!.id}`, {
-            cache: "no-store",
-          });
-          if (sheetsRes.ok) {
-            const sheetsJson = (await sheetsRes.json()) as ApiData;
-            if (sheetsJson.metrics.length > 0 || sheetsJson.values.length > 0) {
-              if (!ignore) {
-                setData(sheetsJson);
-                if (metricOrder.length === 0) {
-                  setMetricOrder(sheetsJson.metrics.map((m) => m.id));
-                }
-              }
-              return;
-            }
-          }
-        }
-
         if (!ignore) {
           setData(json);
           // Initialize metric order if empty
-          if (metricOrder.length === 0) {
+          if (metricOrder.length === 0 && json.metrics.length > 0) {
             setMetricOrder(json.metrics.map((m) => m.id));
           }
         }
@@ -400,7 +385,7 @@ export default function Dashboard() {
     return () => {
       ignore = true;
     };
-  }, [currentUser]);
+  }, [activeProfileId, profileLoading, addToast]);
 
   // Auto-select Hemoglobin when data is loaded
   useEffect(() => {
@@ -703,7 +688,11 @@ export default function Dashboard() {
     <TooltipProvider>
       <div className="min-h-screen bg-background">
         {/* Header - Product + User Info */}
-        <Header profileName={profileName} />
+        <Header
+          profileName={activeProfile?.display_name}
+          currentProfileId={activeProfileId || undefined}
+          showUploadButton
+        />
 
         <main className="p-2 sm:p-3 md:p-4 space-y-3">
           {/* Metric Grid Widget */}

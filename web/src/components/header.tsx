@@ -3,12 +3,17 @@
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Upload } from "lucide-react";
 import { useEffect, useState } from "react";
+import { ProfileSwitcher } from "@/components/profile-switcher";
 
 interface HeaderProps {
   /** User's profile name to display. If null, shows login button instead of user menu */
   profileName?: string | null;
+  /** Current profile ID for the profile switcher */
+  currentProfileId?: string;
+  /** Whether to show the upload button */
+  showUploadButton?: boolean;
   /** Callback when logout is clicked */
   onLogout?: () => void;
   /** Callback when login is clicked */
@@ -85,11 +90,14 @@ function ThemeToggle(): React.ReactElement {
 /**
  * Shared header component for ViziAI
  * - Two-color wordmark (Vizi in teal, AI in coral)
+ * - Profile switcher (when logged in with multiple profiles)
  * - Dark/light mode toggle
  * - User menu or login button depending on auth state
  */
 export function Header({
   profileName,
+  currentProfileId,
+  showUploadButton = false,
   onLogout,
   onLogin,
 }: HeaderProps): React.ReactElement {
@@ -108,6 +116,10 @@ export function Header({
     router.push("/login");
   }
 
+  function handleUploadClick(): void {
+    router.push("/upload");
+  }
+
   async function handleLogoutClick(): Promise<void> {
     if (onLogout) {
       onLogout();
@@ -123,16 +135,43 @@ export function Header({
         className="flex items-center justify-between px-4 py-3 sm:px-6 md:px-8"
         aria-label="Ana navigasyon"
       >
-        <ViziAILogo onClick={handleLogoClick} />
+        <div className="flex items-center gap-4">
+          <ViziAILogo onClick={handleLogoClick} />
+
+          {/* Profile Switcher - only show when logged in */}
+          {isLoggedIn && (
+            <ProfileSwitcher
+              currentProfileId={currentProfileId}
+              currentProfileName={profileName}
+              className="hidden sm:flex"
+            />
+          )}
+        </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Upload Button */}
+          {isLoggedIn && showUploadButton && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleUploadClick}
+              className="gap-1.5 border-primary/30 hover:border-primary hover:bg-primary/5"
+            >
+              <Upload className="h-4 w-4" />
+              <span className="hidden sm:inline">Yükle</span>
+            </Button>
+          )}
+
           <ThemeToggle />
 
           {isLoggedIn ? (
             <>
-              <span className="text-sm font-medium hidden sm:inline text-foreground">
-                {profileName || "Kullanıcı"}
-              </span>
+              {/* Mobile Profile Switcher */}
+              <ProfileSwitcher
+                currentProfileId={currentProfileId}
+                currentProfileName={profileName}
+                className="sm:hidden"
+              />
               <Button
                 variant="outline"
                 size="sm"

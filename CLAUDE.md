@@ -77,6 +77,21 @@ In Google Cloud Console > APIs & Services > Credentials > OAuth 2.0 Client:
 - [ ] User data loads correctly from Neon
 - [ ] All allowed emails can access the app
 
+## Frontend & Design Work
+
+Before any UI/design changes, reference:
+
+- `product/brand-guidelines/BRAND.md` - Colors, typography, voice & tone
+- `product/PROJECT-ROADMAP.md` - Feature roadmap and priorities
+
+**Key brand rules:**
+
+- Primary: Teal (#0D9488 light / #2DD4BF dark)
+- Secondary/Accent: Coral (#F97066 light / #FDA4AF dark)
+- Status colors: Green (normal), Amber (warning), Terracotta (critical - NOT bright red)
+- Font: Inter with Turkish support
+- Tone: Clear, calm, reassuring - never alarming
+
 ## Notes
 
 - Low-activity personal project

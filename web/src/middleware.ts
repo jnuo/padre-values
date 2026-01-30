@@ -8,6 +8,7 @@ import { getToken } from "next-auth/jwt";
  * 1. Checks if the user is authenticated using NextAuth session
  * 2. Redirects unauthenticated users from protected routes to /login
  * 3. Redirects authenticated users from /login to /dashboard
+ * 4. Redirects new users (no profiles) to /onboarding
  */
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -21,7 +22,7 @@ export async function middleware(request: NextRequest) {
   const isAuthenticated = !!token;
 
   // Protected routes that require authentication
-  const protectedRoutes = ["/dashboard"];
+  const protectedRoutes = ["/dashboard", "/upload", "/onboarding"];
   const isProtectedRoute = protectedRoutes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
@@ -33,8 +34,20 @@ export async function middleware(request: NextRequest) {
   );
 
   // Protected API routes
-  const protectedApiRoutes: string[] = ["/api/metrics", "/api/metric-order"];
+  const protectedApiRoutes: string[] = [
+    "/api/metrics",
+    "/api/metric-order",
+    "/api/profiles",
+    "/api/upload",
+    "/api/onboarding",
+  ];
   const isProtectedApiRoute = protectedApiRoutes.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
+
+  // Onboarding-related paths that should not trigger the onboarding check
+  const onboardingPaths = ["/onboarding", "/api/profiles", "/api/onboarding"];
+  const isOnboardingPath = onboardingPaths.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
 
@@ -60,6 +73,16 @@ export async function middleware(request: NextRequest) {
       { error: "Unauthorized", message: "Authentication required" },
       { status: 401 },
     );
+  }
+
+  // For authenticated users on protected routes (except onboarding-related),
+  // check if they need onboarding by looking at a cookie
+  // Note: We can't make DB calls in middleware, so we use a cookie set by the client
+  if (isAuthenticated && isProtectedRoute && !isOnboardingPath) {
+    const needsOnboarding = request.cookies.get("viziai_needs_onboarding");
+    if (needsOnboarding?.value === "true") {
+      return NextResponse.redirect(new URL("/onboarding", request.url));
+    }
   }
 
   return NextResponse.next();
