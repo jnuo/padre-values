@@ -21,10 +21,15 @@ export const authOptions: NextAuthOptions = {
       }
 
       try {
+        console.log(`[Auth] Checking allowlist for email: "${user.email}"`);
+
         // Check if email is in the allowlist (profile_allowed_emails table)
+        // Use LOWER() for case-insensitive comparison (Google may return different casing)
         const allowed = await sql`
-          SELECT 1 FROM profile_allowed_emails WHERE email = ${user.email} LIMIT 1
+          SELECT email FROM profile_allowed_emails WHERE LOWER(email) = LOWER(${user.email}) LIMIT 1
         `;
+
+        console.log(`[Auth] Allowlist query result:`, JSON.stringify(allowed));
 
         if (allowed.length === 0) {
           console.log(`[Auth] Sign-in denied: ${user.email} not in allowlist`);
@@ -58,7 +63,7 @@ export const authOptions: NextAuthOptions = {
         // Auto-claim any profiles linked to this email in profile_allowed_emails
         const allowedProfiles = await sql`
           SELECT profile_id FROM profile_allowed_emails
-          WHERE email = ${user.email}
+          WHERE LOWER(email) = LOWER(${user.email})
           AND claimed_at IS NULL
         `;
 
@@ -69,7 +74,7 @@ export const authOptions: NextAuthOptions = {
           await sql`
             UPDATE profile_allowed_emails
             SET claimed_at = NOW(), claimed_by_user_id = ${dbUserId}
-            WHERE email = ${user.email} AND profile_id = ${profileId}
+            WHERE LOWER(email) = LOWER(${user.email}) AND profile_id = ${profileId}
           `;
 
           // Create user_access entry
@@ -87,7 +92,7 @@ export const authOptions: NextAuthOptions = {
         const existingAccess = await sql`
           SELECT pae.profile_id
           FROM profile_allowed_emails pae
-          WHERE pae.email = ${user.email}
+          WHERE LOWER(pae.email) = LOWER(${user.email})
           AND pae.profile_id NOT IN (
             SELECT profile_id FROM user_access WHERE user_id_new = ${dbUserId}
           )
