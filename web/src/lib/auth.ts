@@ -139,7 +139,7 @@ export const authOptions: NextAuthOptions = {
           // Fallback: look up dbId from database
           try {
             const result = await sql`
-              SELECT id FROM users WHERE email = ${user.email}
+              SELECT id FROM users WHERE LOWER(email) = LOWER(${user.email})
             `;
             if (result[0]?.id) {
               token.dbId = result[0].id;

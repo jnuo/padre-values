@@ -27,7 +27,7 @@ export async function GET() {
     if (!userId) {
       // Look up user by email
       const users = await sql`
-        SELECT id FROM users WHERE email = ${session.user.email}
+        SELECT id FROM users WHERE LOWER(email) = LOWER(${session.user.email})
       `;
 
       if (users.length > 0) {
@@ -107,7 +107,7 @@ export async function POST(request: Request) {
     if (!userId) {
       // Look up user by email
       const users = await sql`
-        SELECT id FROM users WHERE email = ${session.user.email}
+        SELECT id FROM users WHERE LOWER(email) = LOWER(${session.user.email})
       `;
 
       if (users.length > 0) {
