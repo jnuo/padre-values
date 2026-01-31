@@ -22,11 +22,12 @@ export async function GET() {
     const userEmail = session.user.email;
 
     // Find profile via allowed emails
+    // Use LOWER() for case-insensitive comparison (Google may return different casing)
     const result = await sql`
       SELECT p.display_name
       FROM profiles p
       JOIN profile_allowed_emails pae ON p.id = pae.profile_id
-      WHERE pae.email = ${userEmail}
+      WHERE LOWER(pae.email) = LOWER(${userEmail})
       LIMIT 1
     `;
 

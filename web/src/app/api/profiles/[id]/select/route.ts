@@ -36,7 +36,7 @@ export async function POST(
 
     if (!userId) {
       const users = await sql`
-        SELECT id FROM users WHERE email = ${session.user.email}
+        SELECT id FROM users WHERE LOWER(email) = LOWER(${session.user.email})
       `;
       if (users.length > 0) {
         userId = users[0].id;

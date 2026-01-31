@@ -43,11 +43,7 @@ function getUserConfigs(): UserConfig[] {
   }
 }
 
-export function getAvailableUsers(): UserConfig[] {
-  return getUserConfigs();
-}
-
-export function getUserConfig(userId: string): UserConfig | null {
+function getUserConfig(userId: string): UserConfig | null {
   const users = getUserConfigs();
   return users.find((user) => user.id === userId) || null;
 }
