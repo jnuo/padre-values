@@ -210,5 +210,3 @@ export function Header({
     </header>
   );
 }
-
-export { ViziAILogo, ThemeToggle };
