@@ -39,3 +39,4 @@ token_*.json
 *service_account*.json
 .env.neon
 .env.test
+.obsidian/
