@@ -4,9 +4,10 @@ import { Suspense, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
 
-function LoginContent() {
+function LoginContent(): React.ReactElement {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
@@ -60,12 +61,12 @@ function LoginContent() {
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
         <div className="mb-4">
-          <h1
-            className="text-3xl font-bold text-primary cursor-pointer hover:text-primary/80"
-            onClick={() => router.push("/")}
+          <Link
+            href="/"
+            className="text-3xl font-bold text-primary hover:text-primary/80"
           >
             ViziAI
-          </h1>
+          </Link>
         </div>
         <CardTitle className="text-2xl">Tahlil Sonuçları</CardTitle>
         <p className="text-sm text-muted-foreground mt-2">
@@ -109,6 +110,7 @@ function LoginContent() {
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <circle
                   className="opacity-25"
@@ -124,7 +126,7 @@ function LoginContent() {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
               </svg>
-              Yönlendiriliyor...
+              Yönlendiriliyor…
             </span>
           ) : (
             <span className="flex items-center gap-3">
@@ -132,6 +134,7 @@ function LoginContent() {
                 className="h-5 w-5"
                 viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
               >
                 <path
                   fill="#4285F4"
@@ -157,15 +160,8 @@ function LoginContent() {
 
         <div className="mt-6 text-xs text-muted-foreground text-center">
           <p>
-            Giriş yaparak{" "}
-            <a href="#" className="underline hover:text-foreground">
-              Kullanım Koşulları
-            </a>{" "}
-            ve{" "}
-            <a href="#" className="underline hover:text-foreground">
-              Gizlilik Politikası
-            </a>
-            &apos;nı kabul etmiş olursunuz.
+            Giriş yaparak Kullanım Koşulları ve Gizlilik Politikası&apos;nı
+            kabul etmiş olursunuz.
           </p>
         </div>
       </CardContent>
@@ -173,7 +169,7 @@ function LoginContent() {
   );
 }
 
-function LoginFallback() {
+function LoginFallback(): React.ReactElement {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
@@ -181,7 +177,7 @@ function LoginFallback() {
           <h1 className="text-3xl font-bold text-primary">ViziAI</h1>
         </div>
         <CardTitle className="text-2xl">Tahlil Sonuçları</CardTitle>
-        <p className="text-sm text-muted-foreground mt-2">Yükleniyor...</p>
+        <p className="text-sm text-muted-foreground mt-2">Yükleniyor…</p>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="h-12 bg-muted animate-pulse rounded-md" />
@@ -190,7 +186,7 @@ function LoginFallback() {
   );
 }
 
-export default function LoginPage() {
+export default function LoginPage(): React.ReactElement {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Suspense fallback={<LoginFallback />}>

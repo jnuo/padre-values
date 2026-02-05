@@ -120,13 +120,14 @@ export function MetricChart({
               size="sm"
               onClick={onRemove}
               className="h-6 w-6 p-0"
+              aria-label="Grafiği kaldır"
             >
               <X className="h-3 w-3" />
             </Button>
           </div>
         </CardHeader>
         <CardContent className="!px-3 pt-0 pb-2">
-          <div className="text-sm text-muted-foreground">No data available</div>
+          <div className="text-sm text-muted-foreground">Veri bulunamadı</div>
         </CardContent>
       </Card>
     );
@@ -171,7 +172,7 @@ export function MetricChart({
             >
               {latestValue !== null
                 ? `${latestValue} ${metric.unit}`
-                : "No data"}
+                : "Veri yok"}
             </Badge>
           </div>
           <Button
@@ -179,6 +180,7 @@ export function MetricChart({
             size="sm"
             onClick={onRemove}
             className="h-6 w-6 p-0"
+            aria-label="Grafiği kaldır"
           >
             <X className="h-3 w-3" />
           </Button>
@@ -287,14 +289,14 @@ export function MetricChart({
                         >
                           {data.value !== null
                             ? `${data.value} ${metric.unit}`
-                            : "No data"}
+                            : "Veri yok"}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {formatTR(label as string)}
                         </p>
                         {metric.ref_min !== null && metric.ref_max !== null && (
                           <p className="mt-1 text-xs text-status-normal">
-                            Range: {metric.ref_min} - {metric.ref_max}{" "}
+                            Aralık: {metric.ref_min} - {metric.ref_max}{" "}
                             {metric.unit}
                           </p>
                         )}

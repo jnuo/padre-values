@@ -5,31 +5,53 @@ import { useSession } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/header";
 import { FileText, BarChart3, Shield, Zap, LucideIcon } from "lucide-react";
+
+const COLOR_MAP = {
+  primary: {
+    border: "border-l-primary",
+    bg: "bg-primary/10",
+    text: "text-primary",
+  },
+  secondary: {
+    border: "border-l-secondary",
+    bg: "bg-secondary/10",
+    text: "text-secondary",
+  },
+  "status-normal": {
+    border: "border-l-status-normal",
+    bg: "bg-status-normal/10",
+    text: "text-status-normal",
+  },
+} as const;
+
+type ColorKey = keyof typeof COLOR_MAP;
 
 type FeatureCardProps = {
   icon: LucideIcon;
   title: string;
   description: string;
-  colorClass: string;
+  colorKey: ColorKey;
 };
 
 function FeatureCard({
   icon: Icon,
   title,
   description,
-  colorClass,
+  colorKey,
 }: FeatureCardProps): React.ReactElement {
+  const colors = COLOR_MAP[colorKey];
   return (
     <Card
-      className={`border-l-4 border-l-${colorClass} hover:shadow-lg transition-all duration-200`}
+      className={`border-l-4 ${colors.border} hover:shadow-lg transition-shadow duration-200`}
     >
       <CardHeader className="pb-2">
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg bg-${colorClass}/10`}>
-            <Icon className={`h-5 w-5 text-${colorClass}`} />
+          <div className={`p-2 rounded-lg ${colors.bg}`}>
+            <Icon className={`h-5 w-5 ${colors.text}`} />
           </div>
           <CardTitle className="text-lg">{title}</CardTitle>
         </div>
@@ -47,28 +69,28 @@ const FEATURES: FeatureCardProps[] = [
     title: "AI Destekli Analiz",
     description:
       "AI'mız PDF raporlarınızdan otomatik olarak veri çıkarır ve yapılandırır, trendleri ve kalıpları zaman içinde takip etmeyi kolaylaştırır.",
-    colorClass: "primary",
+    colorKey: "primary",
   },
   {
     icon: BarChart3,
     title: "Görsel Dashboard",
     description:
       "Net içgörüler için tasarlanmış sezgisel dashboard'umuzla birden fazla laboratuvar metriğini zaman içinde tek bakışta karşılaştırın.",
-    colorClass: "secondary",
+    colorKey: "secondary",
   },
   {
     icon: FileText,
     title: "Kolay PDF Yükleme",
     description:
       "e-Nabız'dan veya herhangi bir laboratuvardan aldığınız PDF raporlarını sürükleyip bırakın. Sistem otomatik olarak verileri tanır ve işler.",
-    colorClass: "status-normal",
+    colorKey: "status-normal",
   },
   {
     icon: Shield,
     title: "Güvenli ve Özel",
     description:
       "Verileriniz şifreli olarak saklanır ve sadece sizinle paylaşılır. Gizliliğiniz bizim için en önemli önceliktir.",
-    colorClass: "primary",
+    colorKey: "primary",
   },
 ];
 
@@ -82,10 +104,6 @@ export default function Home(): React.ReactElement {
       router.replace("/dashboard");
     }
   }, [status, router]);
-
-  const navigateToLogin = (): void => {
-    router.push("/login");
-  };
 
   // Show nothing while checking auth or redirecting
   if (status === "loading" || status === "authenticated") {
@@ -113,10 +131,10 @@ export default function Home(): React.ReactElement {
             </p>
             <Button
               size="lg"
-              onClick={navigateToLogin}
-              className="px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+              asChild
+              className="px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-shadow"
             >
-              Hemen Başla
+              <Link href="/login">Hemen Başla</Link>
             </Button>
           </div>
 
@@ -164,12 +182,8 @@ export default function Home(): React.ReactElement {
           <p className="text-muted-foreground mb-6">
             Tahlil sonuçlarınızı anlamak hiç bu kadar kolay olmamıştı.
           </p>
-          <Button
-            size="lg"
-            onClick={navigateToLogin}
-            className="px-8 py-6 text-lg font-semibold"
-          >
-            Ücretsiz Deneyin
+          <Button size="lg" asChild className="px-8 py-6 text-lg font-semibold">
+            <Link href="/login">Ücretsiz Deneyin</Link>
           </Button>
         </div>
       </section>
@@ -177,7 +191,7 @@ export default function Home(): React.ReactElement {
       {/* Footer */}
       <footer className="border-t py-6">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; 2025 ViziAI. Tüm hakları saklıdır.</p>
+          <p>&copy; 2026 ViziAI. Tüm hakları saklıdır.</p>
         </div>
       </footer>
     </div>

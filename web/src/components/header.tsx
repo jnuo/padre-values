@@ -63,9 +63,14 @@ function ThemeToggle(): React.ReactElement {
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" className="h-9 w-9" disabled>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-9 w-9"
+        disabled
+        aria-label="Tema değiştir"
+      >
         <Sun className="h-4 w-4" />
-        <span className="sr-only">Toggle theme</span>
       </Button>
     );
   }
@@ -76,14 +81,13 @@ function ThemeToggle(): React.ReactElement {
       size="icon"
       className="h-9 w-9"
       onClick={toggleTheme}
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={isDark ? "Açık temaya geç" : "Koyu temaya geç"}
     >
       {isDark ? (
         <Sun className="h-4 w-4 text-brand-secondary" />
       ) : (
         <Moon className="h-4 w-4 text-brand-primary" />
       )}
-      <span className="sr-only">Toggle theme</span>
     </Button>
   );
 }

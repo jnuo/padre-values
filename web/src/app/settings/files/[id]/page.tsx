@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { formatDateTimeTR } from "@/lib/date";
 
+const EMPTY_FORM = { value: "", unit: "", ref_low: "", ref_high: "" };
+
 interface Metric {
   id: string;
   name: string;
@@ -28,7 +30,7 @@ interface FileData {
   profile_id: string;
 }
 
-export default function FileDetailPage() {
+export default function FileDetailPage(): React.ReactElement {
   const params = useParams();
   const router = useRouter();
   const { addToast } = useToast();
@@ -77,8 +79,6 @@ export default function FileDetailPage() {
       fetchFileDetails();
     }
   }, [fileId]);
-
-  const EMPTY_FORM = { value: "", unit: "", ref_low: "", ref_high: "" };
 
   // Format reference range: "100 - 200", "≥ 100", "≤ 200", or "-"
   function formatRefRange(low: number | null, high: number | null): string {
@@ -235,6 +235,7 @@ export default function FileDetailPage() {
                                   }))
                                 }
                                 className="h-8 text-sm text-right w-24"
+                                aria-label="Değer"
                               />
                             </td>
                             <td className="p-2">
@@ -248,6 +249,7 @@ export default function FileDetailPage() {
                                 }
                                 className="h-8 text-sm text-right w-20"
                                 placeholder="-"
+                                aria-label="Birim"
                               />
                             </td>
                             <td className="p-2">
@@ -263,6 +265,7 @@ export default function FileDetailPage() {
                                   }
                                   className="h-8 text-sm text-right w-16"
                                   placeholder="Min"
+                                  aria-label="Referans minimum"
                                 />
                                 <span className="text-muted-foreground">-</span>
                                 <Input
@@ -276,6 +279,7 @@ export default function FileDetailPage() {
                                   }
                                   className="h-8 text-sm text-right w-16"
                                   placeholder="Max"
+                                  aria-label="Referans maksimum"
                                 />
                               </div>
                             </td>
@@ -287,6 +291,7 @@ export default function FileDetailPage() {
                                   className="h-8 w-8"
                                   onClick={() => saveMetric(metric.id)}
                                   disabled={saving}
+                                  aria-label="Kaydet"
                                 >
                                   {saving ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -299,6 +304,7 @@ export default function FileDetailPage() {
                                   size="icon"
                                   className="h-8 w-8"
                                   onClick={cancelEditing}
+                                  aria-label="İptal"
                                 >
                                   <X className="h-4 w-4" />
                                 </Button>
