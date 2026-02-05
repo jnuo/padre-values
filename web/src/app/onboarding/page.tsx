@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 
 type Step = "welcome" | "create-profile" | "upload-prompt" | "complete";
 
-function OnboardingContent() {
+function OnboardingContent(): React.ReactElement {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isAddMode = searchParams.get("mode") === "add";
@@ -221,7 +221,7 @@ function OnboardingContent() {
                 className="w-full gap-2"
               >
                 Başlayın
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Button>
             </CardContent>
           </Card>
@@ -278,7 +278,7 @@ function OnboardingContent() {
                   disabled={!profileName.trim() || isCreating}
                   className="flex-1"
                 >
-                  {isCreating ? "Oluşturuluyor..." : "Profil Oluştur"}
+                  {isCreating ? "Oluşturuluyor…" : "Profil Oluştur"}
                 </Button>
               </div>
             </CardContent>
@@ -309,11 +309,11 @@ function OnboardingContent() {
                   isUploading && "opacity-50 cursor-wait",
                 )}
               >
-                <input {...getInputProps()} />
+                <input {...getInputProps()} aria-label="PDF dosyası seç" />
                 {isUploading ? (
                   <>
                     <Loader2 className="h-10 w-10 mx-auto mb-3 text-primary animate-spin" />
-                    <p className="font-medium">Yükleniyor...</p>
+                    <p className="font-medium">Yükleniyor…</p>
                   </>
                 ) : isDragActive ? (
                   <>
@@ -349,7 +349,7 @@ function OnboardingContent() {
   );
 }
 
-export default function OnboardingPage() {
+export default function OnboardingPage(): React.ReactElement {
   return (
     <Suspense fallback={<div className="min-h-screen bg-background" />}>
       <OnboardingContent />

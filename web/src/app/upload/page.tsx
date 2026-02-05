@@ -55,7 +55,7 @@ type UploadStatus =
   | "success"
   | "error";
 
-function UploadPageContent() {
+function UploadPageContent(): React.ReactElement {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -474,7 +474,7 @@ function UploadPageContent() {
                   !selectedProfileId && "opacity-50 cursor-not-allowed",
                 )}
               >
-                <input {...getInputProps()} />
+                <input {...getInputProps()} aria-label="PDF dosyası seç" />
                 <Upload className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
                 {isDragActive ? (
                   <p className="text-lg font-medium">
@@ -497,7 +497,7 @@ function UploadPageContent() {
             {status === "uploading" && (
               <div className="flex flex-col items-center py-8">
                 <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-                <p className="text-lg font-medium">Dosya yükleniyor...</p>
+                <p className="text-lg font-medium">Dosya yükleniyor…</p>
                 <p className="text-sm text-muted-foreground">{fileName}</p>
               </div>
             )}
@@ -576,6 +576,7 @@ function UploadPageContent() {
                                     )
                                   }
                                   className="h-8 text-sm"
+                                  aria-label="Metrik adı"
                                 />
                               </td>
                               <td className="p-2">
@@ -590,6 +591,7 @@ function UploadPageContent() {
                                     )
                                   }
                                   className="h-8 text-sm text-right w-24"
+                                  aria-label="Değer"
                                 />
                               </td>
                               <td className="p-2">
@@ -603,6 +605,7 @@ function UploadPageContent() {
                                     )
                                   }
                                   className="h-8 text-sm text-right w-20"
+                                  aria-label="Birim"
                                 />
                               </td>
                               <td className="p-2">
@@ -620,6 +623,7 @@ function UploadPageContent() {
                                   }
                                   className="h-8 text-sm text-right w-20"
                                   placeholder="-"
+                                  aria-label="Referans minimum"
                                 />
                               </td>
                               <td className="p-2">
@@ -637,6 +641,7 @@ function UploadPageContent() {
                                   }
                                   className="h-8 text-sm text-right w-20"
                                   placeholder="-"
+                                  aria-label="Referans maksimum"
                                 />
                               </td>
                               <td className="p-2">
@@ -645,6 +650,7 @@ function UploadPageContent() {
                                   size="icon"
                                   className="h-8 w-8"
                                   onClick={() => handleRemoveMetric(index)}
+                                  aria-label="Metriği sil"
                                 >
                                   <X className="h-4 w-4" />
                                 </Button>
@@ -676,7 +682,7 @@ function UploadPageContent() {
             {status === "confirming" && (
               <div className="flex flex-col items-center py-8">
                 <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-                <p className="text-lg font-medium">Kaydediliyor...</p>
+                <p className="text-lg font-medium">Kaydediliyor…</p>
               </div>
             )}
 
@@ -729,7 +735,7 @@ function UploadPageContent() {
   );
 }
 
-export default function UploadPage() {
+export default function UploadPage(): React.ReactElement {
   return (
     <Suspense
       fallback={

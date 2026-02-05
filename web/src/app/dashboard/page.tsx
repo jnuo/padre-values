@@ -147,7 +147,7 @@ function SortableMetricItem({
   inRange: boolean;
   onSendToTop?: () => void;
   isFirst?: boolean;
-}) {
+}): React.ReactElement {
   const {
     attributes,
     listeners,
@@ -167,7 +167,7 @@ function SortableMetricItem({
       ref={setNodeRef}
       style={{ ...style, pointerEvents: "auto" }}
       className={cn(
-        "group flex items-center gap-2 p-2 border rounded-lg transition-all relative",
+        "group flex items-center gap-2 p-2 border rounded-lg transition-[opacity,transform,box-shadow] relative",
         isDragging
           ? "opacity-40 scale-105 shadow-lg cursor-grabbing"
           : "hover:shadow-sm opacity-100",
@@ -210,7 +210,7 @@ function SortableMetricItem({
           }}
           className={cn(
             "flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium",
-            "transition-all duration-200 ease-out",
+            "transition-[opacity,transform,background-color,border-color,color] duration-200 ease-out",
             // Always visible on mobile, hover-only on desktop
             "opacity-100 sm:opacity-0 sm:group-hover:opacity-100",
             "translate-x-0 sm:translate-x-2 sm:group-hover:translate-x-0",
@@ -242,7 +242,7 @@ function SortableMetricItem({
   );
 }
 
-export default function Dashboard() {
+export default function Dashboard(): React.ReactElement | null {
   const router = useRouter();
   const { addToast } = useToast();
   const [data, setData] = useState<ApiData | null>(null);
@@ -505,7 +505,7 @@ export default function Dashboard() {
 
   // Get date range display
   const dateRangeDisplay = useMemo(() => {
-    if (!filteredData || filteredData.values.length === 0) return "No data";
+    if (!filteredData || filteredData.values.length === 0) return "Veri yok";
 
     const dates = filteredData.values
       .map((v) => parseToISO(v.date) ?? v.date)
@@ -668,7 +668,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingState message="Veriler yükleniyor..." />
+        <LoadingState message="Veriler yükleniyor…" />
       </div>
     );
   }
@@ -699,10 +699,7 @@ export default function Dashboard() {
           {/* Empty State - shown when no metrics/reports */}
           {data && data.metrics.length === 0 && (
             <Card className="rounded-xl">
-              <EmptyState
-                profileId={activeProfileId || undefined}
-                profileName={activeProfile?.display_name}
-              />
+              <EmptyState profileName={activeProfile?.display_name} />
             </Card>
           )}
 
@@ -764,10 +761,11 @@ export default function Dashboard() {
                       <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                       <Input
                         type="text"
-                        placeholder="Ara..."
+                        placeholder="Ara…"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="h-7 pl-8 w-48 text-xs"
+                        aria-label="Metrik ara"
                       />
                     </div>
                     <div className="w-px h-5 bg-border" />
@@ -809,17 +807,18 @@ export default function Dashboard() {
                     <div className="flex-1 md:hidden relative">
                       <Input
                         type="text"
-                        placeholder="Ara..."
+                        placeholder="Ara…"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="h-7 pr-8 text-xs"
-                        autoFocus
+                        aria-label="Metrik ara"
                       />
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={closeSearch}
                         className="absolute right-0.5 top-0.5 h-6 w-6"
+                        aria-label="Aramayı kapat"
                       >
                         <X className="h-3.5 w-3.5" />
                       </Button>
@@ -865,7 +864,7 @@ export default function Dashboard() {
                         <Card
                           key={m.id}
                           className={cn(
-                            "rounded-lg transition-all duration-200 cursor-pointer",
+                            "rounded-lg transition-[box-shadow,border-color] duration-200 cursor-pointer",
                             "hover:shadow-md hover:border-primary/50",
                             "border-l-4",
                             inRange
@@ -883,7 +882,10 @@ export default function Dashboard() {
                               </div>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Info className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 ml-1" />
+                                  <Info
+                                    className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 ml-1"
+                                    aria-label="Detaylar"
+                                  />
                                 </TooltipTrigger>
                                 <TooltipContent side="top" className="max-w-xs">
                                   <div className="space-y-1">
