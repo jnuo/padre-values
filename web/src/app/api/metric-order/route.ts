@@ -4,7 +4,6 @@ import { sql } from "@/lib/db";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Default profile name for migrated data
 const DEFAULT_PROFILE_NAME = "Yüksel O.";
 
 /**
@@ -27,15 +26,14 @@ export async function GET(request: Request) {
 
     const profileId = profiles[0].id;
 
-    // Get metric definitions ordered by display_order
-    const definitions = await sql`
+    const preferences = await sql`
       SELECT name, display_order
-      FROM metric_definitions
+      FROM metric_preferences
       WHERE profile_id = ${profileId}
       ORDER BY display_order ASC, name ASC
     `;
 
-    const order = (definitions || []).map((d) => (d as { name: string }).name);
+    const order = (preferences || []).map((d) => d.name);
 
     return NextResponse.json({ order });
   } catch (error) {
@@ -50,7 +48,7 @@ export async function GET(request: Request) {
 /**
  * PUT /api/metric-order
  * Body: { profileName?: string, order: string[] }
- * Updates display_order in metric_definitions
+ * Updates display_order in metric_preferences
  */
 export async function PUT(request: Request) {
   try {
@@ -76,19 +74,15 @@ export async function PUT(request: Request) {
 
     const profileId = profiles[0].id;
 
-    // Update display_order for each metric
-    let updated = 0;
     for (let i = 0; i < order.length; i++) {
-      const name = order[i];
       await sql`
-        UPDATE metric_definitions
+        UPDATE metric_preferences
         SET display_order = ${i}
-        WHERE profile_id = ${profileId} AND name = ${name}
+        WHERE profile_id = ${profileId} AND name = ${order[i]}
       `;
-      updated++;
     }
 
-    return NextResponse.json({ success: true, updated });
+    return NextResponse.json({ success: true, updated: order.length });
   } catch (error) {
     console.error("/api/metric-order PUT error", error);
     return NextResponse.json(

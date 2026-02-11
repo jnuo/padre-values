@@ -201,26 +201,12 @@ export async function POST(
       } else {
         updatedCount++;
       }
-    }
 
-    // Update or create metric_definitions for new metrics (only for valid metrics)
-    for (const metric of body.metrics) {
-      if (!isValidMetricValue(metric.value)) continue;
-
+      // Ensure metric_preferences row exists for display_order tracking
       await sql`
-        INSERT INTO metric_definitions (profile_id, name, unit, ref_low, ref_high)
-        VALUES (
-          ${profileId},
-          ${metric.name},
-          ${metric.unit || null},
-          ${metric.ref_low ?? null},
-          ${metric.ref_high ?? null}
-        )
-        ON CONFLICT (profile_id, name) DO UPDATE
-        SET
-          unit = COALESCE(EXCLUDED.unit, metric_definitions.unit),
-          ref_low = COALESCE(EXCLUDED.ref_low, metric_definitions.ref_low),
-          ref_high = COALESCE(EXCLUDED.ref_high, metric_definitions.ref_high)
+        INSERT INTO metric_preferences (profile_id, name)
+        VALUES (${profileId}, ${metric.name})
+        ON CONFLICT (profile_id, name) DO NOTHING
       `;
     }
 

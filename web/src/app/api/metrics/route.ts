@@ -4,7 +4,6 @@ import { sql } from "@/lib/db";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Types matching the existing format
 type Metric = {
   id: string;
   name: string;
@@ -24,7 +23,6 @@ type MetricsPayload = {
   values: MetricValue[];
 };
 
-// Default profile name for migrated data (backward compatibility)
 const DEFAULT_PROFILE_NAME = "Yüksel O.";
 
 export async function GET(request: Request) {
@@ -65,49 +63,53 @@ export async function GET(request: Request) {
       return NextResponse.json({ metrics: [], values: [] });
     }
 
-    const reportIds = reports.map((r) => (r as { id: string }).id);
+    const reportIds = reports.map((r) => r.id);
 
-    // Fetch metric_definitions for canonical reference values and display order
-    const metricDefs = await sql`
-      SELECT name, unit, ref_low, ref_high, display_order
-      FROM metric_definitions
+    const metricPrefs = await sql`
+      SELECT name, display_order
+      FROM metric_preferences
       WHERE profile_id = ${profileId}
       ORDER BY display_order ASC, name ASC
     `;
 
-    // Build map of canonical metric info from metric_definitions
-    const metricDefsMap = new Map<
-      string,
-      {
-        unit: string;
-        ref_low: number | null;
-        ref_high: number | null;
-        display_order: number;
-      }
-    >();
-    for (const def of metricDefs || []) {
-      metricDefsMap.set(def.name, {
-        unit: def.unit || "",
-        ref_low: def.ref_low,
-        ref_high: def.ref_high,
-        display_order: def.display_order,
-      });
+    const displayOrderMap = new Map<string, number>();
+    for (const pref of metricPrefs || []) {
+      displayOrderMap.set(pref.name, pref.display_order);
     }
 
-    // Fetch all metrics for these reports
+    const reportDateMap = new Map<string, string>();
+    for (const report of reports) {
+      reportDateMap.set(report.id, report.sample_date);
+    }
+
     const metricsData = await sql`
       SELECT report_id, name, value, unit, ref_low, ref_high
       FROM metrics
       WHERE report_id = ANY(${reportIds})
     `;
 
-    // Build report_id -> date map (sample_date is cast to TEXT in SQL)
-    const reportDateMap = new Map<string, string>();
-    for (const report of reports) {
-      reportDateMap.set(report.id, report.sample_date);
+    // Build latest ref ranges per metric name.
+    // Sort by report date ascending so that overwriting gives us the most recent ref.
+    const metricsByDateAsc = [...(metricsData || [])].sort((a, b) => {
+      const dateA = reportDateMap.get(a.report_id) || "";
+      const dateB = reportDateMap.get(b.report_id) || "";
+      return dateA.localeCompare(dateB);
+    });
+
+    const latestRefsMap = new Map<
+      string,
+      { unit: string; ref_low: number | null; ref_high: number | null }
+    >();
+    for (const m of metricsByDateAsc) {
+      if (m.ref_low != null || m.ref_high != null) {
+        latestRefsMap.set(m.name, {
+          unit: m.unit || "",
+          ref_low: m.ref_low,
+          ref_high: m.ref_high,
+        });
+      }
     }
 
-    // Build unique metrics list - use metric_definitions for refs, fallback to metric row
     const metricsMap = new Map<
       string,
       {
@@ -123,41 +125,25 @@ export async function GET(request: Request) {
       const date = reportDateMap.get(m.report_id);
       if (!date) continue;
 
-      // sample_date is already a string (cast in SQL to avoid timezone issues)
-      const dateStr = date;
       values.push({
         metric_id: m.name,
-        date: dateStr,
+        date,
         value: Number(m.value),
       });
 
-      // Track unique metrics - prefer metric_definitions for refs
       if (!metricsMap.has(m.name)) {
-        const def = metricDefsMap.get(m.name);
-        if (def) {
-          // Use canonical values from metric_definitions
-          metricsMap.set(m.name, {
-            unit: def.unit,
-            ref_min: def.ref_low,
-            ref_max: def.ref_high,
-            display_order: def.display_order,
-          });
-        } else {
-          // Fallback to metric row values if no definition exists
-          metricsMap.set(m.name, {
-            unit: m.unit || "",
-            ref_min: m.ref_low,
-            ref_max: m.ref_high,
-            display_order: 99999, // Put undefined metrics at the end
-          });
-        }
+        const latestRef = latestRefsMap.get(m.name);
+        metricsMap.set(m.name, {
+          unit: latestRef?.unit || m.unit || "",
+          ref_min: latestRef?.ref_low ?? null,
+          ref_max: latestRef?.ref_high ?? null,
+          display_order: displayOrderMap.get(m.name) ?? 99999,
+        });
       }
     }
 
-    // Sort values by date (ascending) for proper chart rendering
-    values.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    values.sort((a, b) => a.date.localeCompare(b.date));
 
-    // Build metrics array, sorted by display_order
     const metrics: Metric[] = Array.from(metricsMap.entries())
       .sort((a, b) => a[1].display_order - b[1].display_order)
       .map(([name, ref]) => ({
