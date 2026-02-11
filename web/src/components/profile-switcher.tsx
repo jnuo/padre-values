@@ -2,7 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Check, ChevronDown, Plus, User } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  Crown,
+  Eye,
+  Pencil,
+  Plus,
+  User,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -119,7 +127,10 @@ export function ProfileSwitcher({
                 className="flex items-center justify-between cursor-pointer"
               >
                 <div className="flex flex-col">
-                  <span className="font-medium">{profile.display_name}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-medium">{profile.display_name}</span>
+                    <AccessBadge level={profile.access_level} />
+                  </div>
                   {profile.report_count !== undefined && (
                     <span className="text-xs text-muted-foreground">
                       {profile.report_count} rapor
@@ -144,4 +155,32 @@ export function ProfileSwitcher({
       </DropdownMenuContent>
     </DropdownMenu>
   );
+}
+
+function AccessBadge({ level }: { level: string }) {
+  switch (level) {
+    case "owner":
+      return (
+        <span className="inline-flex items-center gap-0.5 text-[10px] text-primary">
+          <Crown className="h-3 w-3" />
+          Sahip
+        </span>
+      );
+    case "editor":
+      return (
+        <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground">
+          <Pencil className="h-3 w-3" />
+          Düzenleyici
+        </span>
+      );
+    case "viewer":
+      return (
+        <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground">
+          <Eye className="h-3 w-3" />
+          Görüntüleyici
+        </span>
+      );
+    default:
+      return null;
+  }
 }

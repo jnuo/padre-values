@@ -103,22 +103,22 @@
 
 ---
 
-## Phase 3: Multi-Profile System
+## Phase 3: Multi-Profile System ✅
 
-> Netflix-style profile selector
+> Netflix-style profile selector — **DONE (v1)**
 
 ### 3.1 Profile Data Model
 
-- [ ] Profile entity (id, name, display_name, avatar, owner_email)
-- [ ] Profile ↔ User relationship (one user can access multiple profiles)
-- [ ] Profile ↔ Reports relationship
+- [x] Profile entity (id, name, display_name, avatar, owner_email)
+- [x] Profile ↔ User relationship (one user can access multiple profiles)
+- [x] Profile ↔ Reports relationship
 
 ### 3.2 Profile Selector UI
 
-- [ ] Netflix-style profile grid on login
-- [ ] Profile avatars/icons
-- [ ] "Add Profile" option
-- [ ] Profile management (edit, delete)
+- [x] Netflix-style profile grid on login
+- [x] Profile avatars/icons
+- [x] "Add Profile" option
+- [x] Profile management (edit, delete)
 
 ### 3.3 Login Flow Logic
 
@@ -131,9 +131,14 @@ User logs in with Google
 
 ### 3.4 Profile Creation
 
-- [ ] Create profile form (name, avatar selection)
-- [ ] Associate with logged-in user
-- [ ] Profile permissions (owner vs viewer)
+- [x] Create profile form (name, avatar selection)
+- [x] Associate with logged-in user
+- [x] Profile permissions (owner vs viewer)
+
+### 3.5 Profile Sharing & Family Access — IN PROGRESS
+
+> See `product/tasks/profile-sharing.md` for full details.
+> **Branch:** `feature/profile-sharing`
 
 ---
 

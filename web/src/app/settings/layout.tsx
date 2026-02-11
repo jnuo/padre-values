@@ -15,7 +15,6 @@ export default function SettingsLayout({
       <Header
         profileName={activeProfile?.display_name}
         currentProfileId={activeProfileId || undefined}
-        showUploadButton
       />
       <main className="container max-w-4xl mx-auto p-4">{children}</main>
     </div>

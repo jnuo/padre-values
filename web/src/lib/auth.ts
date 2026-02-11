@@ -1,6 +1,7 @@
 import GoogleProvider from "next-auth/providers/google";
-import { sql } from "@/lib/db";
+import { getServerSession } from "next-auth";
 import type { NextAuthOptions } from "next-auth";
+import { sql } from "@/lib/db";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -183,6 +184,28 @@ export async function hasProfileAccess(
 }
 
 /**
+ * Helper to get the user's access level for a specific profile
+ * Returns 'owner' | 'editor' | 'viewer' | null
+ */
+export async function getProfileAccessLevel(
+  userId: string,
+  profileId: string,
+): Promise<"owner" | "editor" | "viewer" | null> {
+  try {
+    const result = await sql`
+      SELECT access_level FROM user_access
+      WHERE user_id_new = ${userId} AND profile_id = ${profileId}
+      LIMIT 1
+    `;
+    if (result.length === 0) return null;
+    return result[0].access_level as "owner" | "editor" | "viewer";
+  } catch (error) {
+    console.error("[Auth] Error getting profile access level:", error);
+    return null;
+  }
+}
+
+/**
  * Helper to get user's accessible profiles
  */
 export async function getUserProfiles(userId: string): Promise<
@@ -209,4 +232,30 @@ export async function getUserProfiles(userId: string): Promise<
     console.error("[Auth] Error getting user profiles:", error);
     return [];
   }
+}
+
+/**
+ * Authenticate the current session and return the database user ID.
+ * Returns null if not authenticated.
+ */
+export async function requireAuth(): Promise<string | null> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) return null;
+  return getDbUserId(session);
+}
+
+/**
+ * Authenticate and verify the user has owner-level access to a profile.
+ * Returns the userId if authorized, null otherwise.
+ */
+export async function requireProfileOwner(
+  profileId: string,
+): Promise<string | null> {
+  const userId = await requireAuth();
+  if (!userId) return null;
+
+  const level = await getProfileAccessLevel(userId, profileId);
+  if (level !== "owner") return null;
+
+  return userId;
 }

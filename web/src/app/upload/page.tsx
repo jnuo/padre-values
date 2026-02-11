@@ -563,100 +563,120 @@ function UploadPageContent(): React.ReactElement {
                           </tr>
                         </thead>
                         <tbody>
-                          {editedMetrics.map((metric, index) => (
-                            <tr key={index} className="border-t">
-                              <td className="p-2">
-                                <Input
-                                  value={metric.name ?? ""}
-                                  onChange={(e) =>
-                                    handleMetricChange(
-                                      index,
-                                      "name",
-                                      e.target.value,
-                                    )
-                                  }
-                                  className="h-8 text-sm"
-                                  aria-label="Metrik adı"
-                                />
-                              </td>
-                              <td className="p-2">
-                                <Input
-                                  type="number"
-                                  value={metric.value ?? ""}
-                                  onChange={(e) =>
-                                    handleMetricChange(
-                                      index,
-                                      "value",
-                                      parseFloat(e.target.value) || 0,
-                                    )
-                                  }
-                                  className="h-8 text-sm text-right w-24"
-                                  aria-label="Değer"
-                                />
-                              </td>
-                              <td className="p-2">
-                                <Input
-                                  value={metric.unit ?? ""}
-                                  onChange={(e) =>
-                                    handleMetricChange(
-                                      index,
-                                      "unit",
-                                      e.target.value,
-                                    )
-                                  }
-                                  className="h-8 text-sm text-right w-20"
-                                  aria-label="Birim"
-                                />
-                              </td>
-                              <td className="p-2">
-                                <Input
-                                  type="number"
-                                  value={metric.ref_low ?? ""}
-                                  onChange={(e) =>
-                                    handleMetricChange(
-                                      index,
-                                      "ref_low",
-                                      e.target.value
-                                        ? parseFloat(e.target.value)
-                                        : null,
-                                    )
-                                  }
-                                  className="h-8 text-sm text-right w-20"
-                                  placeholder="-"
-                                  aria-label="Referans minimum"
-                                />
-                              </td>
-                              <td className="p-2">
-                                <Input
-                                  type="number"
-                                  value={metric.ref_high ?? ""}
-                                  onChange={(e) =>
-                                    handleMetricChange(
-                                      index,
-                                      "ref_high",
-                                      e.target.value
-                                        ? parseFloat(e.target.value)
-                                        : null,
-                                    )
-                                  }
-                                  className="h-8 text-sm text-right w-20"
-                                  placeholder="-"
-                                  aria-label="Referans maksimum"
-                                />
-                              </td>
-                              <td className="p-2">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8"
-                                  onClick={() => handleRemoveMetric(index)}
-                                  aria-label="Metriği sil"
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              </td>
-                            </tr>
-                          ))}
+                          {editedMetrics.map((metric, index) => {
+                            const isOutOfRange =
+                              metric.value != null &&
+                              ((metric.ref_low != null &&
+                                Number(metric.value) <
+                                  Number(metric.ref_low)) ||
+                                (metric.ref_high != null &&
+                                  Number(metric.value) >
+                                    Number(metric.ref_high)));
+                            return (
+                              <tr
+                                key={index}
+                                className={cn(
+                                  "border-t",
+                                  isOutOfRange && "bg-status-critical/10",
+                                )}
+                              >
+                                <td className="p-2">
+                                  <Input
+                                    value={metric.name ?? ""}
+                                    onChange={(e) =>
+                                      handleMetricChange(
+                                        index,
+                                        "name",
+                                        e.target.value,
+                                      )
+                                    }
+                                    className="h-8 text-sm"
+                                    aria-label="Metrik adı"
+                                  />
+                                </td>
+                                <td className="p-2">
+                                  <Input
+                                    type="number"
+                                    value={metric.value ?? ""}
+                                    onChange={(e) =>
+                                      handleMetricChange(
+                                        index,
+                                        "value",
+                                        parseFloat(e.target.value) || 0,
+                                      )
+                                    }
+                                    className={cn(
+                                      "h-8 text-sm text-right w-24",
+                                      isOutOfRange &&
+                                        "text-status-critical font-medium",
+                                    )}
+                                    aria-label="Değer"
+                                  />
+                                </td>
+                                <td className="p-2">
+                                  <Input
+                                    value={metric.unit ?? ""}
+                                    onChange={(e) =>
+                                      handleMetricChange(
+                                        index,
+                                        "unit",
+                                        e.target.value,
+                                      )
+                                    }
+                                    className="h-8 text-sm text-right w-20"
+                                    aria-label="Birim"
+                                  />
+                                </td>
+                                <td className="p-2">
+                                  <Input
+                                    type="number"
+                                    value={metric.ref_low ?? ""}
+                                    onChange={(e) =>
+                                      handleMetricChange(
+                                        index,
+                                        "ref_low",
+                                        e.target.value
+                                          ? parseFloat(e.target.value)
+                                          : null,
+                                      )
+                                    }
+                                    className="h-8 text-sm text-right w-20"
+                                    placeholder="-"
+                                    aria-label="Referans minimum"
+                                  />
+                                </td>
+                                <td className="p-2">
+                                  <Input
+                                    type="number"
+                                    value={metric.ref_high ?? ""}
+                                    onChange={(e) =>
+                                      handleMetricChange(
+                                        index,
+                                        "ref_high",
+                                        e.target.value
+                                          ? parseFloat(e.target.value)
+                                          : null,
+                                      )
+                                    }
+                                    className="h-8 text-sm text-right w-20"
+                                    placeholder="-"
+                                    aria-label="Referans maksimum"
+                                  />
+                                </td>
+                                <td className="p-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={() => handleRemoveMetric(index)}
+                                    aria-label="Metriği sil"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
