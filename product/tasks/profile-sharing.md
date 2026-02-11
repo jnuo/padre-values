@@ -262,6 +262,10 @@ Dashboard › Yüksel O. (shared by Onur Ovali)
 - [ ] Self-invite blocked
 - [ ] Duplicate invite blocked
 
+### Known Issues
+
+- [ ] **Viewer access level not enforced on write endpoints** (Low priority) — `POST /api/tracking` and `DELETE /api/tracking/[id]` use `hasProfileAccess()` which allows any access level (viewer/editor/owner) to create and delete tracking data. Viewers should be read-only per the access level spec above. Fix: check `getProfileAccessLevel()` and block viewers from write/delete operations.
+
 ### Minor tasks
 
 - [ ] Show unclaimed `profile_allowed_emails` in access page (mom/dad appear as "invited but not signed up")
