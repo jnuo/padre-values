@@ -128,6 +128,16 @@ Users must be in `profile_allowed_emails` table to login:
 - hulyaovaliyil@gmail.com
 - ovaliolcay@yahoo.com
 
+## Deployment
+
+**CRITICAL — NEVER use `npx vercel --prod` or Vercel CLI to deploy.**
+
+The CLI build produces a broken output (only a 404 page, no App Router routes). Deployments happen automatically when code is pushed/merged to `main` via GitHub integration.
+
+- **To deploy:** Just merge the PR to `main`. Vercel auto-deploys from GitHub.
+- **To redeploy:** Use `npx vercel redeploy <deployment-url>` to re-promote a known-good deployment.
+- **If you accidentally CLI-deployed:** Find the last good auto-deploy with `npx vercel ls --prod`, then `npx vercel redeploy <that-url>`.
+
 ## Deployment Checklist
 
 Before deploying to production, complete these steps:
