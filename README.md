@@ -82,7 +82,7 @@ QSTASH_NEXT_SIGNING_KEY=your-next-signing-key
 - **profiles**: Family member profiles
 - **reports**: Blood test reports with sample dates
 - **metrics**: Individual test values (Hemoglobin, etc.)
-- **metric_definitions**: Reference ranges per profile
+- **metric_preferences**: Display order and favorites per profile
 - **processed_files**: Upload tracking (prevents duplicates)
 - **pending_uploads**: In-progress upload state
 
