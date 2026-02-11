@@ -18,7 +18,7 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Metric, MetricValue } from "@/lib/sheets";
 import { compareDateAsc, parseToISO, formatTR } from "@/lib/date";
-import { cn } from "@/lib/utils";
+import { cn, friendlyMetricName } from "@/lib/utils";
 
 /**
  * Check if a value is within the metric's reference range.
@@ -114,7 +114,9 @@ export function MetricChart({
       <Card className={cn("rounded-xl", className)}>
         <CardHeader className="!px-3 pt-3 pb-1">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium">{metric.name}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {friendlyMetricName(metric.name)}
+            </CardTitle>
             <Button
               variant="ghost"
               size="sm"
@@ -160,7 +162,9 @@ export function MetricChart({
       <CardHeader className="!px-3 pt-3 pb-1">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <CardTitle className="text-sm font-medium">{metric.name}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {friendlyMetricName(metric.name)}
+            </CardTitle>
             <Badge
               variant="secondary"
               className={cn(
@@ -277,7 +281,7 @@ export function MetricChart({
                     return (
                       <div className="rounded-lg border bg-popover p-3 shadow-lg">
                         <p className="font-medium text-popover-foreground">
-                          {metric.name}
+                          {friendlyMetricName(metric.name)}
                         </p>
                         <p
                           className={cn(

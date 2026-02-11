@@ -4,27 +4,36 @@ import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, Upload, FolderOpen } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Moon,
+  Sun,
+  Upload,
+  Plus,
+  Heart,
+  Scale,
+  LogOut,
+  Users,
+  FileText,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { ProfileSwitcher } from "@/components/profile-switcher";
+import { AddBloodPressureDialog } from "@/components/add-blood-pressure-dialog";
+import { AddWeightDialog } from "@/components/add-weight-dialog";
 
 interface HeaderProps {
-  /** User's profile name to display. If null, shows login button instead of user menu */
   profileName?: string | null;
-  /** Current profile ID for the profile switcher */
   currentProfileId?: string;
-  /** Whether to show the upload button */
-  showUploadButton?: boolean;
-  /** Callback when logout is clicked */
   onLogout?: () => void;
-  /** Callback when login is clicked */
   onLogin?: () => void;
 }
 
-/**
- * ViziAI Logo Wordmark
- * "Vizi" in brand primary (teal), "AI" in brand secondary (coral)
- */
 function ViziAILogo({ onClick }: { onClick?: () => void }): React.ReactElement {
   return (
     <button
@@ -43,75 +52,39 @@ function ViziAILogo({ onClick }: { onClick?: () => void }): React.ReactElement {
   );
 }
 
-/**
- * Theme toggle button
- * Switches between light and dark mode
- */
-function ThemeToggle(): React.ReactElement {
+function getInitials(name?: string | null): string {
+  if (!name) return "?";
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+export function Header({
+  profileName,
+  currentProfileId,
+  onLogout,
+  onLogin,
+}: HeaderProps): React.ReactElement {
+  const router = useRouter();
+  const { data: session, status } = useSession();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [bpDialogOpen, setBpDialogOpen] = useState(false);
+  const [weightDialogOpen, setWeightDialogOpen] = useState(false);
+
+  const isLoggedIn = status === "authenticated";
+  const isDark = theme === "dark";
+  const userName = session?.user?.name;
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const isDark = theme === "dark";
-
-  function toggleTheme(): void {
-    setTheme(isDark ? "light" : "dark");
-  }
-
-  if (!mounted) {
-    return (
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-9 w-9"
-        disabled
-        aria-label="Tema değiştir"
-      >
-        <Sun className="h-4 w-4" />
-      </Button>
-    );
-  }
-
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className="h-9 w-9"
-      onClick={toggleTheme}
-      aria-label={isDark ? "Açık temaya geç" : "Koyu temaya geç"}
-    >
-      {isDark ? (
-        <Sun className="h-4 w-4 text-brand-secondary" />
-      ) : (
-        <Moon className="h-4 w-4 text-brand-primary" />
-      )}
-    </Button>
-  );
-}
-
-/**
- * Shared header component for ViziAI
- * - Two-color wordmark (Vizi in teal, AI in coral)
- * - Profile switcher (when logged in with multiple profiles)
- * - Dark/light mode toggle
- * - User menu or login button depending on auth state
- */
-export function Header({
-  profileName,
-  currentProfileId,
-  showUploadButton = false,
-  onLogout,
-  onLogin,
-}: HeaderProps): React.ReactElement {
-  const router = useRouter();
-  const { status } = useSession();
-  const isLoggedIn = status === "authenticated";
-
   function handleLogoClick(): void {
-    router.push("/");
+    router.push("/dashboard");
   }
 
   function handleLoginClick(): void {
@@ -120,14 +93,6 @@ export function Header({
       return;
     }
     router.push("/login");
-  }
-
-  function handleUploadClick(): void {
-    router.push("/upload");
-  }
-
-  function handleFilesClick(): void {
-    router.push("/settings");
   }
 
   async function handleLogoutClick(): Promise<void> {
@@ -139,78 +104,169 @@ export function Header({
     await signOut({ callbackUrl: "/" });
   }
 
+  function handleTrackingSaved(): void {
+    window.dispatchEvent(new Event("tracking-updated"));
+  }
+
   return (
-    <header className="border-b bg-card">
-      <nav
-        className="flex items-center justify-between px-4 py-3 sm:px-6 md:px-8"
-        aria-label="Ana navigasyon"
-      >
-        <div className="flex items-center gap-4">
-          <ViziAILogo onClick={handleLogoClick} />
-
-          {/* Profile Switcher - only show when logged in */}
-          {isLoggedIn && (
-            <ProfileSwitcher
-              currentProfileId={currentProfileId}
-              currentProfileName={profileName ?? undefined}
-              className="hidden sm:flex"
-            />
-          )}
-        </div>
-
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Upload Button */}
-          {isLoggedIn && showUploadButton && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleUploadClick}
-              className="gap-1.5 border-primary/30 hover:border-primary hover:bg-primary/5"
-            >
-              <Upload className="h-4 w-4" />
-              <span className="hidden sm:inline">Yükle</span>
-            </Button>
-          )}
-
-          {/* Files Button */}
-          {isLoggedIn && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9"
-              onClick={handleFilesClick}
-              aria-label="Dosyalar"
-            >
-              <FolderOpen className="h-4 w-4" />
-            </Button>
-          )}
-
-          <ThemeToggle />
-
-          {isLoggedIn ? (
-            <>
-              {/* Mobile Profile Switcher */}
+    <>
+      <header className="border-b bg-card">
+        <nav
+          className="flex items-center justify-between px-3 py-2.5 sm:px-6 md:px-8"
+          aria-label="Ana navigasyon"
+        >
+          {/* Left: Logo + Profile Switcher */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            <ViziAILogo onClick={handleLogoClick} />
+            {isLoggedIn && (
               <ProfileSwitcher
                 currentProfileId={currentProfileId}
                 currentProfileName={profileName ?? undefined}
-                className="sm:hidden"
               />
+            )}
+          </div>
+
+          {/* Right: Nav + Actions */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Tahliller nav link — desktop only */}
+            {isLoggedIn && (
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                onClick={handleLogoutClick}
-                className="border-primary/30 hover:border-primary hover:bg-primary/5"
+                onClick={() => router.push("/settings")}
+                className="hidden sm:flex gap-1.5 text-muted-foreground hover:text-foreground"
               >
-                Çıkış
+                <FileText className="h-4 w-4" />
+                Tahliller
               </Button>
-            </>
-          ) : (
-            <Button variant="default" size="sm" onClick={handleLoginClick}>
-              Giriş Yap
-            </Button>
-          )}
-        </div>
-      </nav>
-    </header>
+            )}
+
+            {/* + Ekle dropdown */}
+            {isLoggedIn && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1 border-primary/30 hover:border-primary hover:bg-primary/5"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span className="hidden sm:inline">Ekle</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem
+                    onClick={() => setBpDialogOpen(true)}
+                    className="cursor-pointer"
+                  >
+                    <Heart className="h-4 w-4 text-status-critical" />
+                    Tansiyon Ekle
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setWeightDialogOpen(true)}
+                    className="cursor-pointer"
+                  >
+                    <Scale className="h-4 w-4 text-primary" />
+                    Kilo Ekle
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => router.push("/upload")}
+                    className="cursor-pointer"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Tahlil Yükle
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
+            {/* User avatar dropdown */}
+            {isLoggedIn ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 rounded-full"
+                    aria-label="Kullanıcı menüsü"
+                  >
+                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+                      <span className="text-xs font-semibold text-primary">
+                        {getInitials(userName)}
+                      </span>
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  {/* Mobile-only: Tahliller */}
+                  <DropdownMenuItem
+                    onClick={() => router.push("/settings")}
+                    className="sm:hidden cursor-pointer"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Tahliller
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => router.push("/settings/access")}
+                    className="cursor-pointer"
+                  >
+                    <Users className="h-4 w-4" />
+                    Profiller
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  {mounted && (
+                    <DropdownMenuItem
+                      onClick={() => setTheme(isDark ? "light" : "dark")}
+                      className="cursor-pointer"
+                    >
+                      {isDark ? (
+                        <Sun className="h-4 w-4 text-brand-secondary" />
+                      ) : (
+                        <Moon className="h-4 w-4 text-brand-primary" />
+                      )}
+                      {isDark ? "Açık Tema" : "Koyu Tema"}
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleLogoutClick}
+                    className="cursor-pointer"
+                    variant="destructive"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Çıkış
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button variant="default" size="sm" onClick={handleLoginClick}>
+                Giriş Yap
+              </Button>
+            )}
+          </div>
+        </nav>
+      </header>
+
+      {/* Tracking Dialogs (owned by header, accessible from any page) */}
+      {isLoggedIn && currentProfileId && profileName && (
+        <>
+          <AddBloodPressureDialog
+            open={bpDialogOpen}
+            onOpenChange={setBpDialogOpen}
+            profileId={currentProfileId}
+            profileName={profileName}
+            onSaved={handleTrackingSaved}
+          />
+          <AddWeightDialog
+            open={weightDialogOpen}
+            onOpenChange={setWeightDialogOpen}
+            profileId={currentProfileId}
+            profileName={profileName}
+            onSaved={handleTrackingSaved}
+          />
+        </>
+      )}
+    </>
   );
 }

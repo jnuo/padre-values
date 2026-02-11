@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   ArrowDown,
   ArrowUp,
@@ -10,7 +10,6 @@ import {
   FileText,
   Loader2,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useActiveProfile } from "@/hooks/use-active-profile";
 import { formatDateTR, formatDateTimeTR } from "@/lib/date";
@@ -27,7 +26,6 @@ interface ProcessedFile {
 }
 
 export default function SettingsPage() {
-  const router = useRouter();
   const { activeProfileId } = useActiveProfile();
   const [files, setFiles] = useState<ProcessedFile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,13 +61,16 @@ export default function SettingsPage() {
   function SortIcon({ column }: { column: SortColumn }): React.ReactElement {
     if (sortColumn !== column) {
       return (
-        <ArrowUpDown className="h-4 w-4 ml-1 opacity-30 group-hover:opacity-60 transition-opacity" />
+        <ArrowUpDown
+          aria-hidden="true"
+          className="h-4 w-4 ml-1 opacity-30 group-hover:opacity-60 transition-opacity"
+        />
       );
     }
     if (sortDirection === "asc") {
-      return <ArrowUp className="h-4 w-4 ml-1" />;
+      return <ArrowUp aria-hidden="true" className="h-4 w-4 ml-1" />;
     }
-    return <ArrowDown className="h-4 w-4 ml-1" />;
+    return <ArrowDown aria-hidden="true" className="h-4 w-4 ml-1" />;
   }
 
   function SortableHeader({
@@ -140,14 +141,19 @@ export default function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
+            <FileText aria-hidden="true" className="h-5 w-5" />
             Yüklenen Dosyalar
           </CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center py-8">
+            <div
+              className="flex items-center justify-center py-8"
+              role="status"
+              aria-live="polite"
+            >
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              <span className="sr-only">Yükleniyor…</span>
             </div>
           ) : error ? (
             <p className="text-sm text-status-critical py-4">{error}</p>
@@ -156,65 +162,136 @@ export default function SettingsPage() {
               Henüz yüklenmiş dosya yok.
             </p>
           ) : (
-            <div className="border rounded-lg overflow-hidden">
-              <table className="w-full text-sm">
-                <thead className="bg-muted">
-                  <tr>
-                    <th className="text-left p-3 font-medium">Dosya Adı</th>
-                    <SortableHeader
-                      column="sample_date"
-                      label="Tahlil Tarihi"
-                    />
-                    <SortableHeader column="created_at" label="Yüklenme" />
-                    <th className="text-center p-3 font-medium">Metrik</th>
-                    <th className="text-right p-3 font-medium"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedFiles.map((file) => (
-                    <tr key={file.id} className="border-t hover:bg-muted/50">
-                      <td className="p-3 max-w-[200px]">
-                        <span
-                          className="font-medium truncate block"
+            <>
+              {/* Desktop table view */}
+              <div className="hidden md:block border rounded-lg overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted">
+                    <tr>
+                      <th className="text-left p-3 font-medium">Dosya Adı</th>
+                      <SortableHeader
+                        column="sample_date"
+                        label="Tahlil Tarihi"
+                      />
+                      <SortableHeader column="created_at" label="Yüklenme" />
+                      <th className="text-center p-3 font-medium">Metrik</th>
+                      <th className="text-right p-3 font-medium">
+                        <span className="sr-only">İşlemler</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sortedFiles.map((file) => (
+                      <tr key={file.id} className="border-t hover:bg-muted/50">
+                        <td className="p-3 max-w-[200px]">
+                          <span
+                            className="font-medium truncate block"
+                            title={file.file_name}
+                          >
+                            {file.file_name}
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          {file.sample_date ? (
+                            <span className="font-medium">
+                              {formatDateTR(file.sample_date)}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </td>
+                        <td className="p-3 text-muted-foreground">
+                          {formatDateTimeTR(file.created_at)}
+                        </td>
+                        <td className="p-3 text-center">
+                          <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium tabular-nums">
+                            {file.metric_count}
+                          </span>
+                        </td>
+                        <td className="p-3 text-right">
+                          <Link
+                            href={`/settings/files/${file.id}`}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium border rounded-md hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          >
+                            Değerleri Gör
+                            <ChevronRight
+                              aria-hidden="true"
+                              className="h-4 w-4"
+                            />
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile card view */}
+              <div className="md:hidden space-y-3">
+                <div className="flex gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("sample_date")}
+                    className={`text-xs px-2.5 py-1 rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                      sortColumn === "sample_date"
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Tahlil Tarihi{" "}
+                    {sortColumn === "sample_date" &&
+                      (sortDirection === "desc" ? "↓" : "↑")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSort("created_at")}
+                    className={`text-xs px-2.5 py-1 rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                      sortColumn === "created_at"
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Yüklenme{" "}
+                    {sortColumn === "created_at" &&
+                      (sortDirection === "desc" ? "↓" : "↑")}
+                  </button>
+                </div>
+                {sortedFiles.map((file) => (
+                  <Link
+                    key={file.id}
+                    href={`/settings/files/${file.id}`}
+                    className="flex items-center gap-3 border rounded-lg p-3 hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <p
+                          className="font-medium text-sm truncate"
                           title={file.file_name}
                         >
                           {file.file_name}
-                        </span>
-                      </td>
-                      <td className="p-3">
-                        {file.sample_date ? (
-                          <span className="font-medium">
-                            {formatDateTR(file.sample_date)}
-                          </span>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
-                      </td>
-                      <td className="p-3 text-muted-foreground">
-                        {formatDateTimeTR(file.created_at)}
-                      </td>
-                      <td className="p-3 text-center">
-                        <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium">
+                        </p>
+                        <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium tabular-nums shrink-0">
                           {file.metric_count}
                         </span>
-                      </td>
-                      <td className="p-3 text-right">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            router.push(`/settings/files/${file.id}`)
-                          }
-                        >
-                          Değerleri Gör
-                          <ChevronRight className="h-4 w-4 ml-1" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      </div>
+                      <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
+                        {file.sample_date ? (
+                          <span>Tahlil: {formatDateTR(file.sample_date)}</span>
+                        ) : (
+                          <span>Tahlil tarihi yok</span>
+                        )}
+                        <span>·</span>
+                        <span>{formatDateTimeTR(file.created_at)}</span>
+                      </div>
+                    </div>
+                    <ChevronRight
+                      aria-hidden="true"
+                      className="h-4 w-4 text-muted-foreground shrink-0"
+                    />
+                  </Link>
+                ))}
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

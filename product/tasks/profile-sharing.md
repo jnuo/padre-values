@@ -1,8 +1,10 @@
 # Task: Profile Sharing & Access Management
 
-**Status:** Todo
+**Status:** In Progress
 **Priority:** High
 **Created:** 2026-02-03
+**Branch:** `feature/profile-sharing`
+**Last worked:** 2026-02-05
 
 ---
 
@@ -225,15 +227,54 @@ Dashboard › Yüksel O. (shared by Onur Ovali)
 
 ---
 
-## Files to Modify
+## Progress (2026-02-05)
 
-**New:**
+### Done
 
-- `/web/src/app/api/profiles/[id]/access/route.ts` — Access management API
-- `/web/src/app/settings/access/page.tsx` — Profile Access settings page
-- `/web/src/components/invite-modal.tsx` — Invite user modal
+- [x] DB migration (`db-schema/migrations/20260206_profile_sharing.sql`) — applied to prod
+  - Relaxed `profile_allowed_emails` constraint: `UNIQUE(email)` → `UNIQUE(email, profile_id)`
+  - Created `profile_invites` table (token-based, 30-day expiry)
+- [x] Auth helpers: `getProfileAccessLevel()`, `requireAuth()`, `requireProfileOwner()`
+- [x] Access management API: GET/POST `/api/profiles/[id]/access`, PUT/DELETE `.../[userId]`, DELETE `.../invites/[inviteId]`
+- [x] Invite claim API: GET `/api/invite/[token]` (public), POST `.../claim` (authenticated)
+- [x] Settings tab navigation: Dosyalar + Erişim tabs
+- [x] Access management page (`/settings/access`)
+- [x] Invite modal with copy URL + WhatsApp share
+- [x] Invite claim page (`/invite/[token]`) with all error states
+- [x] Profile switcher badges (Sahip/Düzenleyici/Görüntüleyici)
+- [x] Header icon: FolderOpen → Settings gear
+- [x] `npm run build` passes
+- [x] Deleted Busra's test account + "Kabaloğ" profile for clean test
+- [x] Migration applied to prod
 
-**Modify:**
+### Tested
 
-- `/web/src/components/profile-switcher.tsx` — Show access level
-- `/web/src/app/settings/page.tsx` — Add "Access" tab
+- [x] Settings → Erişim tab renders, shows owned profiles
+- [x] Invite modal opens, creates invite, shows URL
+
+### Still needs testing
+
+- [ ] Open invite URL in incognito → login → claim works end-to-end
+- [ ] After claiming: invitee sees profile in switcher with correct badge
+- [ ] Role change (viewer ↔ editor) from settings
+- [ ] Remove member from settings
+- [ ] Revoke pending invite → link shows "revoked"
+- [ ] Self-invite blocked
+- [ ] Duplicate invite blocked
+
+### Known Issues
+
+- [ ] **Viewer access level not enforced on write endpoints** (Low priority) — `POST /api/tracking` and `DELETE /api/tracking/[id]` use `hasProfileAccess()` which allows any access level (viewer/editor/owner) to create and delete tracking data. Viewers should be read-only per the access level spec above. Fix: check `getProfileAccessLevel()` and block viewers from write/delete operations.
+
+### Minor tasks
+
+- [ ] Show unclaimed `profile_allowed_emails` in access page (mom/dad appear as "invited but not signed up")
+- [ ] Add "copy invite link" button on pending invites (return token in GET endpoint, reconstruct URL)
+- [ ] Add "delete profile" button on access page (owner only, with confirmation)
+- [ ] Delete "Test Profile Final" test profile from prod
+
+### Before merge
+
+- [ ] Complete invite URL claim test with Busra
+- [ ] Clean up Busra's test data after testing
+- [ ] Commit and create PR to main
