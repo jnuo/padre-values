@@ -25,6 +25,7 @@ AI-powered blood test PDF analyzer with visual health insights. Upload lab repor
 - **Storage**: Vercel Blob (PDF files)
 - **AI**: OpenAI GPT-4 for PDF text extraction
 - **Async Processing**: Upstash QStash
+- **Error Tracking**: Sentry (free tier)
 - **Deployment**: Vercel
 
 ## Architecture
@@ -75,6 +76,9 @@ BLOB_READ_WRITE_TOKEN=your-vercel-blob-token
 QSTASH_TOKEN=your-qstash-token
 QSTASH_CURRENT_SIGNING_KEY=your-signing-key
 QSTASH_NEXT_SIGNING_KEY=your-next-signing-key
+
+# Error Tracking
+NEXT_PUBLIC_SENTRY_DSN=your-sentry-dsn
 ```
 
 ## Database Schema
