@@ -169,7 +169,30 @@ export async function POST(
       );
     }
 
-    // Check if there's already a pending invite
+    // If user is already registered, grant access directly (no invite URL needed)
+    const existingUser = await sql`
+      SELECT id, name FROM users WHERE LOWER(email) = ${trimmedEmail}
+    `;
+
+    if (existingUser.length > 0) {
+      await sql`
+        INSERT INTO user_access (user_id_new, profile_id, access_level, granted_by)
+        VALUES (${existingUser[0].id}, ${profileId}, ${inviteLevel}, ${userId})
+        ON CONFLICT (user_id_new, profile_id) DO NOTHING
+      `;
+
+      return NextResponse.json(
+        {
+          directAccess: true,
+          email: trimmedEmail,
+          name: existingUser[0].name,
+          accessLevel: inviteLevel,
+        },
+        { status: 201 },
+      );
+    }
+
+    // User not registered — create invite with token
     const existingInvite = await sql`
       SELECT id FROM profile_invites
       WHERE profile_id = ${profileId}
@@ -185,17 +208,14 @@ export async function POST(
       );
     }
 
-    // Generate secure token
     const token = randomBytes(32).toString("hex");
 
-    // Insert into profile_allowed_emails (so they can sign in)
     await sql`
       INSERT INTO profile_allowed_emails (profile_id, email)
       VALUES (${profileId}, ${trimmedEmail})
       ON CONFLICT (email, profile_id) DO NOTHING
     `;
 
-    // Create invite
     const invite = await sql`
       INSERT INTO profile_invites (profile_id, email, access_level, token, invited_by)
       VALUES (${profileId}, ${trimmedEmail}, ${inviteLevel}, ${token}, ${userId})

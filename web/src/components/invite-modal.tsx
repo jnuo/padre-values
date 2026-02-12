@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy, Loader2 } from "lucide-react";
+import { Check, Copy, Loader2, UserCheck } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +32,7 @@ interface InviteModalProps {
   knownUsers?: KnownUser[];
 }
 
-type Step = "form" | "success";
+type Step = "form" | "success" | "direct";
 
 export function InviteModal({
   profileId,
@@ -48,6 +48,7 @@ export function InviteModal({
   const [error, setError] = useState<string | null>(null);
   const [inviteUrl, setInviteUrl] = useState("");
   const [copied, setCopied] = useState(false);
+  const [grantedName, setGrantedName] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,8 +69,13 @@ export function InviteModal({
         return;
       }
 
-      setInviteUrl(data.invite.inviteUrl);
-      setStep("success");
+      if (data.directAccess) {
+        setGrantedName(data.name || data.email);
+        setStep("direct");
+      } else {
+        setInviteUrl(data.invite.inviteUrl);
+        setStep("success");
+      }
     } catch {
       setError("Bir hata oluştu");
     } finally {
@@ -97,6 +103,7 @@ export function InviteModal({
       setError(null);
       setInviteUrl("");
       setCopied(false);
+      setGrantedName(null);
     }
     onOpenChange(open);
   };
@@ -106,11 +113,29 @@ export function InviteModal({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {step === "form" ? `${profileName} — Davet Et` : "Davet Bağlantısı"}
+            {step === "form"
+              ? `${profileName} — Davet Et`
+              : step === "direct"
+                ? "Erişim Verildi"
+                : "Davet Bağlantısı"}
           </DialogTitle>
         </DialogHeader>
 
-        {step === "form" ? (
+        {step === "direct" ? (
+          <div className="space-y-4 text-center py-2">
+            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+              <UserCheck className="h-6 w-6 text-primary" />
+            </div>
+            <p className="text-sm">
+              <span className="font-medium">{grantedName}</span> artık{" "}
+              <span className="font-medium">{profileName}</span> profiline
+              erişebilir.
+            </p>
+            <Button className="w-full" onClick={() => handleClose(false)}>
+              Tamam
+            </Button>
+          </div>
+        ) : step === "form" ? (
           <form onSubmit={handleSubmit} className="space-y-4">
             {knownUsers.length > 0 && (
               <div className="space-y-2">
