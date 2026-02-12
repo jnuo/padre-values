@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef, Suspense } from "react";
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  Suspense,
+} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDropzone } from "react-dropzone";
 import {
@@ -11,6 +17,7 @@ import {
   X,
   AlertCircle,
   ChevronLeft,
+  ArrowRight,
 } from "lucide-react";
 import { ExtractionLoading } from "@/components/extraction-loading";
 import { Button } from "@/components/ui/button";
@@ -24,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Header } from "@/components/header";
 import { cn } from "@/lib/utils";
 import { formatDateTimeTR } from "@/lib/date";
@@ -70,6 +78,9 @@ function UploadPageContent(): React.ReactElement {
   const [sampleDate, setSampleDate] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [uploadCreatedAt, setUploadCreatedAt] = useState<string | null>(null);
+  const [appliedRenames, setAppliedRenames] = useState<
+    Record<string, { original: string; canonical: string; applied: boolean }>
+  >({});
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const pollStartTimeRef = useRef<number | null>(null);
   const POLL_TIMEOUT_MS = 300000; // 5 minutes max polling
@@ -82,21 +93,16 @@ function UploadPageContent(): React.ReactElement {
     pollStartTimeRef.current = null;
   }
 
-  // Check for pending uploads and resume state
   useEffect(() => {
     async function checkPendingUploads() {
       try {
-        // Check URL for specific uploadId
         const urlUploadId = searchParams.get("uploadId");
-
-        // Fetch pending uploads
         const response = await fetch("/api/upload");
         if (!response.ok) return;
 
         const data = await response.json();
         const uploads = data.uploads || [];
 
-        // Find the relevant upload (from URL or most recent)
         const pendingUpload = urlUploadId
           ? uploads.find((u: { id: string }) => u.id === urlUploadId)
           : uploads[0];
@@ -109,13 +115,10 @@ function UploadPageContent(): React.ReactElement {
 
           if (pendingUpload.status === "extracting") {
             setStatus("extracting");
-            // Poll for completion
             startPolling(pendingUpload.id);
           } else if (pendingUpload.status === "review") {
-            // Fetch extracted data
             await loadExtractedData(pendingUpload.id);
           } else if (pendingUpload.status === "pending") {
-            // Extraction not started yet, start it
             setStatus("extracting");
             startExtraction(pendingUpload.id);
           }
@@ -131,14 +134,12 @@ function UploadPageContent(): React.ReactElement {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- startPolling/startExtraction/loadExtractedData use refs and are stable
   }, [searchParams]);
 
-  // Poll for extraction completion
   function startPolling(id: string): void {
     stopPolling();
     pollStartTimeRef.current = Date.now();
 
     pollIntervalRef.current = setInterval(async () => {
       try {
-        // Check for timeout
         if (
           pollStartTimeRef.current &&
           Date.now() - pollStartTimeRef.current > POLL_TIMEOUT_MS
@@ -155,7 +156,6 @@ function UploadPageContent(): React.ReactElement {
         const data = await response.json();
         const upload = data.uploads?.find((u: { id: string }) => u.id === id);
 
-        // Upload was deleted or not found
         if (!upload) {
           stopPolling();
           setStatus("idle");
@@ -179,7 +179,50 @@ function UploadPageContent(): React.ReactElement {
     }, 2000);
   }
 
-  // Load extracted data for review
+  async function applyAliases(
+    metrics: ExtractedMetric[],
+  ): Promise<{ metrics: ExtractedMetric[]; renames: typeof appliedRenames }> {
+    try {
+      const response = await fetch("/api/aliases");
+      if (!response.ok) return { metrics, renames: {} };
+      const data = await response.json();
+      const aliases: Record<string, string> = data.aliases || {};
+
+      const renames: typeof appliedRenames = {};
+      const updated = metrics.map((m) => {
+        for (const [alias, canonical] of Object.entries(aliases)) {
+          if (m.name.toLowerCase() === alias.toLowerCase()) {
+            renames[m.name.toLowerCase()] = {
+              original: m.name,
+              canonical,
+              applied: true,
+            };
+            return { ...m, name: canonical };
+          }
+        }
+        return m;
+      });
+
+      return { metrics: updated, renames };
+    } catch {
+      return { metrics, renames: {} };
+    }
+  }
+
+  function getRenameInfo(
+    metricName: string,
+  ): { original: string; canonical: string; applied: boolean } | null {
+    for (const entry of Object.values(appliedRenames)) {
+      if (
+        (entry.applied && metricName === entry.canonical) ||
+        (!entry.applied && metricName === entry.original)
+      ) {
+        return entry;
+      }
+    }
+    return null;
+  }
+
   async function loadExtractedData(id: string): Promise<void> {
     try {
       const response = await fetch(`/api/upload/${id}`);
@@ -191,8 +234,13 @@ function UploadPageContent(): React.ReactElement {
       if (upload?.extracted_data) {
         const extracted = upload.extracted_data;
         setExtractedData(extracted);
-        setEditedMetrics(extracted.metrics || []);
         setSampleDate(extracted.sample_date || upload.sample_date || "");
+
+        const { metrics, renames } = await applyAliases(
+          extracted.metrics || [],
+        );
+        setEditedMetrics(metrics);
+        setAppliedRenames(renames);
         setStatus("review");
       }
     } catch (err) {
@@ -202,7 +250,6 @@ function UploadPageContent(): React.ReactElement {
     }
   }
 
-  // Start extraction for a pending upload (async via QStash)
   async function startExtraction(id: string): Promise<void> {
     try {
       setStatus("extracting");
@@ -215,7 +262,6 @@ function UploadPageContent(): React.ReactElement {
         throw new Error(data.message || data.details || "Extraction failed");
       }
 
-      // Extraction is async - start polling for completion
       startPolling(id);
     } catch (err) {
       console.error("Extraction error:", err);
@@ -224,7 +270,6 @@ function UploadPageContent(): React.ReactElement {
     }
   }
 
-  // Fetch profiles on mount and auto-select active profile
   useEffect(() => {
     async function fetchProfiles() {
       try {
@@ -234,14 +279,12 @@ function UploadPageContent(): React.ReactElement {
           const fetchedProfiles = data.profiles || [];
           setProfiles(fetchedProfiles);
 
-          // Read active profile from cookie
           const cookies = document.cookie.split(";");
           const activeProfileCookie = cookies.find((c) =>
             c.trim().startsWith("viziai_active_profile="),
           );
           const cookieProfileId = activeProfileCookie?.split("=")[1]?.trim();
 
-          // Use cookie profile if valid, otherwise first profile
           if (
             cookieProfileId &&
             fetchedProfiles.some((p: Profile) => p.id === cookieProfileId)
@@ -279,7 +322,6 @@ function UploadPageContent(): React.ReactElement {
       setStatus("uploading");
 
       try {
-        // Upload the file
         const formData = new FormData();
         formData.append("file", file);
         formData.append("profileId", selectedProfileId);
@@ -307,7 +349,6 @@ function UploadPageContent(): React.ReactElement {
         setUploadCreatedAt(new Date().toISOString());
         setStatus("extracting");
 
-        // Start extraction (async via QStash)
         const extractResponse = await fetch(
           `/api/upload/${uploadData.uploadId}/extract`,
           {
@@ -327,7 +368,6 @@ function UploadPageContent(): React.ReactElement {
           return;
         }
 
-        // Extraction is now async - start polling for completion
         startPolling(uploadData.uploadId);
       } catch (err) {
         console.error("Upload error:", err);
@@ -392,6 +432,20 @@ function UploadPageContent(): React.ReactElement {
     }
   }
 
+  function handleAliasToggle(index: number, checked: boolean): void {
+    const metric = editedMetrics[index];
+    const info = getRenameInfo(metric.name);
+    if (!info) return;
+
+    const key = info.original.toLowerCase();
+    const newName = checked ? info.canonical : info.original;
+    handleMetricChange(index, "name", newName);
+    setAppliedRenames((prev) => ({
+      ...prev,
+      [key]: { ...prev[key], applied: checked },
+    }));
+  }
+
   async function handleCancel(): Promise<void> {
     stopPolling();
 
@@ -403,13 +457,13 @@ function UploadPageContent(): React.ReactElement {
       }
     }
 
-    // Reset state
     setStatus("idle");
     setUploadId(null);
     setFileName("");
     setUploadCreatedAt(null);
     setExtractedData(null);
     setEditedMetrics([]);
+    setAppliedRenames({});
     setSampleDate("");
     setError(null);
   }
@@ -572,109 +626,152 @@ function UploadPageContent(): React.ReactElement {
                                 (metric.ref_high != null &&
                                   Number(metric.value) >
                                     Number(metric.ref_high)));
+                            const renameInfo = getRenameInfo(metric.name);
                             return (
-                              <tr
-                                key={index}
-                                className={cn(
-                                  "border-t",
-                                  isOutOfRange && "bg-status-critical/10",
+                              <React.Fragment key={index}>
+                                <tr
+                                  className={cn(
+                                    "border-t",
+                                    isOutOfRange && "bg-status-critical/10",
+                                  )}
+                                >
+                                  <td className="p-2">
+                                    <Input
+                                      value={metric.name ?? ""}
+                                      onChange={(e) =>
+                                        handleMetricChange(
+                                          index,
+                                          "name",
+                                          e.target.value,
+                                        )
+                                      }
+                                      className="h-8 text-sm"
+                                      aria-label="Metrik adı"
+                                    />
+                                  </td>
+                                  <td className="p-2">
+                                    <Input
+                                      type="number"
+                                      value={metric.value ?? ""}
+                                      onChange={(e) =>
+                                        handleMetricChange(
+                                          index,
+                                          "value",
+                                          parseFloat(e.target.value) || 0,
+                                        )
+                                      }
+                                      className={cn(
+                                        "h-8 text-sm text-right w-24",
+                                        isOutOfRange &&
+                                          "text-status-critical font-medium",
+                                      )}
+                                      aria-label="Değer"
+                                    />
+                                  </td>
+                                  <td className="p-2">
+                                    <Input
+                                      value={metric.unit ?? ""}
+                                      onChange={(e) =>
+                                        handleMetricChange(
+                                          index,
+                                          "unit",
+                                          e.target.value,
+                                        )
+                                      }
+                                      className="h-8 text-sm text-right w-20"
+                                      aria-label="Birim"
+                                    />
+                                  </td>
+                                  <td className="p-2">
+                                    <Input
+                                      type="number"
+                                      value={metric.ref_low ?? ""}
+                                      onChange={(e) =>
+                                        handleMetricChange(
+                                          index,
+                                          "ref_low",
+                                          e.target.value
+                                            ? parseFloat(e.target.value)
+                                            : null,
+                                        )
+                                      }
+                                      className="h-8 text-sm text-right w-20"
+                                      placeholder="-"
+                                      aria-label="Referans minimum"
+                                    />
+                                  </td>
+                                  <td className="p-2">
+                                    <Input
+                                      type="number"
+                                      value={metric.ref_high ?? ""}
+                                      onChange={(e) =>
+                                        handleMetricChange(
+                                          index,
+                                          "ref_high",
+                                          e.target.value
+                                            ? parseFloat(e.target.value)
+                                            : null,
+                                        )
+                                      }
+                                      className="h-8 text-sm text-right w-20"
+                                      placeholder="-"
+                                      aria-label="Referans maksimum"
+                                    />
+                                  </td>
+                                  <td className="p-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8"
+                                      onClick={() => handleRemoveMetric(index)}
+                                      aria-label="Metriği sil"
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </td>
+                                </tr>
+                                {renameInfo && (
+                                  <tr>
+                                    <td colSpan={6} className="px-2 pb-2 pt-0">
+                                      <div className="flex items-center gap-2.5 text-xs">
+                                        <span className="text-muted-foreground shrink-0">
+                                          <span className="font-medium line-through">
+                                            {renameInfo.original}
+                                          </span>
+                                          <ArrowRight className="inline h-3 w-3 mx-1" />
+                                          <span className="font-medium text-primary">
+                                            {renameInfo.canonical}
+                                          </span>
+                                        </span>
+                                        <Switch
+                                          checked={renameInfo.applied}
+                                          onCheckedChange={(checked) =>
+                                            handleAliasToggle(index, checked)
+                                          }
+                                          aria-label={`${renameInfo.original} → ${renameInfo.canonical}`}
+                                        />
+                                        <span className="text-muted-foreground/70">
+                                          {renameInfo.applied ? (
+                                            <>
+                                              <span className="font-medium text-primary">
+                                                {renameInfo.canonical}
+                                              </span>{" "}
+                                              olarak eklenecek
+                                            </>
+                                          ) : (
+                                            <>
+                                              <span className="font-medium">
+                                                {renameInfo.original}
+                                              </span>{" "}
+                                              olarak kalacak
+                                            </>
+                                          )}
+                                        </span>
+                                      </div>
+                                    </td>
+                                  </tr>
                                 )}
-                              >
-                                <td className="p-2">
-                                  <Input
-                                    value={metric.name ?? ""}
-                                    onChange={(e) =>
-                                      handleMetricChange(
-                                        index,
-                                        "name",
-                                        e.target.value,
-                                      )
-                                    }
-                                    className="h-8 text-sm"
-                                    aria-label="Metrik adı"
-                                  />
-                                </td>
-                                <td className="p-2">
-                                  <Input
-                                    type="number"
-                                    value={metric.value ?? ""}
-                                    onChange={(e) =>
-                                      handleMetricChange(
-                                        index,
-                                        "value",
-                                        parseFloat(e.target.value) || 0,
-                                      )
-                                    }
-                                    className={cn(
-                                      "h-8 text-sm text-right w-24",
-                                      isOutOfRange &&
-                                        "text-status-critical font-medium",
-                                    )}
-                                    aria-label="Değer"
-                                  />
-                                </td>
-                                <td className="p-2">
-                                  <Input
-                                    value={metric.unit ?? ""}
-                                    onChange={(e) =>
-                                      handleMetricChange(
-                                        index,
-                                        "unit",
-                                        e.target.value,
-                                      )
-                                    }
-                                    className="h-8 text-sm text-right w-20"
-                                    aria-label="Birim"
-                                  />
-                                </td>
-                                <td className="p-2">
-                                  <Input
-                                    type="number"
-                                    value={metric.ref_low ?? ""}
-                                    onChange={(e) =>
-                                      handleMetricChange(
-                                        index,
-                                        "ref_low",
-                                        e.target.value
-                                          ? parseFloat(e.target.value)
-                                          : null,
-                                      )
-                                    }
-                                    className="h-8 text-sm text-right w-20"
-                                    placeholder="-"
-                                    aria-label="Referans minimum"
-                                  />
-                                </td>
-                                <td className="p-2">
-                                  <Input
-                                    type="number"
-                                    value={metric.ref_high ?? ""}
-                                    onChange={(e) =>
-                                      handleMetricChange(
-                                        index,
-                                        "ref_high",
-                                        e.target.value
-                                          ? parseFloat(e.target.value)
-                                          : null,
-                                      )
-                                    }
-                                    className="h-8 text-sm text-right w-20"
-                                    placeholder="-"
-                                    aria-label="Referans maksimum"
-                                  />
-                                </td>
-                                <td className="p-2">
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={() => handleRemoveMetric(index)}
-                                    aria-label="Metriği sil"
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                </td>
-                              </tr>
+                              </React.Fragment>
                             );
                           })}
                         </tbody>

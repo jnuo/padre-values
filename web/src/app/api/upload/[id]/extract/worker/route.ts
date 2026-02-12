@@ -6,7 +6,6 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // QStash can wait up to 5 minutes
 
-// Extraction prompt - extracts lab values and normalizes names to Turkish
 const EXTRACTION_PROMPT = `Aşağıdaki laboratuvar sayfasından TÜM güncel 'Sonuç' değerlerini çıkar.
 
 Kurallar:
@@ -69,9 +68,6 @@ interface ExtractionResult {
   metrics: ExtractedMetric[];
 }
 
-/**
- * Convert PDF buffer to array of base64-encoded PNG images (one per page)
- */
 async function pdfToImages(buffer: Buffer): Promise<string[]> {
   const mupdf = await import("mupdf");
   const images: string[] = [];
@@ -95,10 +91,6 @@ async function pdfToImages(buffer: Buffer): Promise<string[]> {
   return images;
 }
 
-/**
- * Worker endpoint called by QStash
- * POST /api/upload/[id]/extract/worker
- */
 async function handler(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -108,7 +100,6 @@ async function handler(
   try {
     console.log(`[Worker] Starting extraction for upload: ${uploadId}`);
 
-    // Get the pending upload
     const uploads = await sql`
       SELECT id, profile_id, file_url, status, user_id
       FROM pending_uploads
@@ -247,32 +238,6 @@ async function handler(
         throw new Error("No test results could be extracted from the PDF");
       }
 
-      // Resolve metric aliases
-      const profileId = upload.profile_id;
-      const aliasMap = new Map<string, string>();
-
-      try {
-        const aliases = await sql`
-          SELECT alias, canonical_name
-          FROM metric_aliases
-          WHERE profile_id = ${profileId}
-        `;
-        for (const alias of aliases) {
-          aliasMap.set(alias.alias.toLowerCase(), alias.canonical_name);
-        }
-      } catch {
-        console.log("[Worker] No metric_aliases table or data");
-      }
-
-      const normalizedMetrics = extractedData.metrics.map((metric) => {
-        const lowerName = metric.name.toLowerCase();
-        const canonicalName = aliasMap.get(lowerName) || metric.name;
-        return { ...metric, name: canonicalName };
-      });
-
-      extractedData.metrics = normalizedMetrics;
-
-      // Update the pending upload with extracted data
       await sql`
         UPDATE pending_uploads
         SET
@@ -284,13 +249,13 @@ async function handler(
       `;
 
       console.log(
-        `[Worker] Extraction completed: ${uploadId}, ${normalizedMetrics.length} metrics`,
+        `[Worker] Extraction completed: ${uploadId}, ${metrics.length} metrics`,
       );
 
       return NextResponse.json({
         uploadId,
         status: "review",
-        metricCount: normalizedMetrics.length,
+        metricCount: metrics.length,
       });
     } catch (extractionError) {
       console.error(`[Worker] Extraction error:`, extractionError);
@@ -318,7 +283,6 @@ async function handler(
   }
 }
 
-// Skip signature verification in local dev (no QStash signing keys)
 const isLocalDev =
   !process.env.QSTASH_CURRENT_SIGNING_KEY ||
   process.env.NODE_ENV === "development";

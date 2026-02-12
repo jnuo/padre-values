@@ -29,7 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useActiveProfile } from "@/hooks/use-active-profile";
-import { InviteModal } from "@/components/invite-modal";
+import { InviteModal, type KnownUser } from "@/components/invite-modal";
 
 interface Member {
   user_id: string;
@@ -482,6 +482,27 @@ export default function AccessPage() {
               fetchAccessData();
             }
           }}
+          knownUsers={(() => {
+            const targetMembers = new Set(
+              accessData
+                .find((p) => p.profileId === inviteModalProfile.id)
+                ?.members.map((m) => m.email) || [],
+            );
+            const seen = new Set<string>();
+            const users: KnownUser[] = [];
+            for (const profile of accessData) {
+              for (const member of profile.members) {
+                if (
+                  !targetMembers.has(member.email) &&
+                  !seen.has(member.email)
+                ) {
+                  seen.add(member.email);
+                  users.push({ email: member.email, name: member.name });
+                }
+              }
+            }
+            return users;
+          })()}
         />
       )}
     </div>

@@ -19,9 +19,17 @@ export type BPStatus = {
 };
 
 /**
- * Classify blood pressure reading into Normal / Yüksek Normal / Yüksek.
+ * Classify blood pressure. Ranges per AHA/ESC 2024 guidelines, simplified.
  */
 export function getBPStatus(systolic: number, diastolic: number): BPStatus {
+  if (systolic < 90 || diastolic < 60) {
+    return {
+      label: "Düşük",
+      color: "text-status-critical",
+      bg: "bg-status-critical/10",
+      borderColor: "border-l-status-critical",
+    };
+  }
   if (systolic >= 140 || diastolic >= 90) {
     return {
       label: "Yüksek",
@@ -30,7 +38,7 @@ export function getBPStatus(systolic: number, diastolic: number): BPStatus {
       borderColor: "border-l-status-critical",
     };
   }
-  if (systolic >= 130 || diastolic >= 85) {
+  if (systolic >= 120 || diastolic >= 80) {
     return {
       label: "Yüksek Normal",
       color: "text-status-warning",

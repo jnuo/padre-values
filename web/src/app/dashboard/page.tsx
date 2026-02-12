@@ -59,9 +59,6 @@ type ApiData = { metrics: Metric[]; values: MetricValue[] };
 
 type DateRange = "all" | "15" | "30" | "90";
 
-/**
- * Check if a value is within the metric's reference range.
- */
 function isValueInRange(
   value: number | undefined,
   refMin: number | null,
@@ -73,12 +70,9 @@ function isValueInRange(
   return aboveMin && belowMax;
 }
 
-/**
- * Normalize Turkish characters for case-insensitive search.
- */
 function normalizeTurkish(str: string): string {
   return str
-    .replace(/İ/g, "i") // Turkish uppercase İ → i (must be before toLowerCase)
+    .replace(/İ/g, "i")
     .toLowerCase()
     .replace(/ğ/g, "g")
     .replace(/ü/g, "u")
@@ -88,30 +82,23 @@ function normalizeTurkish(str: string): string {
     .replace(/ç/g, "c");
 }
 
-// Deduplicate metrics with different capitalizations
 function deduplicateMetrics(data: ApiData): ApiData {
   const metricMap = new Map<string, Metric>();
-  const metricIdMapping = new Map<string, string>(); // old ID → canonical ID
+  const metricIdMapping = new Map<string, string>();
 
-  // Group metrics by normalized name
   for (const metric of data.metrics) {
     const normalizedName = normalizeTurkish(metric.name);
 
     if (!metricMap.has(normalizedName)) {
-      // First occurrence - keep it
       metricMap.set(normalizedName, metric);
       metricIdMapping.set(metric.id, metric.id);
     } else {
-      // Duplicate found - map this ID to the canonical one
       const canonical = metricMap.get(normalizedName)!;
       metricIdMapping.set(metric.id, canonical.id);
     }
   }
 
-  // Deduplicated metrics
   const deduplicatedMetrics = Array.from(metricMap.values());
-
-  // Remap all values to use canonical metric IDs
   const deduplicatedValues = data.values.map((v) => ({
     ...v,
     metric_id: metricIdMapping.get(v.metric_id) || v.metric_id,
@@ -123,7 +110,6 @@ function deduplicateMetrics(data: ApiData): ApiData {
   };
 }
 
-// Sortable metric item for the sort sheet
 function SortableMetricItem({
   id,
   name,
@@ -194,7 +180,6 @@ function SortableMetricItem({
         </div>
       </div>
 
-      {/* Send to Top Button */}
       {!isFirst && onSendToTop && (
         <button
           onClick={(e) => {
@@ -246,7 +231,6 @@ export default function Dashboard(): React.ReactElement | null {
   const [dateRange, setDateRange] = useState<DateRange>("all");
   const [showAverage, setShowAverage] = useState(false);
 
-  // Multi-profile support
   const {
     activeProfile,
     activeProfileId,
@@ -255,7 +239,6 @@ export default function Dashboard(): React.ReactElement | null {
     error: profileError,
   } = useActiveProfile();
 
-  // Redirect to onboarding if no profiles
   useEffect(() => {
     if (needsOnboarding) {
       router.push("/onboarding");
@@ -268,7 +251,6 @@ export default function Dashboard(): React.ReactElement | null {
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [metricOrder, setMetricOrder] = useState<string[]>([]);
 
-  // Show toast when there's a profile error
   useEffect(() => {
     if (profileError) {
       addToast({
@@ -279,7 +261,6 @@ export default function Dashboard(): React.ReactElement | null {
     }
   }, [profileError, addToast]);
 
-  // Load metric order from API on mount
   useEffect(() => {
     async function loadMetricOrder() {
       try {
@@ -314,20 +295,12 @@ export default function Dashboard(): React.ReactElement | null {
         distance: 5,
       },
     }),
-    // Temporarily disable TouchSensor to test if it's blocking scroll
-    // useSensor(TouchSensor, {
-    //   activationConstraint: {
-    //     distance: 8,
-    //   },
-    // }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
   );
 
-  // Fetch data from API using active profile
   useEffect(() => {
-    // Wait for profile to be loaded
     if (profileLoading || !activeProfileId) {
       return;
     }
@@ -335,7 +308,6 @@ export default function Dashboard(): React.ReactElement | null {
     let ignore = false;
     async function load() {
       try {
-        // Fetch metrics for the active profile
         const res = await fetch(`/api/metrics?profileId=${activeProfileId}`, {
           cache: "no-store",
         });
@@ -345,7 +317,6 @@ export default function Dashboard(): React.ReactElement | null {
 
         if (!ignore) {
           setData(json);
-          // Initialize metric order if empty (tracking metrics added later via filteredData)
           if (metricOrder.length === 0 && json.metrics.length > 0) {
             setMetricOrder(json.metrics.map((m) => m.id));
           }
@@ -371,7 +342,6 @@ export default function Dashboard(): React.ReactElement | null {
     };
   }, [activeProfileId, profileLoading, addToast]);
 
-  // Fetch tracking measurements (weight, BP) and inject into data
   const [trackingData, setTrackingData] = useState<TrackingMeasurement[]>([]);
   useEffect(() => {
     if (profileLoading || !activeProfileId) return;
@@ -391,7 +361,6 @@ export default function Dashboard(): React.ReactElement | null {
     }
     loadTracking();
 
-    // Listen for tracking-updated events (from header dialogs)
     const handler = () => loadTracking();
     window.addEventListener("tracking-updated", handler);
     return () => {
@@ -400,7 +369,6 @@ export default function Dashboard(): React.ReactElement | null {
     };
   }, [activeProfileId, profileLoading]);
 
-  // Auto-select Hemoglobin when data is loaded
   useEffect(() => {
     if (data && !hasAutoSelected.current) {
       const hemoglobinMetric = data.metrics.find((metric) =>
@@ -413,14 +381,11 @@ export default function Dashboard(): React.ReactElement | null {
     }
   }, [data]);
 
-  // Filter data based on date range, and merge tracking data
   const filteredData = useMemo(() => {
     if (!data) return { metrics: [], values: [] };
 
-    // First, deduplicate metrics with different capitalizations
     const deduplicated = deduplicateMetrics(data);
 
-    // Inject tracking metrics (weight, BP) as synthetic metrics
     const trackingMetrics: Metric[] = [];
     const trackingValues: MetricValue[] = [];
 
@@ -474,7 +439,6 @@ export default function Dashboard(): React.ReactElement | null {
       }
     }
 
-    // Prepend tracking metrics and values
     const allMetrics = [...trackingMetrics, ...deduplicated.metrics];
     const allValues = [...trackingValues, ...deduplicated.values];
 
@@ -485,7 +449,6 @@ export default function Dashboard(): React.ReactElement | null {
     cutoffDate.setDate(cutoffDate.getDate() - days);
     const cutoffString = cutoffDate.toISOString().split("T")[0];
 
-    // Filter values that are within the date range
     const filteredValues = allValues.filter((v) => {
       const iso = parseToISO(v.date);
       if (!iso) return false;
@@ -495,11 +458,9 @@ export default function Dashboard(): React.ReactElement | null {
     return { metrics: allMetrics, values: filteredValues };
   }, [data, dateRange, trackingData]);
 
-  // Sort and filter metrics based on order and search query
   const displayedMetrics = useMemo(() => {
     let metrics = filteredData.metrics;
 
-    // Apply search filter
     if (searchQuery && searchQuery.length > 1) {
       const normalizedQuery = normalizeTurkish(searchQuery);
       metrics = metrics.filter(
@@ -511,7 +472,6 @@ export default function Dashboard(): React.ReactElement | null {
       );
     }
 
-    // Apply custom sort order — tracking metrics always first
     if (metricOrder.length > 0) {
       metrics = [...metrics].sort((a, b) => {
         const aIsTracking = a.id.startsWith("__tracking_");
@@ -539,7 +499,6 @@ export default function Dashboard(): React.ReactElement | null {
       { date: string; value: number; count: number }
     >();
 
-    // Group values by metric
     const metricGroups = new Map<string, { date: string; value: number }[]>();
     for (const v of filteredData.values) {
       if (!metricGroups.has(v.metric_id)) {
@@ -553,10 +512,8 @@ export default function Dashboard(): React.ReactElement | null {
       if (values.length === 0) continue;
 
       if (showAverage) {
-        // Calculate average for this metric
         const average =
           values.reduce((sum, val) => sum + val.value, 0) / values.length;
-        // Get the latest date for this metric
         const latestEntry = values
           .sort((a, b) => compareDateAsc(a.date, b.date))
           .pop()!;
@@ -566,7 +523,6 @@ export default function Dashboard(): React.ReactElement | null {
           count: values.length,
         });
       } else {
-        // Get the latest (most recent) value for this metric
         const latestEntry = values
           .sort((a, b) => compareDateAsc(a.date, b.date))
           .pop()!;
@@ -581,7 +537,6 @@ export default function Dashboard(): React.ReactElement | null {
     return map;
   }, [filteredData, showAverage]);
 
-  // Get date range display
   const dateRangeDisplay = useMemo(() => {
     if (!filteredData || filteredData.values.length === 0) return "Veri yok";
 
@@ -619,16 +574,12 @@ export default function Dashboard(): React.ReactElement | null {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    // Save old order before updating state (for revert on failure)
     const oldOrder = [...metricOrder];
-
-    // Update order
     const oldIndex = metricOrder.indexOf(active.id as string);
     const newIndex = metricOrder.indexOf(over.id as string);
     const newOrder = arrayMove(metricOrder, oldIndex, newIndex);
     setMetricOrder(newOrder);
 
-    // Save to API
     try {
       const response = await fetch("/api/metric-order", {
         method: "PUT",
@@ -645,7 +596,6 @@ export default function Dashboard(): React.ReactElement | null {
         message: "Sıralama kaydedilemedi. Lütfen tekrar deneyin.",
         duration: 5000,
       });
-      // Revert to old order on failure
       setMetricOrder(oldOrder);
     }
   };
@@ -654,8 +604,6 @@ export default function Dashboard(): React.ReactElement | null {
     if (!data) return;
 
     const defaultOrder = data.metrics.map((m) => m.id);
-
-    // Update UI
     setMetricOrder(defaultOrder);
 
     addToast({
@@ -664,7 +612,6 @@ export default function Dashboard(): React.ReactElement | null {
       duration: 3000,
     });
 
-    // Save to API
     try {
       const response = await fetch("/api/metric-order", {
         method: "PUT",
@@ -686,29 +633,23 @@ export default function Dashboard(): React.ReactElement | null {
 
   const sendToTop = async (metricId: string) => {
     const index = metricOrder.indexOf(metricId);
-    if (index === -1 || index === 0) return; // Already at top or not found
+    if (index === -1 || index === 0) return;
 
-    // Save old order before updating state (for revert on failure)
     const oldOrder = [...metricOrder];
-
-    // Preserve scroll position
     const container = scrollContainerRef.current;
     const scrollTop = container?.scrollTop || 0;
 
-    // Update UI - Remove from current position and add to beginning
     const newOrder = [...metricOrder];
     newOrder.splice(index, 1);
     newOrder.unshift(metricId);
     setMetricOrder(newOrder);
 
-    // Restore scroll position after React updates
     requestAnimationFrame(() => {
       if (container) {
         container.scrollTop = scrollTop;
       }
     });
 
-    // Save to API
     try {
       const response = await fetch("/api/metric-order", {
         method: "PUT",
@@ -725,12 +666,10 @@ export default function Dashboard(): React.ReactElement | null {
         message: "Metrik en üste taşınamadı. Lütfen tekrar deneyin.",
         duration: 5000,
       });
-      // Revert on failure
       setMetricOrder(oldOrder);
     }
   };
 
-  // Handle Escape key to close search
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && showSearchInput) {
@@ -839,9 +778,18 @@ export default function Dashboard(): React.ReactElement | null {
                         placeholder="Ara…"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="h-7 pl-8 w-48 text-xs"
+                        className="h-7 pl-8 pr-7 w-48 text-xs"
                         aria-label="Metrik ara"
                       />
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery("")}
+                          className="absolute right-1.5 top-1/2 -translate-y-1/2 h-4 w-4 rounded-full bg-muted-foreground/20 hover:bg-muted-foreground/40 flex items-center justify-center transition-colors"
+                          aria-label="Aramayı temizle"
+                        >
+                          <X className="h-2.5 w-2.5 text-muted-foreground" />
+                        </button>
+                      )}
                     </div>
                     <div className="w-px h-5 bg-border" />
                     <Button
@@ -919,7 +867,6 @@ export default function Dashboard(): React.ReactElement | null {
                       );
                       const isSelected = selectedMetrics.includes(m.id);
 
-                      // Determine flag status for tooltip
                       let flagStatus = "";
                       if (
                         value !== undefined &&

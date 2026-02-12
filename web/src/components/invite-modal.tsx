@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy, Loader2 } from "lucide-react";
+import { Check, Copy, Loader2, UserCheck } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,20 +19,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+export interface KnownUser {
+  email: string;
+  name: string | null;
+}
+
 interface InviteModalProps {
   profileId: string;
   profileName: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  knownUsers?: KnownUser[];
 }
 
-type Step = "form" | "success";
+type Step = "form" | "success" | "direct";
 
 export function InviteModal({
   profileId,
   profileName,
   open,
   onOpenChange,
+  knownUsers = [],
 }: InviteModalProps) {
   const [step, setStep] = useState<Step>("form");
   const [email, setEmail] = useState("");
@@ -41,6 +48,7 @@ export function InviteModal({
   const [error, setError] = useState<string | null>(null);
   const [inviteUrl, setInviteUrl] = useState("");
   const [copied, setCopied] = useState(false);
+  const [grantedName, setGrantedName] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,8 +69,13 @@ export function InviteModal({
         return;
       }
 
-      setInviteUrl(data.invite.inviteUrl);
-      setStep("success");
+      if (data.directAccess) {
+        setGrantedName(data.name || data.email);
+        setStep("direct");
+      } else {
+        setInviteUrl(data.invite.inviteUrl);
+        setStep("success");
+      }
     } catch {
       setError("Bir hata oluştu");
     } finally {
@@ -90,6 +103,7 @@ export function InviteModal({
       setError(null);
       setInviteUrl("");
       setCopied(false);
+      setGrantedName(null);
     }
     onOpenChange(open);
   };
@@ -99,14 +113,66 @@ export function InviteModal({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {step === "form" ? `${profileName} — Davet Et` : "Davet Bağlantısı"}
+            {step === "form"
+              ? `${profileName} — Davet Et`
+              : step === "direct"
+                ? "Erişim Verildi"
+                : "Davet Bağlantısı"}
           </DialogTitle>
         </DialogHeader>
 
-        {step === "form" ? (
+        {step === "direct" ? (
+          <div className="space-y-4 text-center py-2">
+            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+              <UserCheck className="h-6 w-6 text-primary" />
+            </div>
+            <p className="text-sm">
+              <span className="font-medium">{grantedName}</span> artık{" "}
+              <span className="font-medium">{profileName}</span> profiline
+              erişebilir.
+            </p>
+            <Button className="w-full" onClick={() => handleClose(false)}>
+              Tamam
+            </Button>
+          </div>
+        ) : step === "form" ? (
           <form onSubmit={handleSubmit} className="space-y-4">
+            {knownUsers.length > 0 && (
+              <div className="space-y-2">
+                <Label>Mevcut Kişiler</Label>
+                <div className="flex flex-wrap gap-2">
+                  {knownUsers.map((user) => (
+                    <button
+                      key={user.email}
+                      type="button"
+                      onClick={() => setEmail(user.email)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm transition-colors ${
+                        email === user.email
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border hover:border-primary/50 hover:bg-muted"
+                      }`}
+                    >
+                      <span className="h-5 w-5 rounded-full bg-muted flex items-center justify-center text-[10px] font-medium shrink-0">
+                        {user.name
+                          ? user.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()
+                              .slice(0, 2)
+                          : user.email[0].toUpperCase()}
+                      </span>
+                      {user.name || user.email}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
-              <Label htmlFor="invite-email">E-posta</Label>
+              <Label htmlFor="invite-email">
+                {knownUsers.length > 0 ? "Veya e-posta girin" : "E-posta"}
+              </Label>
               <Input
                 id="invite-email"
                 type="email"

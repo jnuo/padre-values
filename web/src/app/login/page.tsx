@@ -14,7 +14,6 @@ function LoginContent(): React.ReactElement {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Check for error in URL params (from OAuth callback)
   useEffect(() => {
     const errorParam = searchParams.get("error");
     if (errorParam) {
@@ -26,10 +25,8 @@ function LoginContent(): React.ReactElement {
     }
   }, [searchParams]);
 
-  // Get the redirect destination (from middleware or default to dashboard)
   const redirectTo = searchParams.get("redirect") || "/dashboard";
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (status === "authenticated" && session) {
       router.push(redirectTo);
@@ -41,10 +38,7 @@ function LoginContent(): React.ReactElement {
     setError(null);
 
     try {
-      await signIn("google", {
-        callbackUrl: redirectTo,
-      });
-      // Browser will redirect to Google OAuth
+      await signIn("google", { callbackUrl: redirectTo });
     } catch (err) {
       console.error("Sign in error:", err);
       setError("Giriş yapılırken bir hata oluştu");
@@ -52,7 +46,6 @@ function LoginContent(): React.ReactElement {
     }
   };
 
-  // Show loading state while checking session
   if (status === "loading") {
     return <LoginFallback />;
   }
@@ -75,25 +68,8 @@ function LoginContent(): React.ReactElement {
       </CardHeader>
       <CardContent className="space-y-4">
         {error && (
-          <div className="p-4 text-sm bg-muted rounded-lg text-center space-y-2">
-            {error === "Bu e-posta adresiyle giriş izniniz bulunmamaktadır." ? (
-              <>
-                <p className="text-foreground font-medium">
-                  Bu uygulama şu anda davetli kullanıcılara özeldir
-                </p>
-                <p className="text-muted-foreground">
-                  Erişim talebinde bulunmak için{" "}
-                  <a
-                    href="mailto:onurovalii@gmail.com?subject=ViziAI%20Erişim%20Talebi"
-                    className="text-primary hover:underline"
-                  >
-                    bana e-posta gönderin
-                  </a>
-                </p>
-              </>
-            ) : (
-              <p className="text-red-600">{error}</p>
-            )}
+          <div className="p-4 text-sm bg-muted rounded-lg text-center">
+            <p className="text-red-600">{error}</p>
           </div>
         )}
 

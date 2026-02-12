@@ -5,6 +5,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ToastProvider } from "@/components/ui/toast";
 import { Providers } from "@/components/providers";
+import { NotificationChecker } from "@/components/notification-checker";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -52,7 +53,10 @@ export default function RootLayout({
       <body className={`${inter.variable} antialiased`}>
         <Providers>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-            <ToastProvider>{children}</ToastProvider>
+            <ToastProvider>
+              <NotificationChecker />
+              {children}
+            </ToastProvider>
           </ThemeProvider>
         </Providers>
       </body>

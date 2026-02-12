@@ -36,10 +36,10 @@ export function AddBloodPressureDialog({
   profileName,
   recentMeasurements = [],
   onSaved,
-}: AddBloodPressureDialogProps) {
+}: AddBloodPressureDialogProps): React.ReactElement {
   const { addToast } = useToast();
-  const [systolic, setSystolic] = useState("");
-  const [diastolic, setDiastolic] = useState("");
+  const [systolic, setSystolic] = useState("110");
+  const [diastolic, setDiastolic] = useState("70");
   const [pulse, setPulse] = useState("");
   const [saving, setSaving] = useState(false);
 

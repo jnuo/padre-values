@@ -85,6 +85,7 @@ QSTASH_NEXT_SIGNING_KEY=your-next-signing-key
 - **metric_preferences**: Display order and favorites per profile
 - **processed_files**: Upload tracking (prevents duplicates)
 - **pending_uploads**: In-progress upload state
+- **metric_aliases**: Global alias map for metric name normalization
 
 ## Key Pages
 
