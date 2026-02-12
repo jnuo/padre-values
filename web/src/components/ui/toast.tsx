@@ -4,11 +4,17 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 
+export interface ToastAction {
+  label: string;
+  href: string;
+}
+
 export interface ToastProps {
   id: string;
   message: string;
   type?: "error" | "success" | "info";
   duration?: number;
+  action?: ToastAction;
 }
 
 interface ToastContextType {
@@ -17,7 +23,9 @@ interface ToastContextType {
   removeToast: (id: string) => void;
 }
 
-const ToastContext = React.createContext<ToastContextType | undefined>(undefined);
+const ToastContext = React.createContext<ToastContextType | undefined>(
+  undefined,
+);
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = React.useState<ToastProps[]>([]);
@@ -42,7 +50,11 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-md">
         {toasts.map((toast) => (
-          <Toast key={toast.id} {...toast} onClose={() => removeToast(toast.id)} />
+          <Toast
+            key={toast.id}
+            {...toast}
+            onClose={() => removeToast(toast.id)}
+          />
         ))}
       </div>
     </ToastContext.Provider>
@@ -60,19 +72,31 @@ export function useToast() {
 function Toast({
   message,
   type = "info",
+  action,
   onClose,
 }: ToastProps & { onClose: () => void }) {
   return (
     <div
       className={cn(
         "flex items-center gap-3 p-4 rounded-lg shadow-lg border animate-in slide-in-from-bottom-5",
-        type === "error" && "bg-rose-50 dark:bg-rose-950 border-rose-200 dark:border-rose-800",
-        type === "success" && "bg-emerald-50 dark:bg-emerald-950 border-emerald-200 dark:border-emerald-800",
-        type === "info" && "bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800"
+        type === "error" &&
+          "bg-rose-50 dark:bg-rose-950 border-rose-200 dark:border-rose-800",
+        type === "success" &&
+          "bg-emerald-50 dark:bg-emerald-950 border-emerald-200 dark:border-emerald-800",
+        type === "info" &&
+          "bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800",
       )}
     >
       <div className="flex-1 text-sm font-medium">
         {message}
+        {action && (
+          <a
+            href={action.href}
+            className="ml-2 underline underline-offset-2 hover:text-foreground"
+          >
+            {action.label}
+          </a>
+        )}
       </div>
       <button
         onClick={onClose}
