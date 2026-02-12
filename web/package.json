@@ -24,6 +24,7 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@sentry/nextjs": "^10.38.0",
     "@upstash/qstash": "^2.9.0",
     "@vercel/blob": "^2.0.1",
     "class-variance-authority": "^0.7.1",
