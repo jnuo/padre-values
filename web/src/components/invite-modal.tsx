@@ -129,7 +129,12 @@ export function InviteModal({
                     >
                       <span className="h-5 w-5 rounded-full bg-muted flex items-center justify-center text-[10px] font-medium shrink-0">
                         {user.name
-                          ? user.name[0].toUpperCase()
+                          ? user.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()
+                              .slice(0, 2)
                           : user.email[0].toUpperCase()}
                       </span>
                       {user.name || user.email}
