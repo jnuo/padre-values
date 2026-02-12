@@ -1,6 +1,7 @@
 # PRD: Metric Name Normalization
 
-**Last Updated:** 2026-02-03
+**Status:** Done (2026-02-12)
+**Last Updated:** 2026-02-12
 
 ---
 
