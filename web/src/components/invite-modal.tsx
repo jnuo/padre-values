@@ -19,11 +19,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+export interface KnownUser {
+  email: string;
+  name: string | null;
+}
+
 interface InviteModalProps {
   profileId: string;
   profileName: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  knownUsers?: KnownUser[];
 }
 
 type Step = "form" | "success";
@@ -33,6 +39,7 @@ export function InviteModal({
   profileName,
   open,
   onOpenChange,
+  knownUsers = [],
 }: InviteModalProps) {
   const [step, setStep] = useState<Step>("form");
   const [email, setEmail] = useState("");
@@ -105,8 +112,37 @@ export function InviteModal({
 
         {step === "form" ? (
           <form onSubmit={handleSubmit} className="space-y-4">
+            {knownUsers.length > 0 && (
+              <div className="space-y-2">
+                <Label>Mevcut Kişiler</Label>
+                <div className="flex flex-wrap gap-2">
+                  {knownUsers.map((user) => (
+                    <button
+                      key={user.email}
+                      type="button"
+                      onClick={() => setEmail(user.email)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm transition-colors ${
+                        email === user.email
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border hover:border-primary/50 hover:bg-muted"
+                      }`}
+                    >
+                      <span className="h-5 w-5 rounded-full bg-muted flex items-center justify-center text-[10px] font-medium shrink-0">
+                        {user.name
+                          ? user.name[0].toUpperCase()
+                          : user.email[0].toUpperCase()}
+                      </span>
+                      {user.name || user.email}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
-              <Label htmlFor="invite-email">E-posta</Label>
+              <Label htmlFor="invite-email">
+                {knownUsers.length > 0 ? "Veya e-posta girin" : "E-posta"}
+              </Label>
               <Input
                 id="invite-email"
                 type="email"

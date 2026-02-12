@@ -22,21 +22,8 @@ export const authOptions: NextAuthOptions = {
       }
 
       try {
-        console.log(`[Auth] Checking allowlist for email: "${user.email}"`);
+        console.log(`[Auth] Sign-in for email: "${user.email}"`);
 
-        // Check if email is in the allowlist (profile_allowed_emails table)
-        // Use LOWER() for case-insensitive comparison (Google may return different casing)
-        const allowed = await sql`
-          SELECT email FROM profile_allowed_emails WHERE LOWER(email) = LOWER(${user.email}) LIMIT 1
-        `;
-
-        console.log(`[Auth] Allowlist query result:`, JSON.stringify(allowed));
-
-        if (allowed.length === 0) {
-          console.log(`[Auth] Sign-in denied: ${user.email} not in allowlist`);
-          return false;
-        }
-        // Create or update user record in our users table
         const result = await sql`
           INSERT INTO users (email, name, avatar_url)
           VALUES (${user.email}, ${user.name || null}, ${user.image || null})
@@ -58,10 +45,9 @@ export const authOptions: NextAuthOptions = {
           `[Auth] User record created/updated: ${user.email} -> ${dbUserId}`,
         );
 
-        // Store dbId on the user object for the jwt callback
         (user as { dbId?: string }).dbId = dbUserId;
 
-        // Auto-claim any profiles linked to this email in profile_allowed_emails
+        // Auto-claim unclaimed profiles linked to this email
         const allowedProfiles = await sql`
           SELECT profile_id FROM profile_allowed_emails
           WHERE LOWER(email) = LOWER(${user.email})
@@ -71,14 +57,12 @@ export const authOptions: NextAuthOptions = {
         for (const row of allowedProfiles) {
           const profileId = row.profile_id;
 
-          // Mark as claimed
           await sql`
             UPDATE profile_allowed_emails
             SET claimed_at = NOW(), claimed_by_user_id = ${dbUserId}
             WHERE LOWER(email) = LOWER(${user.email}) AND profile_id = ${profileId}
           `;
 
-          // Create user_access entry
           await sql`
             INSERT INTO user_access (user_id_new, profile_id, access_level, granted_by)
             VALUES (${dbUserId}, ${profileId}, 'owner', ${dbUserId})
@@ -88,8 +72,7 @@ export const authOptions: NextAuthOptions = {
           console.log(`[Auth] Claimed profile ${profileId} for ${user.email}`);
         }
 
-        // Also grant access to any already-claimed profiles for this email
-        // (in case the user was previously added to profile_allowed_emails and another user claimed it)
+        // Grant viewer access to already-claimed profiles for this email
         const existingAccess = await sql`
           SELECT pae.profile_id
           FROM profile_allowed_emails pae
@@ -114,12 +97,10 @@ export const authOptions: NextAuthOptions = {
         return true;
       } catch (error) {
         console.error("[Auth] Error during sign-in:", error);
-        // Fail closed - deny sign-in on error
         return false;
       }
     },
     async session({ session, token }) {
-      // Add user IDs to session
       if (session.user) {
         if (token.sub) {
           session.user.id = token.sub;
@@ -133,11 +114,9 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        // Get dbId from user object (set in signIn callback)
         if ((user as { dbId?: string }).dbId) {
           token.dbId = (user as { dbId?: string }).dbId;
         } else if (user.email) {
-          // Fallback: look up dbId from database
           try {
             const result = await sql`
               SELECT id FROM users WHERE LOWER(email) = LOWER(${user.email})
@@ -155,18 +134,12 @@ export const authOptions: NextAuthOptions = {
   },
 };
 
-/**
- * Helper to get the current user's database ID from session
- */
 export function getDbUserId(
   session: { user?: { dbId?: string } } | null,
 ): string | null {
   return session?.user?.dbId || null;
 }
 
-/**
- * Helper to check if a user has access to a profile
- */
 export async function hasProfileAccess(
   userId: string,
   profileId: string,
@@ -183,10 +156,6 @@ export async function hasProfileAccess(
   }
 }
 
-/**
- * Helper to get the user's access level for a specific profile
- * Returns 'owner' | 'editor' | 'viewer' | null
- */
 export async function getProfileAccessLevel(
   userId: string,
   profileId: string,
@@ -205,9 +174,6 @@ export async function getProfileAccessLevel(
   }
 }
 
-/**
- * Helper to get user's accessible profiles
- */
 export async function getUserProfiles(userId: string): Promise<
   Array<{
     id: string;
@@ -234,20 +200,12 @@ export async function getUserProfiles(userId: string): Promise<
   }
 }
 
-/**
- * Authenticate the current session and return the database user ID.
- * Returns null if not authenticated.
- */
 export async function requireAuth(): Promise<string | null> {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) return null;
   return getDbUserId(session);
 }
 
-/**
- * Authenticate and verify the user has owner-level access to a profile.
- * Returns the userId if authorized, null otherwise.
- */
 export async function requireProfileOwner(
   profileId: string,
 ): Promise<string | null> {

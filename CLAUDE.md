@@ -86,6 +86,7 @@ viziai/
 │   ├── src/app/         # Pages and API routes
 │   ├── src/components/  # React components
 │   └── src/lib/         # Utilities (auth, db, etc.)
+├── scripts/             # Operational scripts (metric normalization, etc.)
 ├── db-schema/           # SQL migrations for Neon
 ├── product/             # Brand guidelines, roadmap
 └── _legacy/             # Archived Python code
@@ -98,6 +99,26 @@ viziai/
 - **Auth**: `web/src/lib/auth.ts`
 - **Database**: `web/src/lib/db.ts`
 - **PDF extraction**: `web/src/app/api/upload/[id]/extract/worker/route.ts`
+
+## Metric Name Normalization
+
+Same blood test can appear under different names across lab PDFs (e.g., "Potasiyum", "POTASYUM (SERUM/PLAZMA)", "Potaszyum" are all Potasyum). We handle this with a curated alias table + inline suggestions in the upload review step.
+
+**How it works:**
+
+1. `metric_aliases` table maps known misspellings/variants to canonical names (`alias → canonical_name`, global, not per-user)
+2. During upload review, `GET /api/aliases` fetches the alias map
+3. Extracted metric names are auto-renamed to canonical names, with an inline suggestion row showing the rename (switch toggle to revert)
+4. User confirms → metric saved with the canonical name
+
+**Key:** The alias table is admin-curated (we add entries via SQL when we spot patterns from real uploads). Users can only accept/reject suggestions, not create aliases.
+
+**Files:**
+
+- `scripts/metric-normalization/` — workflow docs, merge script, completed merges checklist
+- `db-schema/migrations/20260212_metric_aliases_global.sql` — alias table schema
+- `web/src/app/api/aliases/route.ts` — GET endpoint returning alias map
+- `web/src/app/upload/page.tsx` — inline suggestion UI in review table
 
 ## Environment Variables (Vercel)
 
@@ -120,13 +141,9 @@ Required for deployment:
 echo -n "value" | npx vercel env add VAR_NAME production
 ```
 
-## Allowed Emails
+## Profile Access
 
-Users must be in `profile_allowed_emails` table to login:
-
-- onurovalii@gmail.com
-- hulyaovaliyil@gmail.com
-- ovaliolcay@yahoo.com
+Any Google account can sign in. Profile access is granted via the `profile_allowed_emails` table -- on sign-in, the user auto-claims any profiles linked to their email.
 
 ## Deployment
 
