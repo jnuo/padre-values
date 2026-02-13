@@ -79,6 +79,7 @@ export async function POST(request: Request) {
       weightKg,
       notes,
       measuredAt,
+      replaceId,
     } = body;
 
     if (!profileId || !type) {
@@ -150,6 +151,46 @@ export async function POST(request: Request) {
       ? new Date(measuredAt).toISOString()
       : new Date().toISOString();
 
+    // Check for existing entry today (same profile + type + date)
+    const existing = await sql`
+      SELECT id, measured_at, systolic, diastolic, pulse, weight_kg
+      FROM tracking_measurements
+      WHERE profile_id = ${profileId}
+        AND type = ${type}
+        AND DATE(measured_at AT TIME ZONE 'Europe/Istanbul') = DATE(NOW() AT TIME ZONE 'Europe/Istanbul')
+      ORDER BY measured_at DESC
+      LIMIT 1
+    `;
+
+    if (existing.length > 0 && !replaceId) {
+      return NextResponse.json({ existing: existing[0] }, { status: 409 });
+    }
+
+    // Update existing row
+    if (replaceId) {
+      const result = await sql`
+        UPDATE tracking_measurements
+        SET measured_at = ${measuredAtValue},
+            systolic = ${type === "blood_pressure" ? systolic : null},
+            diastolic = ${type === "blood_pressure" ? diastolic : null},
+            pulse = ${type === "blood_pressure" ? pulse || null : null},
+            weight_kg = ${type === "weight" ? weightKg : null},
+            notes = ${notes || null}
+        WHERE id = ${replaceId} AND profile_id = ${profileId}
+        RETURNING id, profile_id, type, measured_at, systolic, diastolic, pulse, weight_kg, notes, created_at
+      `;
+
+      if (result.length === 0) {
+        return NextResponse.json(
+          { error: "Record not found" },
+          { status: 404 },
+        );
+      }
+
+      return NextResponse.json({ measurement: result[0] }, { status: 200 });
+    }
+
+    // Insert new row
     const result = await sql`
       INSERT INTO tracking_measurements (profile_id, type, measured_at, systolic, diastolic, pulse, weight_kg, notes)
       VALUES (
