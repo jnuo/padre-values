@@ -65,7 +65,7 @@ export async function POST(request: Request) {
     // Verify file is a PDF
     if (file.type !== "application/pdf") {
       return NextResponse.json(
-        { error: "Bad Request", message: "Only PDF files are accepted" },
+        { error: "Bad Request", message: "Sadece PDF dosyaları kabul edilir" },
         { status: 400 },
       );
     }
@@ -88,7 +88,7 @@ export async function POST(request: Request) {
 
     if (buffer.length < 5 || buffer.subarray(0, 5).toString() !== "%PDF-") {
       return NextResponse.json(
-        { error: "Bad Request", message: "File is not a valid PDF" },
+        { error: "Bad Request", message: "Geçersiz PDF dosyası" },
         { status: 400 },
       );
     }
