@@ -82,9 +82,16 @@ export async function POST(request: Request) {
       );
     }
 
-    // Read file content and calculate hash
+    // Read file content and validate PDF magic bytes
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+
+    if (buffer.length < 5 || buffer.subarray(0, 5).toString() !== "%PDF-") {
+      return NextResponse.json(
+        { error: "Bad Request", message: "File is not a valid PDF" },
+        { status: 400 },
+      );
+    }
     const contentHash = crypto
       .createHash("sha256")
       .update(buffer)
@@ -165,7 +172,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("[API] POST /api/upload error:", error);
     return NextResponse.json(
-      { error: "Failed to upload file", details: String(error) },
+      { error: "Failed to upload file" },
       { status: 500 },
     );
   }
@@ -239,7 +246,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("[API] GET /api/upload error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch uploads", details: String(error) },
+      { error: "Failed to fetch uploads" },
       { status: 500 },
     );
   }

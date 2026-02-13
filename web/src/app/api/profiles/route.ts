@@ -77,7 +77,7 @@ export async function GET() {
   } catch (error) {
     console.error("[API] GET /api/profiles error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch profiles", details: String(error) },
+      { error: "Failed to fetch profiles" },
       { status: 500 },
     );
   }
@@ -209,7 +209,6 @@ export async function POST(request: Request) {
         error: "Failed to create profile",
         message:
           "Profil oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.",
-        details: String(error),
       },
       { status: 500 },
     );

@@ -70,7 +70,7 @@ export async function GET(
   } catch (error) {
     console.error("[API] GET /api/upload/[id] error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch upload", details: String(error) },
+      { error: "Failed to fetch upload" },
       { status: 500 },
     );
   }
@@ -157,7 +157,7 @@ export async function DELETE(
   } catch (error) {
     console.error("[API] DELETE /api/upload/[id] error:", error);
     return NextResponse.json(
-      { error: "Failed to delete upload", details: String(error) },
+      { error: "Failed to delete upload" },
       { status: 500 },
     );
   }

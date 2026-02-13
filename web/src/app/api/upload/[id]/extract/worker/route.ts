@@ -270,10 +270,7 @@ async function handler(
         WHERE id = ${uploadId}
       `;
 
-      return NextResponse.json(
-        { error: "Extraction failed", details: String(extractionError) },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: "Extraction failed" }, { status: 500 });
     }
   } catch (error) {
     reportError(error, { op: "worker.handler", uploadId });

@@ -129,7 +129,7 @@ export async function POST(
   } catch (error) {
     console.error("[API] POST /api/upload/[id]/extract error:", error);
     return NextResponse.json(
-      { error: "Failed to queue extraction", details: String(error) },
+      { error: "Failed to queue extraction" },
       { status: 500 },
     );
   }

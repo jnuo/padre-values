@@ -130,7 +130,7 @@ export async function PUT(
   } catch (error) {
     console.error("[API] PUT /api/settings/files/[id]/metrics error:", error);
     return NextResponse.json(
-      { error: "Failed to update metric", details: String(error) },
+      { error: "Failed to update metric" },
       { status: 500 },
     );
   }

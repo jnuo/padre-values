@@ -86,7 +86,7 @@ export async function GET(
   } catch (error) {
     console.error("[API] GET /api/settings/files/[id] error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch file details", details: String(error) },
+      { error: "Failed to fetch file details" },
       { status: 500 },
     );
   }
