@@ -40,3 +40,4 @@ token_*.json
 .env.neon
 .env.test
 .obsidian/
+.vercel

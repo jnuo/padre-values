@@ -38,7 +38,7 @@ export function AddWeightDialog({
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const weightNum = parseFloat(weight);
+  const weightNum = parseFloat(weight.replace(",", "."));
   const hasValidInput = !isNaN(weightNum) && weightNum > 0;
 
   const recent = recentMeasurements
@@ -111,15 +111,17 @@ export function AddWeightDialog({
                 </Label>
                 <Input
                   id="weight"
-                  type="number"
+                  type="text"
                   inputMode="decimal"
-                  step="0.1"
                   placeholder="82.5"
                   value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (v === "" || /^[0-9]*[.,]?[0-9]*$/.test(v)) {
+                      setWeight(v);
+                    }
+                  }}
                   className="h-14 text-2xl font-semibold text-center tabular-nums"
-                  min={1}
-                  max={500}
                   autoFocus
                 />
               </div>
