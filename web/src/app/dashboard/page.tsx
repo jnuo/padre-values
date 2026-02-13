@@ -54,6 +54,7 @@ import { Header } from "@/components/header";
 import { LoadingState, ErrorState } from "@/components/ui/spinner";
 import type { TrackingMeasurement } from "@/lib/tracking";
 import { useRouter } from "next/navigation";
+import { reportError } from "@/lib/error-reporting";
 
 type ApiData = { metrics: Metric[]; values: MetricValue[] };
 
@@ -276,7 +277,7 @@ export default function Dashboard(): React.ReactElement | null {
           }
         }
       } catch (err) {
-        console.error("Failed to load metric order:", err);
+        reportError(err, { op: "dashboard.loadMetricOrder" });
         addToast({
           type: "error",
           message: "Metrik sıralaması yüklenemedi.",
@@ -323,7 +324,10 @@ export default function Dashboard(): React.ReactElement | null {
         }
       } catch (e: unknown) {
         const errorMessage = (e as Error)?.message ?? "Bilinmeyen hata";
-        console.error("Failed to load metrics data:", e);
+        reportError(e, {
+          op: "dashboard.loadMetrics",
+          profileId: activeProfileId,
+        });
         if (!ignore) {
           setError(errorMessage);
           addToast({
@@ -356,7 +360,10 @@ export default function Dashboard(): React.ReactElement | null {
           if (!ignore) setTrackingData(json.measurements || []);
         }
       } catch (e) {
-        console.error("Failed to load tracking data:", e);
+        reportError(e, {
+          op: "dashboard.loadTracking",
+          profileId: activeProfileId,
+        });
       }
     }
     loadTracking();
@@ -590,7 +597,7 @@ export default function Dashboard(): React.ReactElement | null {
         throw new Error(`HTTP ${response.status}`);
       }
     } catch (err) {
-      console.error("Failed to save metric order:", err);
+      reportError(err, { op: "dashboard.saveMetricOrder" });
       addToast({
         type: "error",
         message: "Sıralama kaydedilemedi. Lütfen tekrar deneyin.",
@@ -622,7 +629,7 @@ export default function Dashboard(): React.ReactElement | null {
         throw new Error(`HTTP ${response.status}`);
       }
     } catch (err) {
-      console.error("Failed to reset metric order:", err);
+      reportError(err, { op: "dashboard.resetMetricOrder" });
       addToast({
         type: "error",
         message: "Sıralama sıfırlanamadı. Lütfen tekrar deneyin.",
@@ -660,7 +667,7 @@ export default function Dashboard(): React.ReactElement | null {
         throw new Error(`HTTP ${response.status}`);
       }
     } catch (err) {
-      console.error("Failed to send metric to top:", err);
+      reportError(err, { op: "dashboard.sendToTop", metricId });
       addToast({
         type: "error",
         message: "Metrik en üste taşınamadı. Lütfen tekrar deneyin.",

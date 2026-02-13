@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Header } from "@/components/header";
 import { cn } from "@/lib/utils";
+import { reportError } from "@/lib/error-reporting";
 
 type Step = "welcome" | "create-profile" | "upload-prompt" | "complete";
 
@@ -39,7 +40,7 @@ function OnboardingContent(): React.ReactElement {
           }
         }
       } catch (err) {
-        console.error("Failed to check profiles:", err);
+        reportError(err, { op: "onboarding.checkProfiles" });
       }
     }
 
@@ -98,7 +99,7 @@ function OnboardingContent(): React.ReactElement {
         // Redirect to upload page to continue extraction/review
         router.push(`/upload?uploadId=${uploadData.uploadId}`);
       } catch (err) {
-        console.error("Upload error:", err);
+        reportError(err, { op: "onboarding.upload" });
         setError("Bir hata oluştu. Lütfen tekrar deneyin.");
         setIsUploading(false);
       }
@@ -145,7 +146,7 @@ function OnboardingContent(): React.ReactElement {
       setCreatedProfileName(data.profile.display_name);
       setStep("upload-prompt");
     } catch (err) {
-      console.error("Create profile error:", err);
+      reportError(err, { op: "onboarding.createProfile" });
       setError("Bir hata oluştu. Lütfen tekrar deneyin.");
     } finally {
       setIsCreating(false);

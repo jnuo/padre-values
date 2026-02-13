@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { reportError } from "@/lib/error-reporting";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -157,7 +158,7 @@ export async function GET(request: Request) {
     const payload: MetricsPayload = { metrics, values };
     return NextResponse.json(payload);
   } catch (error) {
-    console.error("/api/metrics error", error);
+    reportError(error, { op: "api.metrics.GET" });
     return NextResponse.json(
       {
         error: "Failed to fetch metrics from database",

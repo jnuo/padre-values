@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useToast } from "@/components/ui/toast";
+import { reportError } from "@/lib/error-reporting";
 
 const ACCESS_LABELS: Record<string, string> = {
   owner: "sahip",
@@ -40,7 +41,7 @@ export function NotificationChecker() {
 
         fetch("/api/notifications", { method: "POST" });
       })
-      .catch(() => {});
+      .catch((err) => reportError(err, { op: "notifications.check" }));
   }, [status, addToast]);
 
   return null;

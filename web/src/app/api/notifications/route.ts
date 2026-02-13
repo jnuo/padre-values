@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { sql } from "@/lib/db";
+import { reportError } from "@/lib/error-reporting";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -24,7 +25,7 @@ export async function GET() {
 
     return NextResponse.json({ notifications: rows });
   } catch (error) {
-    console.error("[API] GET /api/notifications error:", error);
+    reportError(error, { op: "api.notifications.GET" });
     return NextResponse.json({ notifications: [] });
   }
 }
@@ -44,7 +45,7 @@ export async function POST() {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("[API] POST /api/notifications error:", error);
+    reportError(error, { op: "api.notifications.POST" });
     return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
 }

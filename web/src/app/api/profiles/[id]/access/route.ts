@@ -6,6 +6,7 @@ import {
 } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { randomBytes } from "crypto";
+import { reportError } from "@/lib/error-reporting";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -103,7 +104,7 @@ export async function GET(
       accessLevel,
     });
   } catch (error) {
-    console.error("[API] GET /api/profiles/[id]/access error:", error);
+    reportError(error, { op: "api.profiles.access.GET" });
     return NextResponse.json(
       { error: "Failed to fetch access list" },
       { status: 500 },
@@ -243,7 +244,7 @@ export async function POST(
       { status: 201 },
     );
   } catch (error) {
-    console.error("[API] POST /api/profiles/[id]/access error:", error);
+    reportError(error, { op: "api.profiles.access.POST" });
     return NextResponse.json(
       { error: "Davet oluşturulamadı" },
       { status: 500 },

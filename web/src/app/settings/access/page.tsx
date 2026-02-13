@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { useActiveProfile } from "@/hooks/use-active-profile";
 import { InviteModal, type KnownUser } from "@/components/invite-modal";
+import { reportError } from "@/lib/error-reporting";
 
 interface Member {
   user_id: string;
@@ -127,7 +128,7 @@ export default function AccessPage() {
 
       setAccessData(results.filter(Boolean) as ProfileAccess[]);
     } catch (error) {
-      console.error("Failed to fetch access data:", error);
+      reportError(error, { op: "settings.access.fetch" });
     } finally {
       setLoading(false);
     }
@@ -158,7 +159,11 @@ export default function AccessPage() {
         await fetchAccessData();
       }
     } catch (error) {
-      console.error("Failed to change access:", error);
+      reportError(error, {
+        op: "settings.access.changeAccess",
+        profileId,
+        targetUserId,
+      });
     }
   };
 
@@ -176,7 +181,11 @@ export default function AccessPage() {
         await fetchAccessData();
       }
     } catch (error) {
-      console.error("Failed to remove access:", error);
+      reportError(error, {
+        op: "settings.access.removeAccess",
+        profileId,
+        targetUserId,
+      });
     }
   };
 
@@ -193,7 +202,7 @@ export default function AccessPage() {
         window.location.reload();
       }
     } catch (error) {
-      console.error("Failed to delete profile:", error);
+      reportError(error, { op: "settings.access.deleteProfile", profileId });
     } finally {
       setDeletingProfile(null);
     }
@@ -211,7 +220,7 @@ export default function AccessPage() {
         window.location.reload();
       }
     } catch (error) {
-      console.error("Failed to leave profile:", error);
+      reportError(error, { op: "settings.access.leaveProfile", profileId });
     } finally {
       setLeavingProfile(null);
     }
@@ -228,7 +237,11 @@ export default function AccessPage() {
         await fetchAccessData();
       }
     } catch (error) {
-      console.error("Failed to revoke invite:", error);
+      reportError(error, {
+        op: "settings.access.revokeInvite",
+        profileId,
+        inviteId,
+      });
     }
   };
 
