@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
-import { requireAuth, hasProfileAccess } from "@/lib/auth";
+import {
+  requireAuth,
+  hasProfileAccess,
+  getProfileAccessLevel,
+} from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -77,10 +81,11 @@ export async function POST(request: Request) {
       diastolic,
       pulse,
       weightKg,
-      notes,
       measuredAt,
       replaceId,
     } = body;
+    const notes =
+      typeof body.notes === "string" ? body.notes.slice(0, 500) : null;
 
     if (!profileId || !type) {
       return NextResponse.json(
@@ -96,8 +101,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const hasAccess = await hasProfileAccess(userId, profileId);
-    if (!hasAccess) {
+    const level = await getProfileAccessLevel(userId, profileId);
+    if (!level || !["owner", "editor"].includes(level)) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
