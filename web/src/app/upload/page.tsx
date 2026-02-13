@@ -267,7 +267,7 @@ function UploadPageContent(): React.ReactElement {
       startPolling(id);
     } catch (err) {
       reportError(err, { op: "upload.startExtraction", uploadId: id });
-      setError(String(err));
+      setError("Veri çıkarma başarısız");
       setStatus("error");
     }
   }

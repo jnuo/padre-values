@@ -265,7 +265,7 @@ async function handler(
         UPDATE pending_uploads
         SET
           status = 'pending',
-          error_message = ${String(extractionError)},
+          error_message = 'Veri çıkarma başarısız',
           updated_at = NOW()
         WHERE id = ${uploadId}
       `;
