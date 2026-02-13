@@ -42,6 +42,12 @@ export function AddBloodPressureDialog({
   const [diastolic, setDiastolic] = useState("70");
   const [pulse, setPulse] = useState("");
   const [saving, setSaving] = useState(false);
+  const [existingEntry, setExistingEntry] = useState<{
+    id: string;
+    measured_at: string;
+    systolic: number;
+    diastolic: number;
+  } | null>(null);
 
   const systolicNum = parseInt(systolic);
   const diastolicNum = parseInt(diastolic);
@@ -52,7 +58,7 @@ export function AddBloodPressureDialog({
     diastolicNum > 0;
   const status = hasValidInput ? getBPStatus(systolicNum, diastolicNum) : null;
 
-  async function handleSave() {
+  async function handleSave(replaceId?: string) {
     if (!hasValidInput) return;
     setSaving(true);
 
@@ -66,8 +72,15 @@ export function AddBloodPressureDialog({
           systolic: systolicNum,
           diastolic: diastolicNum,
           pulse: pulse ? parseInt(pulse) : null,
+          ...(replaceId && { replaceId }),
         }),
       });
+
+      if (res.status === 409) {
+        const data = await res.json();
+        setExistingEntry(data.existing);
+        return;
+      }
 
       if (!res.ok) {
         const data = await res.json();
@@ -82,6 +95,7 @@ export function AddBloodPressureDialog({
       setSystolic("");
       setDiastolic("");
       setPulse("");
+      setExistingEntry(null);
       onOpenChange(false);
       onSaved?.();
     } catch (err) {
@@ -100,7 +114,13 @@ export function AddBloodPressureDialog({
     .slice(0, 3);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) setExistingEntry(null);
+        onOpenChange(v);
+      }}
+    >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -198,13 +218,34 @@ export function AddBloodPressureDialog({
             </div>
           </div>
 
+          {/* Existing entry warning */}
+          {existingEntry && (
+            <div className="rounded-lg border border-status-warning/30 bg-status-warning/10 px-3 py-2.5 text-sm text-status-warning">
+              Bugün zaten kayıt var (
+              {new Date(existingEntry.measured_at).toLocaleTimeString("tr-TR", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+              &apos;de {existingEntry.systolic}/{existingEntry.diastolic}).
+              Değiştirmek ister misin?
+            </div>
+          )}
+
           {/* Save Button */}
           <Button
-            onClick={handleSave}
+            onClick={() =>
+              existingEntry ? handleSave(existingEntry.id) : handleSave()
+            }
             disabled={!hasValidInput || saving}
             className="w-full h-12 text-base"
           >
-            {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : "Kaydet"}
+            {saving ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : existingEntry ? (
+              "Değiştir"
+            ) : (
+              "Kaydet"
+            )}
           </Button>
 
           {/* Recent Measurements */}
