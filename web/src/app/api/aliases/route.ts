@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { reportError } from "@/lib/error-reporting";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +15,7 @@ export async function GET() {
     );
     return NextResponse.json({ aliases });
   } catch (error) {
-    console.error("Failed to fetch aliases:", error);
+    reportError(error, { op: "api.aliases.GET" });
     return NextResponse.json({ aliases: {} });
   }
 }

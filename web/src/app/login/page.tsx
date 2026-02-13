@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
+import { reportError } from "@/lib/error-reporting";
 
 function LoginContent(): React.ReactElement {
   const router = useRouter();
@@ -40,7 +41,7 @@ function LoginContent(): React.ReactElement {
     try {
       await signIn("google", { callbackUrl: redirectTo });
     } catch (err) {
-      console.error("Sign in error:", err);
+      reportError(err, { op: "login.googleSignIn" });
       setError("Giriş yapılırken bir hata oluştu");
       setIsLoading(false);
     }

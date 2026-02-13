@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { reportError } from "@/lib/error-reporting";
 
 interface Profile {
   id: string;
@@ -54,7 +55,7 @@ export function ProfileSwitcher({
           setProfiles(data.profiles || []);
         }
       } catch (error) {
-        console.error("Failed to fetch profiles:", error);
+        reportError(error, { op: "profileSwitcher.fetch" });
       } finally {
         setLoading(false);
       }
@@ -81,7 +82,7 @@ export function ProfileSwitcher({
         console.error("Failed to select profile");
       }
     } catch (error) {
-      console.error("Failed to select profile:", error);
+      reportError(error, { op: "profileSwitcher.select", profileId });
     } finally {
       setSwitching(false);
     }

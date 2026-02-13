@@ -2,6 +2,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { getServerSession } from "next-auth";
 import type { NextAuthOptions } from "next-auth";
 import { sql } from "@/lib/db";
+import { reportError } from "@/lib/error-reporting";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -96,7 +97,7 @@ export const authOptions: NextAuthOptions = {
         console.log(`[Auth] Sign-in allowed: ${user.email}`);
         return true;
       } catch (error) {
-        console.error("[Auth] Error during sign-in:", error);
+        reportError(error, { op: "auth.signIn", email: user.email });
         return false;
       }
     },
@@ -125,7 +126,10 @@ export const authOptions: NextAuthOptions = {
               token.dbId = result[0].id;
             }
           } catch (error) {
-            console.error("[Auth] Error looking up dbId:", error);
+            reportError(error, {
+              op: "auth.jwt.lookupDbId",
+              email: user.email,
+            });
           }
         }
       }
@@ -151,7 +155,7 @@ export async function hasProfileAccess(
     `;
     return result.length > 0;
   } catch (error) {
-    console.error("[Auth] Error checking profile access:", error);
+    reportError(error, { op: "auth.hasProfileAccess", userId, profileId });
     return false;
   }
 }
@@ -169,7 +173,7 @@ export async function getProfileAccessLevel(
     if (result.length === 0) return null;
     return result[0].access_level as "owner" | "editor" | "viewer";
   } catch (error) {
-    console.error("[Auth] Error getting profile access level:", error);
+    reportError(error, { op: "auth.getProfileAccessLevel", userId, profileId });
     return null;
   }
 }
@@ -195,7 +199,7 @@ export async function getUserProfiles(userId: string): Promise<
       access_level: string;
     }>;
   } catch (error) {
-    console.error("[Auth] Error getting user profiles:", error);
+    reportError(error, { op: "auth.getUserProfiles", userId });
     return [];
   }
 }

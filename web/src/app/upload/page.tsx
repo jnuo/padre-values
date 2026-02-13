@@ -35,6 +35,7 @@ import { Switch } from "@/components/ui/switch";
 import { Header } from "@/components/header";
 import { cn } from "@/lib/utils";
 import { formatDateTimeTR } from "@/lib/date";
+import { reportError } from "@/lib/error-reporting";
 
 interface Profile {
   id: string;
@@ -124,7 +125,7 @@ function UploadPageContent(): React.ReactElement {
           }
         }
       } catch (error) {
-        console.error("Failed to check pending uploads:", error);
+        reportError(error, { op: "upload.checkPending" });
       }
     }
 
@@ -174,7 +175,7 @@ function UploadPageContent(): React.ReactElement {
           setStatus("error");
         }
       } catch (err) {
-        console.error("Polling error:", err);
+        reportError(err, { op: "upload.polling" });
       }
     }, 2000);
   }
@@ -204,7 +205,8 @@ function UploadPageContent(): React.ReactElement {
       });
 
       return { metrics: updated, renames };
-    } catch {
+    } catch (error) {
+      reportError(error, { op: "upload.applyAliases" });
       return { metrics, renames: {} };
     }
   }
@@ -244,7 +246,7 @@ function UploadPageContent(): React.ReactElement {
         setStatus("review");
       }
     } catch (err) {
-      console.error("Failed to load extracted data:", err);
+      reportError(err, { op: "upload.loadExtractedData", uploadId: id });
       setError("Veri yüklenemedi");
       setStatus("error");
     }
@@ -264,7 +266,7 @@ function UploadPageContent(): React.ReactElement {
 
       startPolling(id);
     } catch (err) {
-      console.error("Extraction error:", err);
+      reportError(err, { op: "upload.startExtraction", uploadId: id });
       setError(String(err));
       setStatus("error");
     }
@@ -295,7 +297,7 @@ function UploadPageContent(): React.ReactElement {
           }
         }
       } catch (error) {
-        console.error("Failed to fetch profiles:", error);
+        reportError(error, { op: "upload.fetchProfiles" });
       }
     }
 
@@ -370,7 +372,7 @@ function UploadPageContent(): React.ReactElement {
 
         startPolling(uploadData.uploadId);
       } catch (err) {
-        console.error("Upload error:", err);
+        reportError(err, { op: "upload.onDrop" });
         setError("Bir hata oluştu. Lütfen tekrar deneyin.");
         setStatus("error");
       }
@@ -426,7 +428,7 @@ function UploadPageContent(): React.ReactElement {
 
       setStatus("success");
     } catch (err) {
-      console.error("Confirm error:", err);
+      reportError(err, { op: "upload.confirm", uploadId });
       setError("Bir hata oluştu. Lütfen tekrar deneyin.");
       setStatus("review");
     }
@@ -453,7 +455,7 @@ function UploadPageContent(): React.ReactElement {
       try {
         await fetch(`/api/upload/${uploadId}`, { method: "DELETE" });
       } catch (err) {
-        console.error("Cancel error:", err);
+        reportError(err, { op: "upload.cancel", uploadId });
       }
     }
 

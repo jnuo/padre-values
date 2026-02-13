@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
+import { reportError } from "@/lib/error-reporting";
 
 interface Profile {
   id: string;
@@ -106,7 +107,7 @@ export function useActiveProfile() {
           }
         }
       } catch (err) {
-        console.error("Failed to fetch profiles:", err);
+        reportError(err, { op: "useActiveProfile.fetch" });
         if (mounted) {
           setError("Profiller yüklenemedi");
         }
@@ -137,7 +138,7 @@ export function useActiveProfile() {
 
       return true;
     } catch (err) {
-      console.error("Failed to select profile:", err);
+      reportError(err, { op: "useActiveProfile.select", profileId });
       return false;
     }
   };

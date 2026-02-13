@@ -13,6 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useActiveProfile } from "@/hooks/use-active-profile";
 import { formatDateTR, formatDateTimeTR } from "@/lib/date";
+import { reportError } from "@/lib/error-reporting";
 
 type SortColumn = "sample_date" | "created_at";
 type SortDirection = "asc" | "desc";
@@ -124,7 +125,10 @@ export default function SettingsPage() {
         const data = await response.json();
         setFiles(data.files || []);
       } catch (err) {
-        console.error("Failed to fetch files:", err);
+        reportError(err, {
+          op: "settings.fetchFiles",
+          profileId: activeProfileId,
+        });
         setError("Dosyalar yüklenirken bir hata oluştu");
       } finally {
         setLoading(false);

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions, getDbUserId } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { del } from "@vercel/blob";
+import { reportError } from "@/lib/error-reporting";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -220,7 +221,7 @@ export async function POST(
       `;
       console.log(`[API] processed_files recorded: ${upload.file_name}`);
     } catch (e) {
-      console.error("[API] processed_files insert error:", e);
+      reportError(e, { op: "upload.confirm.processedFiles", uploadId });
     }
 
     // Delete PDF from Vercel Blob storage BEFORE clearing file_url
@@ -232,11 +233,11 @@ export async function POST(
         console.log(`[API] Deleted blob: ${upload.file_url}`);
         blobDeleted = true;
       } catch (blobError) {
-        // Log but don't fail - keep file_url for manual cleanup later
-        console.error(
-          `[API] Failed to delete blob: ${upload.file_url}`,
-          blobError,
-        );
+        reportError(blobError, {
+          op: "upload.confirm.deleteBlob",
+          uploadId,
+          fileUrl: upload.file_url,
+        });
       }
     }
 
@@ -261,7 +262,7 @@ export async function POST(
       metricsUpdated: updatedCount,
     });
   } catch (error) {
-    console.error("[API] POST /api/upload/[id]/confirm error:", error);
+    reportError(error, { op: "upload.confirm.POST" });
     return NextResponse.json(
       { error: "Failed to confirm upload", details: String(error) },
       { status: 500 },

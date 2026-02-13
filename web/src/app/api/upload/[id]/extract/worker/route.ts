@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import { verifySignatureAppRouter } from "@upstash/qstash/nextjs";
+import { reportError } from "@/lib/error-reporting";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -258,7 +259,7 @@ async function handler(
         metricCount: metrics.length,
       });
     } catch (extractionError) {
-      console.error(`[Worker] Extraction error:`, extractionError);
+      reportError(extractionError, { op: "worker.extraction", uploadId });
 
       await sql`
         UPDATE pending_uploads
@@ -275,7 +276,7 @@ async function handler(
       );
     }
   } catch (error) {
-    console.error("[Worker] Error:", error);
+    reportError(error, { op: "worker.handler", uploadId });
     return NextResponse.json(
       { error: "Worker failed", details: String(error) },
       { status: 500 },
