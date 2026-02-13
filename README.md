@@ -81,6 +81,34 @@ QSTASH_NEXT_SIGNING_KEY=your-next-signing-key
 NEXT_PUBLIC_SENTRY_DSN=your-sentry-dsn
 ```
 
+## Testing
+
+### Unit Tests (Jest)
+
+```bash
+cd web
+npm test
+```
+
+### E2E Tests (Playwright)
+
+End-to-end tests run against a real dev server and database. They seed a dummy test user (`e2e-test@viziai.test`), exercise the UI in a real browser, and clean up after themselves.
+
+```bash
+cd web
+npx playwright test          # headless
+npx playwright test --headed # watch it run
+npx playwright show-report   # view HTML report
+```
+
+Requires `.env.local` with `NEON_DATABASE_URL` and `NEXTAUTH_SECRET`.
+
+### CI
+
+E2E tests run automatically on every **pull request to `main`** via GitHub Actions. The workflow installs Chromium, starts the dev server, runs the tests, and uploads the Playwright report as an artifact if anything fails.
+
+The `NEON_DATABASE_URL` secret must be set in GitHub repo settings under Settings > Secrets > Actions.
+
 ## Database Schema
 
 - **profiles**: Family member profiles
