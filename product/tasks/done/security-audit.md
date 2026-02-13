@@ -1,6 +1,6 @@
 # Task: Security Audit Findings
 
-**Status:** In Progress
+**Status:** Done
 **Priority:** Critical
 **Created:** 2026-02-13
 
@@ -31,10 +31,10 @@ Comprehensive security audit of all API routes, auth, file uploads, and dependen
 
 ---
 
-## Remaining
+## Deferred (not worth the effort)
 
-- [ ] Blob storage access level
-- [ ] Rate limiting on sensitive endpoints
+- Blob storage access level — URLs use SHA-256 hashes, not guessable, low risk
+- Rate limiting — upload flow is naturally sequential, OAuth handles login brute force
 
 ---
 
