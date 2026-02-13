@@ -264,8 +264,11 @@ export default function Dashboard(): React.ReactElement | null {
 
   useEffect(() => {
     async function loadMetricOrder() {
+      if (!activeProfileId) return;
       try {
-        const response = await fetch("/api/metric-order");
+        const response = await fetch(
+          `/api/metric-order?profileId=${activeProfileId}`,
+        );
         if (response.ok) {
           const data = await response.json();
           if (
@@ -287,7 +290,7 @@ export default function Dashboard(): React.ReactElement | null {
     }
 
     loadMetricOrder();
-  }, []);
+  }, [activeProfileId]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const sensors = useSensors(
@@ -591,7 +594,7 @@ export default function Dashboard(): React.ReactElement | null {
       const response = await fetch("/api/metric-order", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ order: newOrder }),
+        body: JSON.stringify({ profileId: activeProfileId, order: newOrder }),
       });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
@@ -623,7 +626,10 @@ export default function Dashboard(): React.ReactElement | null {
       const response = await fetch("/api/metric-order", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ order: defaultOrder }),
+        body: JSON.stringify({
+          profileId: activeProfileId,
+          order: defaultOrder,
+        }),
       });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
@@ -661,7 +667,7 @@ export default function Dashboard(): React.ReactElement | null {
       const response = await fetch("/api/metric-order", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ order: newOrder }),
+        body: JSON.stringify({ profileId: activeProfileId, order: newOrder }),
       });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);

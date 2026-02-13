@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { requireAuth, hasProfileAccess } from "@/lib/auth";
 import { reportError } from "@/lib/error-reporting";
 
 export const runtime = "nodejs";
@@ -24,31 +25,26 @@ type MetricsPayload = {
   values: MetricValue[];
 };
 
-const DEFAULT_PROFILE_NAME = "Yüksel O.";
-
 export async function GET(request: Request) {
   try {
+    const userId = await requireAuth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
-    const profileIdParam = searchParams.get("profileId");
-    const profileName = searchParams.get("profileName") || DEFAULT_PROFILE_NAME;
+    const profileId = searchParams.get("profileId");
 
-    let profileId: string;
+    if (!profileId) {
+      return NextResponse.json(
+        { error: "profileId is required" },
+        { status: 400 },
+      );
+    }
 
-    if (profileIdParam) {
-      // Use profile ID directly if provided
-      profileId = profileIdParam;
-    } else {
-      // Fall back to profile name lookup for backward compatibility
-      const profiles = await sql`
-        SELECT id FROM profiles WHERE display_name = ${profileName}
-      `;
-
-      if (!profiles || profiles.length === 0) {
-        // Return empty data if no profile found
-        return NextResponse.json({ metrics: [], values: [] });
-      }
-
-      profileId = profiles[0].id;
+    const hasAccess = await hasProfileAccess(userId, profileId);
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
     // Get all reports for this profile
@@ -160,10 +156,7 @@ export async function GET(request: Request) {
   } catch (error) {
     reportError(error, { op: "api.metrics.GET" });
     return NextResponse.json(
-      {
-        error: "Failed to fetch metrics from database",
-        details: String(error),
-      },
+      { error: "Failed to fetch metrics" },
       { status: 500 },
     );
   }

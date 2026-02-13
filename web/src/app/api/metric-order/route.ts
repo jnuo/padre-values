@@ -1,30 +1,35 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { requireAuth, hasProfileAccess } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const DEFAULT_PROFILE_NAME = "Yüksel O.";
-
 /**
- * GET /api/metric-order?profileName=X
+ * GET /api/metric-order?profileId=xxx
  * Returns array of metric names in display_order
  */
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const profileName = searchParams.get("profileName") || DEFAULT_PROFILE_NAME;
-
-    // Find the profile
-    const profiles = await sql`
-      SELECT id FROM profiles WHERE display_name = ${profileName}
-    `;
-
-    if (!profiles || profiles.length === 0) {
-      return NextResponse.json({ order: [] });
+    const userId = await requireAuth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const profileId = profiles[0].id;
+    const { searchParams } = new URL(request.url);
+    const profileId = searchParams.get("profileId");
+
+    if (!profileId) {
+      return NextResponse.json(
+        { error: "profileId is required" },
+        { status: 400 },
+      );
+    }
+
+    const hasAccess = await hasProfileAccess(userId, profileId);
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
 
     const preferences = await sql`
       SELECT name, display_order
@@ -47,14 +52,26 @@ export async function GET(request: Request) {
 
 /**
  * PUT /api/metric-order
- * Body: { profileName?: string, order: string[] }
+ * Body: { profileId: string, order: string[] }
  * Updates display_order in metric_preferences
  */
 export async function PUT(request: Request) {
   try {
+    const userId = await requireAuth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
-    const profileName = body.profileName || DEFAULT_PROFILE_NAME;
+    const profileId: unknown = body.profileId;
     const order: unknown = body.order;
+
+    if (!profileId || typeof profileId !== "string") {
+      return NextResponse.json(
+        { error: "profileId is required" },
+        { status: 400 },
+      );
+    }
 
     if (!Array.isArray(order)) {
       return NextResponse.json(
@@ -63,16 +80,10 @@ export async function PUT(request: Request) {
       );
     }
 
-    // Find the profile
-    const profiles = await sql`
-      SELECT id FROM profiles WHERE display_name = ${profileName}
-    `;
-
-    if (!profiles || profiles.length === 0) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    const hasAccess = await hasProfileAccess(userId, profileId);
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
-
-    const profileId = profiles[0].id;
 
     for (let i = 0; i < order.length; i++) {
       await sql`

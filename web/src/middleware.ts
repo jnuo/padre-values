@@ -65,9 +65,12 @@ export async function middleware(request: NextRequest) {
 
   // Redirect authenticated users from login page to dashboard
   if (isAuthRoute && isAuthenticated) {
-    // Check if there's a redirect param to honor
+    // Check if there's a redirect param to honor (must be relative path)
     const redirectTo = request.nextUrl.searchParams.get("redirect");
-    const destination = redirectTo || "/dashboard";
+    const destination =
+      redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
+        ? redirectTo
+        : "/dashboard";
     return NextResponse.redirect(new URL(destination, request.url));
   }
 

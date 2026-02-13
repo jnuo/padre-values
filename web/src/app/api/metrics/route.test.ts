@@ -68,29 +68,21 @@ describe("/api/metrics", () => {
     });
   });
 
-  describe("Profile name handling", () => {
-    it("should use default profile name when not specified", () => {
-      const DEFAULT_PROFILE_NAME = "Yüksel O.";
-
-      // Simulate URL parsing
+  describe("profileId handling", () => {
+    it("should require profileId query param", () => {
       const url = new URL("http://localhost:3000/api/metrics");
-      const profileName =
-        url.searchParams.get("profileName") || DEFAULT_PROFILE_NAME;
+      const profileId = url.searchParams.get("profileId");
 
-      expect(profileName).toBe(DEFAULT_PROFILE_NAME);
+      expect(profileId).toBeNull();
     });
 
-    it("should use provided profile name from query params", () => {
-      const DEFAULT_PROFILE_NAME = "Yüksel O.";
-
-      // Simulate URL parsing with profileName param
+    it("should parse profileId from query params", () => {
       const url = new URL(
-        "http://localhost:3000/api/metrics?profileName=Test%20Profile",
+        "http://localhost:3000/api/metrics?profileId=abc-123",
       );
-      const profileName =
-        url.searchParams.get("profileName") || DEFAULT_PROFILE_NAME;
+      const profileId = url.searchParams.get("profileId");
 
-      expect(profileName).toBe("Test Profile");
+      expect(profileId).toBe("abc-123");
     });
   });
 

@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions, getDbUserId } from "@/lib/auth";
 import { sql } from "@/lib/db";
+import { requireAuth, hasProfileAccess } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,16 +11,9 @@ export const dynamic = "force-dynamic";
  */
 export async function DELETE(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    let userId = getDbUserId(session);
+    const userId = await requireAuth();
     if (!userId) {
-      const users =
-        await sql`SELECT id FROM users WHERE LOWER(email) = LOWER(${session.user.email})`;
-      if (users.length > 0) userId = users[0].id;
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -32,6 +24,11 @@ export async function DELETE(request: Request) {
         { error: "profileId required" },
         { status: 400 },
       );
+    }
+
+    const hasAccess = await hasProfileAccess(userId, profileId);
+    if (!hasAccess) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
     // Delete in order: metrics -> reports -> processed_files -> pending_uploads
@@ -55,6 +52,6 @@ export async function DELETE(request: Request) {
     });
   } catch (error) {
     console.error("[API] Cleanup error:", error);
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+    return NextResponse.json({ error: "Cleanup failed" }, { status: 500 });
   }
 }

@@ -277,15 +277,24 @@ async function handler(
     }
   } catch (error) {
     reportError(error, { op: "worker.handler", uploadId });
-    return NextResponse.json(
-      { error: "Worker failed", details: String(error) },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Worker failed" }, { status: 500 });
   }
 }
 
-const isLocalDev =
-  !process.env.QSTASH_CURRENT_SIGNING_KEY ||
-  process.env.NODE_ENV === "development";
+const isLocalDev = process.env.NODE_ENV === "development";
 
-export const POST = isLocalDev ? handler : verifySignatureAppRouter(handler);
+// In production, verify QStash signature. During build or local dev, skip.
+// verifySignatureAppRouter reads keys at import time, so only call it when keys exist.
+export const POST =
+  isLocalDev || !process.env.QSTASH_CURRENT_SIGNING_KEY
+    ? async (...args: Parameters<typeof handler>) => {
+        // Fail-closed: if running in production without signing key, reject
+        if (!isLocalDev && !process.env.QSTASH_CURRENT_SIGNING_KEY) {
+          return NextResponse.json(
+            { error: "Server misconfigured" },
+            { status: 500 },
+          );
+        }
+        return handler(...args);
+      }
+    : verifySignatureAppRouter(handler);
