@@ -182,6 +182,43 @@ In Google Cloud Console > APIs & Services > Credentials > OAuth 2.0 Client:
 - [ ] User data loads correctly from Neon
 - [ ] All allowed emails can access the app
 
+## Security Checklist (Every Feature)
+
+Before writing or modifying any API route, check these:
+
+### Access Control
+
+- **Always use `requireAuth()`** — every API route must authenticate the user first
+- **Always check profile access** — use `getProfileAccessLevel()` (not just `hasProfileAccess()`) when the operation modifies data
+- **Enforce access levels**: `owner`/`editor` for write operations (PUT/POST/DELETE), `viewer` is read-only
+- **Verify ownership of the resource** — look up the resource's `profile_id`, then check the user has access to that profile. Never trust client-sent `profileId` for write operations without verifying access
+
+### IDOR Prevention
+
+- When a route takes a resource ID (e.g., `/api/tracking/[id]`), always fetch the resource first, get its `profile_id`, then verify the current user has access to that profile
+- Never assume that because a user is authenticated, they can access any resource
+
+### Input Validation
+
+- Validate all numeric inputs have sane ranges (e.g., weight 1-500, systolic 50-300)
+- Validate enum/type fields against allowed values
+- Don't trust client-sent `type` or `measured_at` fields for updates — read from DB
+
+### How It Works
+
+```
+Request → requireAuth() → get resource → getProfileAccessLevel() → check level → proceed
+```
+
+**Auth helpers** (`web/src/lib/auth.ts`):
+
+- `requireAuth()` — returns userId or null (from session JWT)
+- `hasProfileAccess(userId, profileId)` — boolean, any access level
+- `getProfileAccessLevel(userId, profileId)` — returns `"owner" | "editor" | "viewer" | null`
+- `requireProfileOwner(profileId)` — returns userId only if owner
+
+**Access levels**: `owner` > `editor` > `viewer`. Viewers can only read. Editors can read + write. Owners can read + write + manage access.
+
 ## Frontend & Design Work
 
 Before any UI/design changes, reference:
