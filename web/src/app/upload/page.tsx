@@ -261,13 +261,13 @@ function UploadPageContent(): React.ReactElement {
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.message || data.details || "Extraction failed");
+        throw new Error(data.message || "Extraction failed");
       }
 
       startPolling(id);
     } catch (err) {
       reportError(err, { op: "upload.startExtraction", uploadId: id });
-      setError(String(err));
+      setError("Veri çıkarma başarısız");
       setStatus("error");
     }
   }
@@ -361,11 +361,7 @@ function UploadPageContent(): React.ReactElement {
         const extractData = await extractResponse.json();
 
         if (!extractResponse.ok) {
-          setError(
-            extractData.message ||
-              extractData.details ||
-              "Veri çıkarma başarısız",
-          );
+          setError(extractData.message || "Veri çıkarma başarısız");
           setStatus("error");
           return;
         }

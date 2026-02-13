@@ -46,7 +46,7 @@ export async function GET() {
   } catch (error) {
     console.error("[API] GET /api/onboarding/status error:", error);
     return NextResponse.json(
-      { error: "Failed to check onboarding status", details: String(error) },
+      { error: "Failed to check onboarding status" },
       { status: 500 },
     );
   }

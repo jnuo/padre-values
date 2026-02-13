@@ -90,7 +90,7 @@ export async function POST(
   } catch (error) {
     console.error("[API] POST /api/profiles/[id]/select error:", error);
     return NextResponse.json(
-      { error: "Failed to select profile", details: String(error) },
+      { error: "Failed to select profile" },
       { status: 500 },
     );
   }
