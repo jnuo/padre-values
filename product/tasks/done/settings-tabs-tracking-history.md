@@ -1,6 +1,8 @@
 # Task: Settings Tabs — Tracking History (Kilo & Tansiyon)
 
-**Status:** Pending
+**Status:** Done
+**Completed:** 2026-02-13
+**PR:** #25
 **Priority:** High
 **Created:** 2026-02-13
 

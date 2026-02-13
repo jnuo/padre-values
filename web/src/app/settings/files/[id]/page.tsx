@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
-import { formatDateTimeTR } from "@/lib/date";
+import { formatDateTR } from "@/lib/date";
 
 const EMPTY_FORM = { value: "", unit: "", ref_low: "", ref_high: "" };
 
@@ -43,6 +43,7 @@ interface FileData {
   id: string;
   file_name: string;
   created_at: string;
+  sample_date: string | null;
   profile_id: string;
 }
 
@@ -214,9 +215,11 @@ export default function FileDetailPage(): React.ReactElement {
             <FileText aria-hidden="true" className="h-5 w-5 shrink-0" />
             <span className="truncate">{file.file_name}</span>
           </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            {formatDateTimeTR(file.created_at)}
-          </p>
+          {file.sample_date && (
+            <p className="text-sm text-muted-foreground">
+              Tahlil tarihi: {formatDateTR(file.sample_date)}
+            </p>
+          )}
         </CardHeader>
         <CardContent>
           {metrics.length === 0 ? (

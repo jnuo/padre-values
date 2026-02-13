@@ -79,6 +79,7 @@ export async function GET(
         id: file.id,
         file_name: file.file_name,
         created_at: file.created_at,
+        sample_date: metrics[0]?.sample_date ?? null,
         profile_id: file.profile_id,
       },
       metrics,
